@@ -1,0 +1,288 @@
+/* Base styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #eef2f5; /* Light blue-gray background */
+    color: #333;
+    line-height: 1.6;
+    scroll-behavior: smooth;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 30px auto;
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e6ed;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+    color: #0056b3; /* Darker blue for headings */
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: #004085;
+}
+
+.subtitle {
+    text-align: center;
+    color: #667;
+    font-style: italic;
+    margin-top: -10px;
+    margin-bottom: 40px;
+    font-size: 1.1em;
+}
+
+/* Input Section */
+.input-section label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #444;
+    font-size: 1.05em;
+}
+
+textarea {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid #c0d9eb; /* Softer border */
+    border-radius: 8px;
+    font-size: 0.95em;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 280px;
+    background-color: #f8fcff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    outline: none;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 16px 25px;
+    background-color: #28a745; /* Success green */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin-bottom: 40px;
+    font-weight: 600;
+}
+
+button:hover {
+    background-color: #218838;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Loading Animation */
+.loading-animation {
+    text-align: center;
+    padding: 30px;
+    margin-top: 30px;
+    font-style: italic;
+    color: #555;
+    background-color: #e6f7ff;
+    border: 1px solid #b3e0ff;
+    border-radius: 10px;
+    display: none; /* Hidden by default */
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.spinner {
+    border: 5px solid rgba(0, 86, 179, 0.2); /* Lighter blue */
+    border-left-color: #0056b3; /* Darker blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Prediction Result Section */
+.prediction-section {
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 2px dashed #d0e0ed;
+}
+
+.result-box {
+    background-color: #e9f7ed; /* Light green */
+    border: 1px solid #c3e6cb;
+    border-left: 6px solid #28a745; /* Green bar */
+    padding: 25px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #155724;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px; /* Space between numbers */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.result-box span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #d4edda; /* Slightly darker green for numbers */
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #1a6d38;
+    min-width: 55px; /* Ensures consistent width for numbers */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.result-box span:hover {
+    transform: translateY(-2px);
+    background-color: #c9e0d1;
+}
+
+/* Summary and Details Boxes */
+.analysis-summary,
+.backtest-details-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #d0e0ed;
+}
+
+.stats-box,
+.details-box {
+    background-color: #f7faff;
+    border: 1px solid #dbe9f5;
+    border-left: 6px solid #007bff; /* Blue bar */
+    padding: 25px;
+    border-radius: 10px;
+    color: #004a80;
+    font-size: 1em;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+}
+
+.stats-box p,
+.details-box p {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed rgba(0, 123, 255, 0.1);
+}
+.stats-box p:last-child,
+.details-box p:last-child {
+    border-bottom: none;
+}
+
+.stats-box p strong,
+.details-box p strong {
+    color: #003366;
+    font-weight: 700;
+    flex-basis: 70%; /* Adjust width for text */
+}
+
+.stats-box p span,
+.details-box p span {
+    font-weight: 600;
+    color: #0056b3;
+    flex-basis: 30%; /* Adjust width for value */
+    text-align: right;
+}
+
+.strategy-breakdown {
+    margin-top: 25px;
+    background-color: #eaf6ff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px dashed #c0e0f5;
+}
+
+.strategy-breakdown h4 {
+    text-align: left;
+    margin-bottom: 15px;
+    color: #0056b3;
+    font-size: 1.15em;
+    border-bottom: 1px solid rgba(0, 123, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.strategy-breakdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.strategy-breakdown li {
+    padding: 8px 0;
+    border-bottom: 1px dotted rgba(0, 123, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95em;
+    color: #004a80;
+}
+
+.strategy-breakdown li:last-child {
+    border-bottom: none;
+}
+
+.strategy-breakdown li span {
+    font-weight: 600;
+    color: #0056b3;
+}
+
+
+/* Disclaimer */
+.disclaimer {
+    margin-top: 60px;
+    padding: 30px;
+    border-top: 1px solid #d0e0ed;
+    font-size: 0.95em;
+    color: #667;
+    text-align: center;
+    background-color: #fff9e6; /* Light yellow for caution */
+    border-radius: 10px;
+    border: 1px solid #ffe0b3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.disclaimer strong {
+    color: #d9534f; /* Red for emphasis */
+    font-weight: 700;
+}
+.disclaimer p {
+    margin: 8px 0;
+}
