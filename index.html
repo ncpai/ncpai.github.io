@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Dự Đoán XSMB Chuyên Sâu - phucnc-ai</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Favicon hoặc các meta tag khác nếu cần -->
+</head>
+<body>
+    <div class="container">
+        <h1>Hệ thống Dự Đoán XSMB Chuyên Sâu - phucnc-ai</h1>
+        <p class="subtitle">Phân tích toàn diện &amp; Thuật toán học máy</p>
+
+        <div class="input-section">
+            <label for="dataInput">Dán dữ liệu lịch sử XSMB (khoảng 500+ ngày, theo định dạng):</label>
+            <textarea id="dataInput" rows="18" placeholder="Ví dụ về định dạng dữ liệu, mỗi dòng 'Đầu Đuôi' cho 10 số lô đã về:
+XSMB Thứ 6 ngày 27-6-2025
+Đầu Đuôi
+0 2,5
+1 0,1,3,4,5,9
+2 1,2,5
+3 7,9
+4 0
+5 0,0
+6 0,1,2
+7 5,7,8
+8 0,5
+9 1,6,7
+XSMB Thứ 7 ngày 28-6-2025
+Đầu Đuôi
+0 1,3
+... và nhiều ngày khác nữa"></textarea>
+            <button id="processDataBtn">Xử lý Dữ liệu & Tạo Dự đoán</button>
+        </div>
+
+        <div class="loading-animation" id="loadingAnimation">
+            <div class="spinner"></div>
+            <p>Đang phân tích lịch sử dữ liệu và chạy mô hình dự đoán phức tạp...</p>
+            <p>(Quá trình này có thể mất vài chục giây tùy thuộc vào lượng dữ liệu và hiệu năng máy tính của bạn.)</p>
+        </div>
+
+        <div class="prediction-section">
+            <h2>Dự Đoán 16 Lô VIP cho Ngày Mai:</h2>
+            <div id="predictionResult" class="result-box">Chưa có dữ liệu để dự đoán. Vui lòng dán dữ liệu lịch sử và bấm nút "Xử lý".</div>
+        </div>
+
+        <div class="analysis-summary">
+            <h3>Tổng Quan Phân Tích &amp; Backtest:</h3>
+            <div id="summaryStats" class="stats-box">
+                <p>Số ngày lịch sử được phân tích: <span id="summaryTotalDays">N/A</span></p>
+                <p>Số lượng các chiến lược dự đoán được áp dụng: <span id="summaryStrategyCount">N/A</span></p>
+                <p>Tổng thời gian xử lý: <span id="summaryProcessingTime">N/A</span></p>
+            </div>
+        </div>
+
+        <div class="backtest-details-section">
+            <h3>Chi Tiết Hiệu Suất Backtest (Mô Phỏng Lịch Sử):</h3>
+            <div id="backtestStats" class="details-box">
+                <p><strong>Số ngày đã mô phỏng backtest:</strong> <span id="btTotalDays">N/A</span></p>
+                <p><strong>Điểm trung bình số lô trúng trên mỗi ngày:</strong> <span id="btAvgHit">N/A</span></p>
+                <p><strong>Số ngày đạt từ 10/16 số lô trúng:</strong> <span id="btHighAccuracyDays">N/A</span></p>
+                <p><strong>Tỷ lệ ngày đạt từ 10/16 số lô trúng:</strong> <span id="btHighAccuracyRate">N/A</span></p>
+                <p><strong>Tỷ lệ ngày hòa vốn/có lãi (giả định ≥ 5 số trúng):</strong> <span id="btWinRate">N/A</span></p>
+                <p><strong>Lịch sử số lô trúng qua từng ngày backtest:</strong> <span id="btHistory">N/A</span></p>
+                <div class="strategy-breakdown">
+                    <h4>Đóng góp của từng chiến lược (Điểm trung bình):</h4>
+                    <ul id="strategyContributionList">
+                        <li>Đang tính toán...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="disclaimer">
+            <p><strong>Thông tin quan trọng:</strong> Hệ thống này sử dụng các thuật toán thống kê, phân tích chuỗi thời gian và mô hình hóa dữ liệu phức tạp dựa trên lịch sử XSMB để đưa ra dự đoán. Tuy nhiên, xin lưu ý rằng xổ số là trò chơi may rủi và kết quả luôn có yếu tố ngẫu nhiên. Mọi dự đoán chỉ mang tính chất tham khảo, không đảm bảo độ chính xác 100% hay bất kỳ lợi nhuận nào. Người chơi cần có trách nhiệm và không nên phụ thuộc vào các công cụ dự đoán.</p>
+            <p>Chúng tôi không chịu trách nhiệm về bất kỳ tổn thất tài chính nào phát sinh từ việc sử dụng thông tin dự đoán này.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
