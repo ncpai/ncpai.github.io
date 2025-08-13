@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTIMATE BACCARAT AI SYSTEM - TensorFlow LSTM Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 25%, #16213e 50%, #0f3460 75%, #1e1e3f 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 15px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(240, 84, 84, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            animation: backgroundFloat 30s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(-20px, -20px) scale(1.02) rotate(1deg); }
+            50% { transform: translate(20px, -10px) scale(0.98) rotate(-1deg); }
+            75% { transform: translate(-10px, 20px) scale(1.01) rotate(0.5deg); }
+        }
+
+        .smart-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Smart Header */
+        .smart-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .smart-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            animation: headerShine 3s linear infinite;
+        }
+
+        @keyframes headerShine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(270deg, #ffd700, #ff6b6b, #4ecdc4, #667eea, #ffd700);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            animation: gradientFlow 4s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .ai-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 255, 0, 0.1);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            margin-top: 10px;
+        }
+
+        .ai-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Smart Input Section */
+        .smart-input-section {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(79, 70, 229, 0.08) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(147, 51, 234, 0.3);
+        }
+
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .input-title {
+            font-size: 1.4em;
+            color: #a78bfa;
+            font-weight: bold;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .quick-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .quick-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Smart Buttons Grid */
+        .smart-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .smart-btn {
+            padding: 25px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 2px solid transparent;
+            color: white;
+        }
+
+        .smart-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .smart-btn:hover::before {
+            left: 100%;
+        }
+
+        .smart-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .smart-btn.player {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-color: #3498db;
+        }
+
+        .smart-btn.banker {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-color: #e74c3c;
+        }
+
+        .smart-btn.tie {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            border-color: #27ae60;
+        }
+
+        .smart-btn .icon {
+            font-size: 2em;
+        }
+
+        .smart-btn .label {
+            font-size: 1.1em;
+        }
+
+        .smart-btn .sub-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        /* Side Bets Toggle */
+        .side-bets-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .side-bets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .side-bets-title {
+            font-size: 1.1em;
+            color: #ffd700;
+        }
+
+        .side-bet-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .side-bet-chip {
+            padding: 10px 20px;
+            background: rgba(155, 89, 182, 0.2);
+            border: 2px solid #9b59b6;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .side-bet-chip:hover {
+            background: rgba(155, 89, 182, 0.4);
+            transform: scale(1.05);
+        }
+
+        .side-bet-chip.active {
+            background: #9b59b6;
+            box-shadow: 0 0 20px rgba(155, 89, 182, 0.6);
+        }
+
+        .side-bet-chip.active::after {
+            content: '✓';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #00ff00;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: black;
+        }
+
+        /* Real-time Predictions Dashboard */
+        .predictions-dashboard {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .prediction-tile {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-tile.hot {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2) 0%, rgba(255, 107, 107, 0.1) 100%);
+            border-color: #ff6b6b;
+            animation: hotPulse 1.5s ease-in-out infinite;
+        }
+
+        .prediction-tile.very-hot {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 107, 107, 0.15) 100%);
+            border-color: #ff0000;
+            animation: veryHotPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes hotPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 107, 107, 0.8); }
+        }
+
+        @keyframes veryHotPulse {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(255, 0, 0, 0.9);
+                transform: scale(1.02);
+            }
+        }
+
+        .prediction-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .prediction-label {
+            font-size: 0.9em;
+            color: #aaa;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prediction-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .prediction-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .prediction-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .confidence-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        /* AI Recommendation Panel */
+        .ai-recommendation {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 107, 107, 0.15) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 3px solid #ffd700;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: recommendGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes recommendGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.6); }
+        }
+
+        .ai-recommendation::before {
+            content: '⭐';
+            position: absolute;
+            font-size: 150px;
+            opacity: 0.05;
+            top: -30px;
+            right: -30px;
+            transform: rotate(15deg);
+        }
+
+        .recommend-title {
+            font-size: 1.8em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .recommend-cards {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .recommend-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .recommend-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+
+        .recommend-card.primary {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #ffd700;
+            animation: primaryPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes primaryPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .recommend-bet {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .recommend-confidence {
+            font-size: 2em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .recommend-reason {
+            font-size: 0.9em;
+            color: #aaa;
+            margin-top: 10px;
+        }
+
+        /* Smart Statistics Grid */
+        .smart-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(46, 213, 115, 0.1) 0%, rgba(0, 184, 148, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(46, 213, 115, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-icon {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #aaa;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4fd1c5;
+        }
+
+        /* History Timeline */
+        .history-timeline {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-title {
+            font-size: 1.2em;
+            color: #fff;
+        }
+
+        .history-count {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .history-track {
+            display: flex;
+            gap: 5px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow-x: auto;
+            max-height: 80px;
+            align-items: center;
+        }
+
+        .history-item {
+            min-width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .history-item:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .history-item.player {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .history-item.banker {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .history-item.tie {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .history-item.with-pair::after {
+            content: '•';
+            position: absolute;
+            bottom: -5px;
+            font-size: 20px;
+            color: #9b59b6;
+        }
+
+        /* Pattern Recognition */
+        .pattern-panel {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(240, 84, 84, 0.08) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            display: none; /* Hidden as the new AI doesn't use explicit patterns */
+        }
+        
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            gap: 15px;
+        }
+        .loading-overlay.show {
+            display: flex;
+        }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loading-text {
+            color: #ffd700;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1200px) {
+            .predictions-dashboard {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .smart-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .smart-buttons { grid-template-columns: 1fr; }
+            .predictions-dashboard { grid-template-columns: repeat(2, 1fr); }
+            .smart-stats { grid-template-columns: 1fr; }
+            .recommend-cards { flex-direction: column; }
+        }
+
+         /* Alert System */
+        .smart-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            color: #333;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .smart-alert.show { display: block; }
+        .smart-alert.success { border-left: 5px solid #00ff00; }
+        .smart-alert.warning { border-left: 5px solid #ffa500; }
+        .smart-alert.info { border-left: 5px solid #00bfff; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2, #667eea); }
+    </style>
+</head>
+<body>
+    <div class="smart-container">
+        <div class="smart-header">
+            <h1>🎰 ULTIMATE BACCARAT AI SYSTEM 🎰</h1>
+            <div class="ai-status">AI NEURAL NETWORK ACTIVE (LSTM)</div>
+        </div>
+
+        <div class="smart-input-section">
+            <div class="input-header">
+                <div class="input-title">🎯 NHẬP KẾT QUẢ THÔNG MINH</div>
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="undoLast()">↩️ Hoàn tác</button>
+                    <button class="quick-btn" onclick="clearAll()">🗑️ Xóa hết</button>
+                    <button class="quick-btn" onclick="autoDemo()">🎲 Demo AI</button>
+                </div>
+            </div>
+
+            <div class="smart-buttons">
+                <button class="smart-btn player" onclick="smartInput('P')" id="btnPlayer">
+                    <div class="icon">👤</div>
+                    <div class="label">CON</div>
+                    <div class="sub-label">Player</div>
+                </button>
+                <button class="smart-btn banker" onclick="smartInput('B')" id="btnBanker">
+                    <div class="icon">🏦</div>
+                    <div class="label">CÁI</div>
+                    <div class="sub-label">Banker</div>
+                </button>
+                <button class="smart-btn tie" onclick="smartInput('T')" id="btnTie">
+                    <div class="icon">🤝</div>
+                    <div class="label">HÒA</div>
+                    <div class="sub-label">Tie</div>
+                </button>
+            </div>
+
+            <div class="side-bets-container">
+                <div class="side-bets-header">
+                    <div class="side-bets-title">💰 SIDE BETS (Tùy chọn - Click để thêm)</div>
+                </div>
+                <div class="side-bet-options">
+                    <div class="side-bet-chip" onclick="toggleSideBet('PP')" id="chipPP">
+                        👥 Đôi Con
+                    </div>
+                    <div class="side-bet-chip" onclick="toggleSideBet('BP')" id="chipBP">
+                        👥 Đôi Cái
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="predictions-dashboard">
+            <div class="prediction-tile" id="predPlayer">
+                <div class="confidence-badge" id="confPlayer">0%</div>
+                <div class="prediction-icon">👤</div>
+                <div class="prediction-label">CON</div>
+                <div class="prediction-value" id="probPlayer">0%</div>
+                <div class="prediction-bar">
+                    <div class="prediction-fill" id="barPlayer" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="prediction-tile" id="predBanker">
+                <div class="confidence-badge" id="confBanker">0%</div>
+                <div class="prediction-icon">🏦</div>
+                <div class="prediction-label">CÁI</div>
+                <div class="prediction-value" id="probBanker">0%</div>
+                <div class="prediction-bar">
+                    <div class="prediction-fill" id="barBanker" style="width: 0%; background: linear-gradient(90deg, #e74c3c, #c0392b)"></div>
+                </div>
+            </div>
+            <div class="prediction-tile" id="predTie">
+                <div class="confidence-badge" id="confTie">0%</div>
+                <div class="prediction-icon">🤝</div>
+                <div class="prediction-label">HÒA</div>
+                <div class="prediction-value" id="probTie">0%</div>
+                <div class="prediction-bar">
+                    <div class="prediction-fill" id="barTie" style="width: 0%; background: linear-gradient(90deg, #27ae60, #229954)"></div>
+                </div>
+            </div>
+            <div class="prediction-tile" id="predPP">
+                <div class="confidence-badge" id="confPP">0%</div>
+                <div class="prediction-icon">👥</div>
+                <div class="prediction-label">ĐÔI CON</div>
+                <div class="prediction-value" id="probPP">0%</div>
+                <div class="prediction-bar">
+                    <div class="prediction-fill" id="barPP" style="width: 0%; background: linear-gradient(90deg, #9b59b6, #8e44ad)"></div>
+                </div>
+            </div>
+            <div class="prediction-tile" id="predBP">
+                <div class="confidence-badge" id="confBP">0%</div>
+                <div class="prediction-icon">👥</div>
+                <div class="prediction-label">ĐÔI CÁI</div>
+                <div class="prediction-value" id="probBP">0%</div>
+                <div class="prediction-bar">
+                    <div class="prediction-fill" id="barBP" style="width: 0%; background: linear-gradient(90deg, #e67e22, #d35400)"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-recommendation" id="aiRecommend">
+            <div class="recommend-title">💎 AI ĐỀ XUẤT 💎</div>
+            <div class="recommend-cards" id="recommendCards">
+                </div>
+        </div>
+
+        <div class="smart-stats">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">Tổng ván</div>
+                <div class="stat-value" id="totalGames">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-label">Chuỗi hiện tại</div>
+                <div class="stat-value" id="currentStreak">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">Độ chính xác AI</div>
+                <div class="stat-value" id="aiAccuracy">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🧠</div>
+                <div class="stat-label">Ván đã học</div>
+                <div class="stat-value" id="learnedGames">0</div>
+            </div>
+        </div>
+
+        <div class="history-timeline">
+            <div class="history-header">
+                <div class="history-title">📜 Lịch sử</div>
+                <div class="history-count">Tổng: <span id="historyCount">0</span></div>
+            </div>
+            <div class="history-track" id="historyTrack">
+                </div>
+        </div>
+
+        <div class="smart-alert" id="smartAlert"></div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">ĐANG XỬ LÝ...</div>
+        </div>
+    </div>
+
+    <script>
+        // ===============================================
+        // TENSORFLOW.JS LSTM BACCARAT AI SYSTEM
+        // ===============================================
+
+        class TensorFlowBaccaratAI {
+            constructor() {
+                this.sequenceLength = 5; // LSTM looks at the last 5 games
+                this.numFeatures = 5;    // P, B, T, PP, BP (one-hot encoded)
+                this.history = [];
+                this.model = null;
+                this.lastPrediction = this.getDefaultPrediction();
+                this.statistics = this.getDefaultStatistics();
+                this.accuracyHistory = [];
+
+                this.createModel();
+            }
+            
+            getDefaultPrediction() {
+                return {
+                    P: { prob: 33.3, conf: 50 },
+                    B: { prob: 33.3, conf: 50 },
+                    T: { prob: 33.3, conf: 50 },
+                    PP: { prob: 7.5, conf: 50 },
+                    BP: { prob: 7.5, conf: 50 }
+                };
+            }
+
+            getDefaultStatistics() {
+                 return {
+                    total: 0,
+                    streak: { type: null, count: 0 },
+                    correct: 0,
+                    predicted: 0
+                };
+            }
+
+            createModel() {
+                // Input layer for the sequence
+                const inputs = tf.input({ shape: [this.sequenceLength, this.numFeatures] });
+
+                // Core LSTM layer to find temporal patterns
+                const lstmLayer = tf.layers.lstm({ units: 32, returnSequences: false }).apply(inputs);
+
+                // Output Head 1: Predicts P, B, or T
+                const mainOutput = tf.layers.dense({ units: 3, activation: 'softmax', name: 'main' }).apply(lstmLayer);
+
+                // Output Head 2: Predicts Player Pair (Yes/No)
+                const ppOutput = tf.layers.dense({ units: 1, activation: 'sigmoid', name: 'pp' }).apply(lstmLayer);
+                
+                // Output Head 3: Predicts Banker Pair (Yes/No)
+                const bpOutput = tf.layers.dense({ units: 1, activation: 'sigmoid', name: 'bp' }).apply(lstmLayer);
+
+                // Create the model with one input and three outputs
+                this.model = tf.model({ inputs: inputs, outputs: [mainOutput, ppOutput, bpOutput] });
+                
+                // Compile the model with appropriate loss functions for each output head
+                this.model.compile({
+                    optimizer: 'adam',
+                    loss: ['categoricalCrossentropy', 'binaryCrossentropy', 'binaryCrossentropy'],
+                    metrics: ['accuracy']
+                });
+                console.log("LSTM Model created successfully.");
+            }
+            
+            // Helper to one-hot encode a single game result
+            _encodeResult(entry) {
+                const main = entry.main;
+                const sideBets = entry.sideBets;
+                const encoding = [
+                    main === 'P' ? 1 : 0,
+                    main === 'B' ? 1 : 0,
+                    main === 'T' ? 1 : 0,
+                    sideBets.includes('PP') ? 1 : 0,
+                    sideBets.includes('BP') ? 1 : 0
+                ];
+                return encoding;
+            }
+
+            // Prepare data for training
+            _prepareData() {
+                const sequences = [];
+                const mainLabels = [];
+                const ppLabels = [];
+                const bpLabels = [];
+
+                if (this.history.length <= this.sequenceLength) {
+                    return null;
+                }
+
+                for (let i = this.sequenceLength; i < this.history.length; i++) {
+                    // The sequence of 5 games
+                    const sequence = this.history.slice(i - this.sequenceLength, i).map(this._encodeResult);
+                    sequences.push(sequence);
+
+                    // The result (label) to predict
+                    const targetEntry = this.history[i];
+                    mainLabels.push([targetEntry.main === 'P' ? 1 : 0, targetEntry.main === 'B' ? 1 : 0, targetEntry.main === 'T' ? 1 : 0]);
+                    ppLabels.push([targetEntry.sideBets.includes('PP') ? 1 : 0]);
+                    bpLabels.push([targetEntry.sideBets.includes('BP') ? 1 : 0]);
+                }
+                
+                return {
+                    xs: tf.tensor3d(sequences, [sequences.length, this.sequenceLength, this.numFeatures]),
+                    ys: [tf.tensor2d(mainLabels), tf.tensor2d(ppLabels), tf.tensor2d(bpLabels)]
+                };
+            }
+
+            async addResultAndPredict(main, sideBets = []) {
+                // Check accuracy of the previous prediction
+                this.checkAccuracy(main);
+
+                const entry = { main, sideBets };
+                this.history.push(entry);
+                this.updateStatistics(entry);
+
+                // If not enough data, return default
+                if (this.history.length <= this.sequenceLength) {
+                    console.log("Not enough data to train. Need " + (this.sequenceLength + 1) + " games.");
+                    return this.getDefaultPrediction();
+                }
+
+                // Show a more descriptive loading message
+                setLoadingText('AI ĐANG HỌC...');
+
+                // 1. Prepare data for training
+                const data = this._prepareData();
+                if (!data) return this.getDefaultPrediction();
+                
+                // 2. Retrain the model on the fly
+                // Note: In a real-world scenario, you might train for more epochs or only retrain periodically.
+                await this.model.fit(data.xs, data.ys, {
+                    epochs: 5,
+                    shuffle: true,
+                    callbacks: { onEpochEnd: (epoch, logs) => console.log(`Epoch ${epoch+1}: loss = ${logs.loss.toFixed(4)}`) }
+                });
+                
+                setLoadingText('AI ĐANG DỰ ĐOÁN...');
+
+                // 3. Predict the next outcome
+                const lastSequence = this.history.slice(-this.sequenceLength).map(this._encodeResult);
+                const inputTensor = tf.tensor3d([lastSequence], [1, this.sequenceLength, this.numFeatures]);
+                const [mainPred, ppPred, bpPred] = this.model.predict(inputTensor);
+
+                const mainProbs = await mainPred.data();
+                const ppProb = await ppPred.data();
+                const bpProb = await bpPred.data();
+
+                // 4. Clean up tensors to prevent memory leaks
+                tf.dispose([data.xs, ...data.ys, inputTensor, mainPred, ppPred, bpPred]);
+
+                // 5. Format the predictions for the UI
+                const predictions = {
+                    P: { prob: mainProbs[0] * 100, conf: 50 + (mainProbs[0] * 45) },
+                    B: { prob: mainProbs[1] * 100, conf: 50 + (mainProbs[1] * 45) },
+                    T: { prob: mainProbs[2] * 100, conf: 50 + (mainProbs[2] * 45) },
+                    PP: { prob: ppProb[0] * 100, conf: 50 + (ppProb[0] * 45) },
+                    BP: { prob: bpProb[0] * 100, conf: 50 + (bpProb[0] * 45) }
+                };
+
+                this.lastPrediction = predictions;
+                return predictions;
+            }
+            
+            checkAccuracy(actualResult) {
+                if(this.history.length === 0) return;
+
+                // Find which prediction was highest from the *previous* turn
+                const mainPreds = { P: this.lastPrediction.P.prob, B: this.lastPrediction.B.prob, T: this.lastPrediction.T.prob };
+                const predictedResult = Object.keys(mainPreds).reduce((a, b) => mainPreds[a] > mainPreds[b] ? a : b);
+
+                this.statistics.predicted++;
+                if (predictedResult === actualResult) {
+                    this.statistics.correct++;
+                }
+            }
+            
+            updateStatistics(entry) {
+                this.statistics.total++;
+                if(this.statistics.streak.type === entry.main) {
+                    this.statistics.streak.count++;
+                } else {
+                    this.statistics.streak.type = entry.main;
+                    this.statistics.streak.count = 1;
+                }
+            }
+
+            getAccuracy() {
+                if (this.statistics.predicted === 0) return '0.0%';
+                return ((this.statistics.correct / this.statistics.predicted) * 100).toFixed(1) + '%';
+            }
+
+            reset() {
+                this.history = [];
+                this.lastPrediction = this.getDefaultPrediction();
+                this.statistics = this.getDefaultStatistics();
+                this.createModel(); // Recreate a fresh, untrained model
+            }
+        }
+
+        // ====================================
+        // GLOBAL SYSTEM INSTANCE
+        // ====================================
+
+        const AI = new TensorFlowBaccaratAI();
+        let selectedSideBets = new Set();
+        let isProcessing = false;
+
+        // ====================================
+        // UI FUNCTIONS
+        // ====================================
+
+        async function smartInput(main) {
+            if (isProcessing) return;
+            isProcessing = true;
+            showLoading();
+            
+            const sideBets = Array.from(selectedSideBets);
+
+            // Add result and let the AI learn and predict
+            const predictions = await AI.addResultAndPredict(main, sideBets);
+            
+            // Clear side bets selection for the next round
+            selectedSideBets.clear();
+            updateSideBetsUI();
+            
+            // Update UI with new data
+            updateUI(predictions);
+            hideLoading();
+            isProcessing = false;
+        }
+
+        function toggleSideBet(type) {
+            const chip = document.getElementById(`chip${type}`);
+            if (selectedSideBets.has(type)) {
+                selectedSideBets.delete(type);
+                chip.classList.remove('active');
+            } else {
+                selectedSideBets.add(type);
+                chip.classList.add('active');
+            }
+        }
+
+        function updateSideBetsUI() {
+            document.getElementById('chipPP').classList.toggle('active', selectedSideBets.has('PP'));
+            document.getElementById('chipBP').classList.toggle('active', selectedSideBets.has('BP'));
+        }
+
+        async function undoLast() {
+            if (isProcessing || AI.history.length === 0) return;
+            isProcessing = true;
+            showLoading();
+
+            const history = [...AI.history];
+            history.pop();
+            
+            AI.reset(); // Reset and create a fresh model
+
+            // Re-learn from the shortened history
+            let predictions = AI.getDefaultPrediction();
+            for (let i = 0; i < history.length; i++) {
+                const entry = history[i];
+                setLoadingText(`ĐANG HỌC LẠI... (${i+1}/${history.length})`);
+                predictions = await AI.addResultAndPredict(entry.main, entry.sideBets);
+            }
+            
+            updateUI(predictions);
+            hideLoading();
+            showAlert('info', '↩️ Đã hoàn tác và học lại');
+            isProcessing = false;
+        }
+
+        function clearAll() {
+            if (!confirm('Xóa toàn bộ dữ liệu và reset AI?')) return;
+            showLoading();
+            AI.reset();
+            
+            setTimeout(() => {
+                updateUI(AI.getDefaultPrediction());
+                hideLoading();
+                showAlert('info', '🗑️ Đã xóa tất cả và reset AI');
+            }, 300);
+        }
+
+        async function autoDemo() {
+            if (isProcessing) return;
+            isProcessing = true;
+            showLoading();
+            AI.reset();
+
+            const demoData = [
+                {main: 'P', sideBets: []}, {main: 'B', sideBets: []}, {main: 'B', sideBets: ['BP']},
+                {main: 'P', sideBets: []}, {main: 'T', sideBets: []}, {main: 'P', sideBets: []},
+                {main: 'P', sideBets: ['PP']}, {main: 'B', sideBets: []}, {main: 'B', sideBets: []},
+                {main: 'B', sideBets: []}, {main: 'P', sideBets: []}, {main: 'B', sideBets: []},
+                {main: 'P', sideBets: []}, {main: 'P', sideBets: []}, {main: 'T', sideBets: []},
+                {main: 'B', sideBets: []}, {main: 'B', sideBets: []}, {main: 'P', sideBets: ['PP']},
+                {main: 'B', sideBets: []}, {main: 'P', sideBets: []}
+            ];
+            
+            let predictions = AI.getDefaultPrediction();
+            for (let i = 0; i < demoData.length; i++) {
+                const entry = demoData[i];
+                setLoadingText(`NẠP DỮ LIỆU DEMO... (${i+1}/${demoData.length})`);
+                // Use a non-predictive add for speed, then predict once at the end.
+                // For this implementation, we'll just run the full process.
+                predictions = await AI.addResultAndPredict(entry.main, entry.sideBets);
+            }
+            
+            updateUI(predictions);
+            hideLoading();
+            showAlert('success', `✅ Demo ${demoData.length} ván thành công!`);
+            isProcessing = false;
+        }
+
+        function updateUI(predictions) {
+            updatePredictions(predictions);
+            updateRecommendations(predictions);
+            updateStatisticsUI();
+            updateHistory();
+        }
+
+        function updatePredictions(predictions) {
+            const types = ['Player', 'Banker', 'Tie', 'PP', 'BP'];
+            const keys = ['P', 'B', 'T', 'PP', 'BP'];
+            
+            keys.forEach((key, i) => {
+                const pred = predictions[key];
+                const type = types[i];
+                
+                document.getElementById(`prob${type}`).textContent = pred.prob.toFixed(1) + '%';
+                document.getElementById(`conf${type}`).textContent = pred.conf.toFixed(0) + '%';
+                document.getElementById(`bar${type}`).style.width = pred.prob + '%';
+                
+                const tile = document.getElementById(`pred${type}`);
+                tile.classList.remove('hot', 'very-hot');
+                if (pred.prob > 60 && pred.conf > 70) {
+                    tile.classList.add('very-hot');
+                } else if (pred.prob > 45 && pred.conf > 60) {
+                    tile.classList.add('hot');
+                }
+            });
+        }
+
+        function updateRecommendations(predictions) {
+             const container = document.getElementById('recommendCards');
+             const sorted = Object.entries(predictions)
+                .map(([type, pred]) => ({ type, ...pred }))
+                .sort((a, b) => b.prob - a.prob);
+
+            const recs = sorted.filter(p => p.prob > 40 && p.conf > 60).slice(0, 3);
+
+            if (recs.length === 0) {
+                container.innerHTML = '<div style="color: #888;">AI đang chờ thêm dữ liệu để đề xuất...</div>';
+                return;
+            }
+
+            container.innerHTML = recs.map((rec, i) => {
+                const typeLabel = { 'P': 'CON', 'B': 'CÁI', 'T': 'HÒA', 'PP': 'ĐÔI CON', 'BP': 'ĐÔI CÁI' }[rec.type];
+                return `
+                    <div class="recommend-card ${i === 0 ? 'primary' : ''}">
+                        <div class="recommend-bet">${typeLabel}</div>
+                        <div class="recommend-confidence">${rec.prob.toFixed(1)}%</div>
+                        <div class="recommend-reason">LSTM Phân tích</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStatisticsUI() {
+            const stats = AI.statistics;
+            document.getElementById('totalGames').textContent = stats.total;
+            const streakText = stats.streak.type ? `${stats.streak.type} x${stats.streak.count}` : '-';
+            document.getElementById('currentStreak').textContent = streakText;
+            document.getElementById('aiAccuracy').textContent = AI.getAccuracy();
+            document.getElementById('learnedGames').textContent = Math.max(0, AI.history.length - AI.sequenceLength);
+        }
+
+        function updateHistory() {
+            const track = document.getElementById('historyTrack');
+            document.getElementById('historyCount').textContent = AI.history.length;
+
+            if (AI.history.length === 0) {
+                track.innerHTML = '<div style="color: #888;">Chưa có dữ liệu</div>';
+                return;
+            }
+
+            const recent = AI.history.slice(-30);
+            track.innerHTML = recent.map(entry => {
+                const withPair = entry.sideBets.length > 0 ? 'with-pair' : '';
+                const className = { 'P': 'player', 'B': 'banker', 'T': 'tie' }[entry.main];
+                return `<div class="history-item ${className} ${withPair}">${entry.main}</div>`;
+            }).join('');
+            track.scrollLeft = track.scrollWidth; // Auto-scroll to the end
+        }
+
+        function showAlert(type, message) {
+            const alert = document.getElementById('smartAlert');
+            alert.className = `smart-alert ${type} show`;
+            alert.textContent = message;
+            setTimeout(() => alert.classList.remove('show'), 3000);
+        }
+        
+        function setLoadingText(text) {
+             document.getElementById('loadingText').textContent = text;
+        }
+
+        function showLoading() {
+            setLoadingText('ĐANG XỬ LÝ...');
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        // ====================================
+        // INITIALIZATION
+        // ====================================
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI(AI.getDefaultPrediction());
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '1') smartInput('P');
+            else if (e.key === '2') smartInput('B');
+            else if (e.key === '3') smartInput('T');
+            else if (e.key === 'z' && (e.ctrlKey || e.metaKey)) undoLast();
+        });
+    </script>
+</body>
+</html>
