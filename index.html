@@ -18,6 +18,7 @@
             min-height: 100vh;
             padding: 20px;
             position: relative;
+            overflow-x: hidden; /* Prevent horizontal scroll from decor */
         }
 
         body::before {
@@ -34,6 +35,42 @@
             pointer-events: none;
             z-index: 1;
         }
+
+        /* New Background Decor */
+        .background-decor .han-char {
+            position: fixed;
+            font-size: 20vw;
+            font-weight: bold;
+            color: rgba(255, 215, 0, 0.04);
+            z-index: 1;
+            pointer-events: none;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.1);
+            animation: floatChar 30s infinite linear alternate;
+        }
+
+        .background-decor .han-char:nth-child(1) {
+            top: 5%;
+            left: -5%;
+        }
+
+        .background-decor .han-char:nth-child(2) {
+            bottom: 5%;
+            right: -5%;
+            animation-delay: -15s;
+        }
+
+        @keyframes floatChar {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-30px) rotate(5deg);
+            }
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+        }
+
 
         .container {
             max-width: 1400px;
@@ -88,6 +125,46 @@
             0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
             50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
         }
+        
+        /* New Lucky Phrases Styles */
+        .lucky-phrases {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .lucky-text {
+            font-size: 1.3em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            animation: neonFlicker 5s infinite alternate;
+        }
+
+        .lucky-text-1 {
+            color: #ffd700;
+            text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #e74c3c;
+        }
+
+        .lucky-text-2 {
+            color: #4fd1c5;
+            text-shadow: 0 0 5px #4fd1c5, 0 0 10px #4fd1c5, 0 0 20px #4fd1c5, 0 0 30px #3498db;
+            animation-delay: -2.5s;
+        }
+
+        @keyframes neonFlicker {
+            0%, 100% {
+                opacity: 1;
+                filter: brightness(1.1);
+            }
+            50% {
+                opacity: 0.8;
+                filter: brightness(1);
+            }
+        }
+
 
         /* Accuracy Statistics Section */
         .accuracy-section {
@@ -287,13 +364,20 @@
         }
 
         .chart-bar {
-            flex: 0 0 40px;
-            background: linear-gradient(180deg, #4fd1c5, #667eea);
+            flex: 0 0 25px; /* Reduced width for more bars */
             border-radius: 5px 5px 0 0;
-            min-height: 5px;
             transition: all 0.3s;
             position: relative;
         }
+        
+        .chart-bar.bar-correct {
+             background: linear-gradient(180deg, #2ecc71, #27ae60);
+        }
+
+        .chart-bar.bar-incorrect {
+            background: linear-gradient(180deg, #e74c3c, #c0392b);
+        }
+
 
         .chart-bar:hover {
             opacity: 0.8;
@@ -848,12 +932,23 @@
     </style>
 </head>
 <body>
+    <!-- New Background Decor Elements -->
+    <div class="background-decor">
+        <div class="han-char">福</div>
+        <div class="han-char">福</div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>🎰 BACCARAT PRO 2.0 - THUẬT TOÁN 142857 🎰</h1>
             <p class="disclaimer">
                 💎 HỆ THỐNG PHÂN TÍCH CHUYÊN NGHIỆP - 30+ MẪU CHUẨN 💎
             </p>
+            <!-- New Lucky Phrases -->
+            <div class="lucky-phrases">
+                <span class="lucky-text lucky-text-1">MAY MẮN PHÁT TÀI</span>
+                <span class="lucky-text lucky-text-2">ĐÁNH ĐÂU TRÚNG ĐÓ</span>
+            </div>
         </div>
 
         <!-- Accuracy Statistics Section -->
@@ -953,7 +1048,7 @@
                 </div>
                 
                 <div class="accuracy-chart">
-                    <h4 style="margin-bottom: 10px; color: #aaa; font-size: 0.95em;">📊 Biểu đồ độ chính xác 20 ván gần nhất</h4>
+                    <h4 style="margin-bottom: 10px; color: #aaa; font-size: 0.95em;">📊 Biểu đồ độ chính xác toàn bộ</h4>
                     <div class="chart-bars" id="accuracyChart"></div>
                 </div>
                 
@@ -1112,7 +1207,8 @@
                     B: { predicted: 0, correct: 0 },
                     T: { predicted: 0, correct: 0 }
                 };
-                this.last20Accuracy = []; // Tăng từ 10 lên 20
+                this.accuracyHistory = []; // [MODIFIED] Store full accuracy history
+                this.last20Accuracy = []; 
                 this.roi = 100; // Starting with 100 units
                 this.roiHistory = [];
             }
@@ -1164,7 +1260,8 @@
                     }
                 }
                 
-                // Update last 20 accuracy (tăng từ 10)
+                // [MODIFIED] Update both full and recent accuracy history
+                this.accuracyHistory.push(isCorrect ? 1 : 0);
                 this.last20Accuracy.push(isCorrect ? 1 : 0);
                 if (this.last20Accuracy.length > 20) {
                     this.last20Accuracy.shift();
@@ -1222,7 +1319,7 @@
                 return ((this.roi - 100) / 100) * 100; // Percentage gain/loss
             }
 
-            getRecentHistory(limit = 20) { // Tăng từ 10 lên 20
+            getRecentHistory(limit = 20) { 
                 const recent = [];
                 const start = Math.max(0, this.predictions.length - limit);
                 
@@ -1252,6 +1349,7 @@
                     B: { predicted: 0, correct: 0 },
                     T: { predicted: 0, correct: 0 }
                 };
+                this.accuracyHistory = []; // [MODIFIED] Reset full history
                 this.last20Accuracy = [];
                 this.roi = 100;
                 this.roiHistory = [];
@@ -1466,11 +1564,11 @@
                 if (history.length < 4) return { detected: false };
                 const last4 = history.slice(-4);
                 const isPingPong = last4[0] !== last4[1] && 
-                                  last4[1] !== last4[2] && 
-                                  last4[2] !== last4[3] &&
-                                  last4[0] === last4[2] &&
-                                  last4[1] === last4[3] &&
-                                  !last4.includes('T');
+                                     last4[1] !== last4[2] && 
+                                     last4[2] !== last4[3] &&
+                                     last4[0] === last4[2] &&
+                                     last4[1] === last4[3] &&
+                                     !last4.includes('T');
                 return { 
                     detected: isPingPong, 
                     confidence: isPingPong ? 0.75 : 0,
@@ -1543,7 +1641,7 @@
                 pattern.push(count);
                 
                 const isZigZag = pattern.length >= 3 && 
-                                 pattern.every(p => p === 1 || p === 2);
+                                   pattern.every(p => p === 1 || p === 2);
                 
                 return { 
                     detected: isZigZag, 
@@ -1592,7 +1690,7 @@
                 if (history.length < 3) return { detected: false };
                 const last3 = history.slice(-3);
                 const isSandwich = (last3[0] === last3[2] && last3[0] !== last3[1] && 
-                                   !last3.includes('T'));
+                                      !last3.includes('T'));
                 return { 
                     detected: isSandwich, 
                     confidence: isSandwich ? 0.6 : 0,
@@ -1686,6 +1784,8 @@
                 const pCount = last13.filter(r => r === 'P').length;
                 const bCount = last13.filter(r => r === 'B').length;
                 
+                if (Math.min(pCount, bCount) === 0) return { detected: false };
+
                 const ratio = Math.max(pCount, bCount) / Math.min(pCount, bCount);
                 const isGolden = ratio >= 1.5 && ratio <= 1.7; // Xấp xỉ 1.618
                 
@@ -1794,9 +1894,13 @@
                 // Normalize
                 if (weights > 0) {
                     const total = finalPrediction.P + finalPrediction.B + finalPrediction.T;
-                    finalPrediction.P = (finalPrediction.P / total) * 100;
-                    finalPrediction.B = (finalPrediction.B / total) * 100;
-                    finalPrediction.T = (finalPrediction.T / total) * 100;
+                    if (total > 0) {
+                        finalPrediction.P = (finalPrediction.P / total) * 100;
+                        finalPrediction.B = (finalPrediction.B / total) * 100;
+                        finalPrediction.T = (finalPrediction.T / total) * 100;
+                    } else {
+                         finalPrediction = { P: 33.3, B: 33.3, T: 33.3 };
+                    }
                 }
                 
                 // Make prediction for accuracy tracking
@@ -1878,7 +1982,8 @@
         function undoLast() {
             if (gameHistory.length > 0) {
                 gameHistory.pop();
-                analyzer.history.pop();
+                analyzer = new AdvancedBaccaratAnalyzer(); // Re-init to rebuild state
+                gameHistory.forEach(r => analyzer.addResult(r));
                 updateDisplay();
                 analyzeAndPredict();
                 updateAccuracyStats();
@@ -1906,13 +2011,8 @@
                 else if (random < weights[0] + weights[1]) result = 'B';
                 else result = 'T';
                 
-                gameHistory.push(result);
-                analyzer.addResult(result);
+                addResult(result);
             }
-            
-            updateDisplay();
-            analyzeAndPredict();
-            updateAccuracyStats();
         }
 
         function resetAccuracyStats() {
@@ -1963,13 +2063,11 @@
             // Update breakdown by type
             ['P', 'B', 'T'].forEach(type => {
                 const stats = tracker.stats[type];
-                document.getElementById(`${type.toLowerCase() === 'p' ? 'player' : 
-                    type.toLowerCase() === 'b' ? 'banker' : 'tie'}PredCount`).textContent = stats.predicted;
-                document.getElementById(`${type.toLowerCase() === 'p' ? 'player' : 
-                    type.toLowerCase() === 'b' ? 'banker' : 'tie'}Correct`).textContent = stats.correct;
+                const typeName = type === 'P' ? 'player' : type === 'B' ? 'banker' : 'tie';
+                document.getElementById(`${typeName}PredCount`).textContent = stats.predicted;
+                document.getElementById(`${typeName}Correct`).textContent = stats.correct;
                 const accuracy = tracker.getAccuracyByType(type);
-                document.getElementById(`${type.toLowerCase() === 'p' ? 'player' : 
-                    type.toLowerCase() === 'b' ? 'banker' : 'tie'}Accuracy`).textContent = accuracy.toFixed(1) + '%';
+                document.getElementById(`${typeName}Accuracy`).textContent = accuracy.toFixed(1) + '%';
             });
             
             // Update accuracy trend
@@ -2016,39 +2114,53 @@
                 }
             }
             
-            // Update accuracy chart (20 mục)
+            // [MODIFIED] Update accuracy chart and history
             updateAccuracyChart();
-            
-            // Update prediction history (20 mục)
             updatePredictionHistory();
         }
 
+        // [MODIFIED] This function now shows the entire history
         function updateAccuracyChart() {
             const tracker = analyzer.accuracyTracker;
+            const chartContainer = document.querySelector('.accuracy-chart');
             const chartDiv = document.getElementById('accuracyChart');
             
-            if (tracker.last20Accuracy.length === 0) {
-                chartDiv.innerHTML = '<div style="text-align: center; color: #888;">Chưa có dữ liệu</div>';
+            const historyToShow = tracker.accuracyHistory;
+            
+            if (historyToShow.length === 0) {
+                chartDiv.innerHTML = '<div style="text-align: center; color: #888; width: 100%;">Chưa có dữ liệu</div>';
                 return;
             }
             
-            const bars = tracker.last20Accuracy.map((acc, idx) => {
-                const height = acc * 100; // 1 = 100%, 0 = 0%
+            // Dynamically update the chart title
+            const chartTitle = chartContainer.querySelector('h4');
+            if (chartTitle) {
+                chartTitle.textContent = `📊 Biểu đồ độ chính xác toàn bộ (${historyToShow.length} ván)`;
+            }
+
+            const bars = historyToShow.map((acc, idx) => {
+                const height = acc ? '100%' : '5%'; // Incorrect predictions have a small visible bar
+                const colorClass = acc ? 'bar-correct' : 'bar-incorrect';
+                const title = `Ván #${idx + 1} - ${acc ? 'Đúng' : 'Sai'}`;
                 return `
-                    <div class="chart-bar" style="height: ${height}%;">
+                    <div class="chart-bar ${colorClass}" style="height: ${height};" title="${title}">
                         <div class="chart-bar-value">${acc ? '✓' : '✗'}</div>
-                        <div class="chart-bar-label">#${tracker.predictions.length - tracker.last20Accuracy.length + idx + 1}</div>
+                        <div class="chart-bar-label">#${idx + 1}</div>
                     </div>
                 `;
             }).join('');
             
             chartDiv.innerHTML = bars;
+            
+            // Scroll to the end of the chart to show the latest result
+            chartContainer.scrollLeft = chartContainer.scrollWidth;
         }
+
 
         function updatePredictionHistory() {
             const tracker = analyzer.accuracyTracker;
             const historyDiv = document.getElementById('predictionHistory');
-            const recentHistory = tracker.getRecentHistory(20); // Tăng từ 10 lên 20
+            const recentHistory = tracker.getRecentHistory(20); 
             
             if (recentHistory.length === 0) {
                 historyDiv.innerHTML = '<div style="text-align: center; color: #888;">Chưa có lịch sử dự đoán</div>';
