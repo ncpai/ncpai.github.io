@@ -370,8 +370,9 @@
             position: relative;
         }
         
+        /* MODIFIED: Changed green to blue */
         .chart-bar.bar-correct {
-             background: linear-gradient(180deg, #2ecc71, #27ae60);
+             background: linear-gradient(180deg, #3498db, #2980b9);
         }
 
         .chart-bar.bar-incorrect {
@@ -402,6 +403,28 @@
             color: #fff;
             font-weight: bold;
         }
+        
+        /* NEW: Styles for the streak sequence display */
+        .streak-sequence {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            min-height: 30px;
+            align-items: center;
+        }
+        .streak-number {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .streak-number.correct {
+            color: #3498db; /* Blue for correct streaks */
+        }
+        .streak-number.incorrect {
+            color: #e74c3c; /* Red for incorrect streaks */
+        }
 
         .accuracy-history {
             margin-top: 20px;
@@ -424,7 +447,7 @@
         }
 
         .history-entry.correct {
-            border-left: 3px solid #2ecc71;
+            border-left: 3px solid #3498db; /* Changed from green to blue */
         }
 
         .history-entry.incorrect {
@@ -453,8 +476,8 @@
         }
 
         .entry-result.correct {
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
+            background: rgba(52, 152, 219, 0.2); /* Changed from green to blue */
+            color: #3498db;
         }
 
         .entry-result.incorrect {
@@ -989,7 +1012,7 @@
             </div>
             
             <div class="accuracy-details">
-                <h3 style="margin-bottom: 15px; color: #2ecc71;">📈 Phân Tích Chi Tiết</h3>
+                <h3 style="margin-bottom: 15px; color: #3498db;">📈 Phân Tích Chi Tiết</h3>
                 
                 <div class="accuracy-breakdown">
                     <div class="breakdown-item">
@@ -1045,6 +1068,12 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- NEW: Streak sequence display -->
+                <div class="accuracy-streak-display" style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 10px; color: #aaa; font-size: 0.95em;">🔗 Chuỗi Đúng/Sai (Đúng / Sai)</h4>
+                    <div id="accuracyStreakSequence" class="streak-sequence"></div>
                 </div>
                 
                 <div class="accuracy-chart">
@@ -1848,12 +1877,15 @@
 
             analyze() {
                 if (this.history.length < 3) {
-                    return {
+                    const initialResult = {
                         prediction: { P: 33.3, B: 33.3, T: 33.3 },
                         confidence: 0,
                         patterns: { detected: [], warnings: [] },
                         magic: null
                     };
+                    // Make an initial "prediction" so the first result can be tracked
+                    this.accuracyTracker.makePrediction(initialResult.prediction);
+                    return initialResult;
                 }
 
                 // Get pattern analysis
@@ -1979,14 +2011,30 @@
             updateAccuracyStats();
         }
 
+        // MODIFIED: This function is now fixed to correctly rebuild the analyzer's state.
         function undoLast() {
             if (gameHistory.length > 0) {
-                gameHistory.pop();
-                analyzer = new AdvancedBaccaratAnalyzer(); // Re-init to rebuild state
-                gameHistory.forEach(r => analyzer.addResult(r));
-                updateDisplay();
-                analyzeAndPredict();
-                updateAccuracyStats();
+                gameHistory.pop(); // Modify the global history array
+
+                // Re-initialize the analyzer to have a clean slate.
+                analyzer = new AdvancedBaccaratAnalyzer();
+
+                // Re-process the entire shortened history to rebuild the analyzer's internal state,
+                // including the sequence of predictions and accuracy results.
+                gameHistory.forEach(result => {
+                    // 1. Generate a prediction based on the history *so far*.
+                    // This sets analyzer.accuracyTracker.currentPrediction.
+                    analyzer.analyze(); 
+                    
+                    // 2. Add the actual result. The analyzer will use the prediction it just made
+                    // to calculate if it was correct and update its internal accuracyHistory.
+                    analyzer.addResult(result);
+                });
+                
+                // After rebuilding the analyzer's internal state, update the entire UI once.
+                updateDisplay();       // Update the history bubbles and basic stats.
+                analyzeAndPredict();   // Generate the prediction for the *next* round.
+                updateAccuracyStats(); // Update all stats displays, which will now read the correctly rebuilt state.
             }
         }
 
@@ -2117,6 +2165,7 @@
             // [MODIFIED] Update accuracy chart and history
             updateAccuracyChart();
             updatePredictionHistory();
+            updateAccuracyStreakSequence(); // NEW: Call the function for the new streak display
         }
 
         // [MODIFIED] This function now shows the entire history
@@ -2154,6 +2203,41 @@
             
             // Scroll to the end of the chart to show the latest result
             chartContainer.scrollLeft = chartContainer.scrollWidth;
+        }
+
+        // NEW: Function to update the streak sequence display
+        function updateAccuracyStreakSequence() {
+            const tracker = analyzer.accuracyTracker;
+            const history = tracker.accuracyHistory; // This is an array of 0s (incorrect) and 1s (correct)
+            const sequenceDiv = document.getElementById('accuracyStreakSequence');
+
+            if (history.length === 0) {
+                sequenceDiv.innerHTML = '<span style="color: #888;">Chưa có dữ liệu</span>';
+                return;
+            }
+
+            const streaks = [];
+            if (history.length > 0) {
+                let currentStreakType = history[0];
+                let currentStreakLength = 0;
+
+                for (const result of history) {
+                    if (result === currentStreakType) {
+                        currentStreakLength++;
+                    } else {
+                        streaks.push({ type: currentStreakType, length: currentStreakLength });
+                        currentStreakType = result;
+                        currentStreakLength = 1;
+                    }
+                }
+                // Add the very last streak
+                streaks.push({ type: currentStreakType, length: currentStreakLength });
+            }
+
+            sequenceDiv.innerHTML = streaks.map(streak => {
+                const className = streak.type === 1 ? 'correct' : 'incorrect';
+                return `<span class="streak-number ${className}">${streak.length}</span>`;
+            }).join('');
         }
 
 
