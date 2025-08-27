@@ -147,7 +147,7 @@
             <div id="analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow duration-500">
                 <h2 class="text-xl font-semibold mb-4 text-yellow-300">🧠 Phân Tích & Đề Xuất</h2>
                 <div id="analysisResult" class="space-y-4">
-                    <p class="text-gray-400 text-center py-8">Cần ít nhất 4 kết quả để bắt đầu phân tích...</p>
+                    <p class="text-gray-400 text-center py-8">Cần ít nhất 10 kết quả để bắt đầu phân tích...</p>
                 </div>
             </div>
             
@@ -167,9 +167,9 @@
         // --- CORE LOGIC: PATTERN MATCHER ---
         class PatternMatcher {
             constructor() {
-                this.MIN_HISTORY_FOR_ANALYSIS = 4;
-                this.MIN_PATTERN_LENGTH = 4;
-                this.MAX_PATTERN_LENGTH = 12;
+                this.MIN_HISTORY_FOR_ANALYSIS = 10;
+                this.MIN_PATTERN_LENGTH = 10;
+                this.MAX_PATTERN_LENGTH = 15;
             }
 
             calculateSimilarity(arr1, arr2) {
@@ -188,6 +188,7 @@
                         const segment = sessionHistory.slice(i, i + pattern.length);
                         const nextResult = sessionHistory[i + pattern.length];
                         const similarity = this.calculateSimilarity(pattern, segment);
+                        // REMOVED WEIGHT
                         if (similarity >= 0.9) occurrences.push({ type: 'similar', next: nextResult, similarity });
                         const reverseSimilarity = this.calculateSimilarity(reversedPattern, segment);
                         if (reverseSimilarity >= 0.9) occurrences.push({ type: 'reversed', next: nextResult, similarity: reverseSimilarity });
@@ -233,6 +234,7 @@
                 }
                 const votes = { P: 0, B: 0 };
                 allMatches.forEach(match => {
+                    // REMOVED WEIGHT
                     if (votes[match.next] !== undefined) votes[match.next] += match.similarity;
                 });
                 const totalVotes = votes.P + votes.B;
