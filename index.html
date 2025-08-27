@@ -188,10 +188,17 @@
                         const segment = sessionHistory.slice(i, i + pattern.length);
                         const nextResult = sessionHistory[i + pattern.length];
                         const similarity = this.calculateSimilarity(pattern, segment);
-                        // REMOVED WEIGHT
-                        if (similarity >= 0.9) occurrences.push({ type: 'similar', next: nextResult, similarity });
+                        
+                        // UPDATED: Check for 100% match
+                        if (similarity === 1) {
+                            occurrences.push({ type: 'similar', next: nextResult, similarity: 1 });
+                        }
+                        
                         const reverseSimilarity = this.calculateSimilarity(reversedPattern, segment);
-                        if (reverseSimilarity >= 0.9) occurrences.push({ type: 'reversed', next: nextResult, similarity: reverseSimilarity });
+                        // UPDATED: Check for 100% match
+                        if (reverseSimilarity === 1) {
+                            occurrences.push({ type: 'reversed', next: nextResult, similarity: 1 });
+                        }
                     }
                 }
                 return occurrences;
@@ -230,22 +237,21 @@
                     }
                 }
                 if (allMatches.length === 0) {
-                    return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự.', confidence: 0 };
+                    return { prediction: null, analysisText: 'Không tìm thấy hình cầu trùng khớp 100%.', confidence: 0 };
                 }
                 const votes = { P: 0, B: 0 };
                 allMatches.forEach(match => {
-                    // REMOVED WEIGHT
                     if (votes[match.next] !== undefined) votes[match.next] += match.similarity;
                 });
                 const totalVotes = votes.P + votes.B;
                 if (totalVotes === 0) {
-                     return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự.', confidence: 0 };
+                     return { prediction: null, analysisText: 'Không tìm thấy hình cầu trùng khớp 100%.', confidence: 0 };
                 }
                 const confidenceP = (votes.P / totalVotes) * 100;
                 const confidenceB = (votes.B / totalVotes) * 100;
                 const maxConfidence = Math.max(confidenceP, confidenceB);
                 const predictedWinner = votes.P > votes.B ? 'P' : 'B';
-                const analysisTextPrefix = `Tìm thấy ${allMatches.length} hình cầu tương tự. Lịch sử cho thấy:\n- PLAYER: ${votes.P.toFixed(1)} điểm\n- BANKER: ${votes.B.toFixed(1)} điểm`;
+                const analysisTextPrefix = `Tìm thấy ${allMatches.length} hình cầu trùng khớp 100%. Lịch sử cho thấy:\n- PLAYER: ${votes.P.toFixed(0)} lần\n- BANKER: ${votes.B.toFixed(0)} lần`;
                 
                 const streakInfo = this.analyzeCurrentStreak(currentHistory);
                 let recommendation = '';
