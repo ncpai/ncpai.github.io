@@ -147,7 +147,7 @@
             <div id="analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow duration-500">
                 <h2 class="text-xl font-semibold mb-4 text-yellow-300">🧠 Phân Tích & Đề Xuất</h2>
                 <div id="analysisResult" class="space-y-4">
-                    <p class="text-gray-400 text-center py-8">Cần ít nhất 10 kết quả để bắt đầu phân tích...</p>
+                    <p class="text-gray-400 text-center py-8">Cần ít nhất 6 kết quả để bắt đầu phân tích...</p>
                 </div>
             </div>
             
@@ -167,8 +167,8 @@
         // --- CORE LOGIC: PATTERN MATCHER ---
         class PatternMatcher {
             constructor() {
-                this.MIN_HISTORY_FOR_ANALYSIS = 10;
-                this.MIN_PATTERN_LENGTH = 10;
+                this.MIN_HISTORY_FOR_ANALYSIS = 6; // UPDATED
+                this.MIN_PATTERN_LENGTH = 6;       // UPDATED
                 this.MAX_PATTERN_LENGTH = 15;
             }
 
@@ -189,13 +189,11 @@
                         const nextResult = sessionHistory[i + pattern.length];
                         const similarity = this.calculateSimilarity(pattern, segment);
                         
-                        // UPDATED: Check for 100% match
                         if (similarity === 1) {
                             occurrences.push({ type: 'similar', next: nextResult, similarity: 1 });
                         }
                         
                         const reverseSimilarity = this.calculateSimilarity(reversedPattern, segment);
-                        // UPDATED: Check for 100% match
                         if (reverseSimilarity === 1) {
                             occurrences.push({ type: 'reversed', next: nextResult, similarity: 1 });
                         }
@@ -228,14 +226,19 @@
                     return { prediction: null, analysisText: `Cần ít nhất ${this.MIN_HISTORY_FOR_ANALYSIS} kết quả...`, confidence: 0 };
                 }
                 const allMatches = [];
+                let foundPatternLength = 0; // Variable to store the length of the found pattern
+
+                // UPDATED: Flexible search loop
                 for (let len = Math.min(this.MAX_PATTERN_LENGTH, currentHistory.length); len >= this.MIN_PATTERN_LENGTH; len--) {
                     const pattern = currentHistory.slice(-len);
                     const occurrences = this.findPatternOccurrences(pattern, allHistoricalSessions);
                     if (occurrences.length > 0) {
                         allMatches.push(...occurrences);
-                        break;
+                        foundPatternLength = len; // Store the length
+                        break; // Stop after the first (longest) match is found
                     }
                 }
+
                 if (allMatches.length === 0) {
                     return { prediction: null, analysisText: 'Không tìm thấy hình cầu trùng khớp 100%.', confidence: 0 };
                 }
@@ -251,7 +254,7 @@
                 const confidenceB = (votes.B / totalVotes) * 100;
                 const maxConfidence = Math.max(confidenceP, confidenceB);
                 const predictedWinner = votes.P > votes.B ? 'P' : 'B';
-                const analysisTextPrefix = `Tìm thấy ${allMatches.length} hình cầu trùng khớp 100%. Lịch sử cho thấy:\n- PLAYER: ${votes.P.toFixed(0)} lần\n- BANKER: ${votes.B.toFixed(0)} lần`;
+                const analysisTextPrefix = `Tìm thấy ${allMatches.length} hình cầu ${foundPatternLength} tay trùng khớp 100%. Lịch sử cho thấy:\n- PLAYER: ${votes.P.toFixed(0)} lần\n- BANKER: ${votes.B.toFixed(0)} lần`;
                 
                 const streakInfo = this.analyzeCurrentStreak(currentHistory);
                 let recommendation = '';
