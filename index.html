@@ -169,7 +169,7 @@
             constructor() {
                 this.MIN_HISTORY_FOR_ANALYSIS = 6;
                 this.MIN_PATTERN_LENGTH = 6;
-                this.MAX_PATTERN_LENGTH = 20; // UPDATED
+                this.MAX_PATTERN_LENGTH = 20;
             }
 
             calculateSimilarity(arr1, arr2) {
@@ -181,7 +181,7 @@
             findPatternOccurrences(pattern, allHistory) {
                 const occurrences = [];
                 if (pattern.length < this.MIN_PATTERN_LENGTH) return occurrences;
-                const reversedPattern = [...pattern].reverse();
+                // const reversedPattern = [...pattern].reverse(); // REMOVED
                 for (const sessionHistory of allHistory) {
                     if (sessionHistory.length < pattern.length + 1) continue;
                     for (let i = 0; i <= sessionHistory.length - pattern.length - 1; i++) {
@@ -193,10 +193,10 @@
                             occurrences.push({ type: 'similar', next: nextResult, similarity: 1 });
                         }
                         
-                        const reverseSimilarity = this.calculateSimilarity(reversedPattern, segment);
-                        if (reverseSimilarity === 1) {
-                            occurrences.push({ type: 'reversed', next: nextResult, similarity: 1 });
-                        }
+                        // const reverseSimilarity = this.calculateSimilarity(reversedPattern, segment); // REMOVED
+                        // if (reverseSimilarity === 1) { // REMOVED
+                        //     occurrences.push({ type: 'reversed', next: nextResult, similarity: 1 }); // REMOVED
+                        // }
                     }
                 }
                 return occurrences;
@@ -229,7 +229,6 @@
                 const allMatches = [];
                 let totalOccurrences = 0;
 
-                // UPDATED: Comprehensive search loop
                 for (let len = Math.min(this.MAX_PATTERN_LENGTH, currentHistory.length); len >= this.MIN_PATTERN_LENGTH; len--) {
                     const pattern = currentHistory.slice(-len);
                     const occurrences = this.findPatternOccurrences(pattern, allHistoricalSessions);
