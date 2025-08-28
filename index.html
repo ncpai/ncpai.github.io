@@ -198,70 +198,71 @@
                     streakLength: "Độ dài chuỗi bệt",
                     alternatingStreak: "Độ dài chuỗi 1-1",
                     pbRatio: "Tỷ lệ P/B (20 ván)",
-                    last3Pattern: "Hình cầu 3 tay cuối",
                     last5Pattern: "Hình cầu 5 tay cuối",
+                    choppinessIndex: "Độ 'lộn xộn' (20 ván)",
+                    currentColumnDepth: "Chiều sâu cột hiện tại",
+                    doublePattern: "Cầu '2-2' (PPBB/BBPP)"
                 };
             }
 
-            // Extracts numerical features from the game history
             extractFeatures(history) {
                 if (history.length < 5) return null;
-
                 const features = {};
                 const last = history[history.length - 1];
-
-                // Feature 1: Current streak length (positive for P, negative for B)
                 let streakLength = 0;
                 for (let i = history.length - 1; i >= 0; i--) {
-                    if (history[i] === last) streakLength++;
-                    else break;
+                    if (history[i] === last) streakLength++; else break;
                 }
                 features.streakLength = last === 'P' ? streakLength : -streakLength;
-
-                // Feature 2: Alternating streak length (1-1 pattern)
                 let alternatingStreak = 0;
                 if(history.length > 1){
                     for (let i = history.length - 1; i >= 1; i--) {
-                        if (history[i] !== history[i-1]) alternatingStreak++;
-                        else break;
+                        if (history[i] !== history[i-1]) alternatingStreak++; else break;
                     }
                 }
                 features.alternatingStreak = alternatingStreak;
-
-                // Feature 3: Player/Banker ratio in the last 20 games
                 const recent20 = history.slice(-20);
                 const pCount = recent20.filter(r => r === 'P').length;
                 const bCount = recent20.filter(r => r === 'B').length;
                 features.pbRatio = pCount - bCount;
-
-                // Feature 4 & 5: Last 3 and 5 patterns (converted to a hash)
-                features.last3Pattern = history.slice(-3).join('');
                 features.last5Pattern = history.slice(-5).join('');
-
+                let changes = 0;
+                for(let i = 1; i < recent20.length; i++){
+                    if(recent20[i] !== recent20[i-1]) changes++;
+                }
+                features.choppinessIndex = changes;
+                let currentColumnDepth = 0;
+                if(history.length > 0){
+                    const lastResult = history[history.length - 1];
+                    let depth = 0;
+                    for(let i = history.length - 1; i >= 0; i--){
+                        if(history[i] === lastResult) depth++; else break;
+                    }
+                    currentColumnDepth = depth;
+                }
+                features.currentColumnDepth = currentColumnDepth;
+                if(history.length >= 4){
+                    const last4 = history.slice(-4);
+                    if(last4[0] === last4[1] && last4[2] === last4[3] && last4[1] !== last4[2]){
+                        features.doublePattern = last4.join('');
+                    }
+                }
                 return features;
             }
 
-            // "Trains" the model by analyzing the entire history
-            train(fullHistory) {
+            train(fullHistory, sortedSessionKeys) {
                 if (fullHistory.length < this.MIN_HISTORY_FOR_TRAINING) {
                     this.weights = {};
                     return;
                 }
-
                 const featureStats = {};
-
-                // 1. Gather stats for each feature
                 for (let i = 5; i < fullHistory.length; i++) {
                     const historySlice = fullHistory.slice(0, i);
                     const features = this.extractFeatures(historySlice);
-                    const outcome = fullHistory[i]; // The result that followed these features
-
+                    const outcome = fullHistory[i];
                     if (!features) continue;
-
                     for (const key in features) {
-                        if (!featureStats[key]) {
-                            featureStats[key] = {};
-                        }
+                        if (!featureStats[key]) featureStats[key] = {};
                         const value = features[key];
                         if (!featureStats[key][value]) {
                             featureStats[key][value] = { P: 0, B: 0, total: 0 };
@@ -270,53 +271,57 @@
                         featureStats[key][value].total++;
                     }
                 }
-
-                // 2. Calculate weights based on stats
                 const newWeights = {};
                 for (const key in featureStats) {
                     newWeights[key] = {};
                     for (const value in featureStats[key]) {
                         const stats = featureStats[key][value];
-                        // Simple weight: difference in probability
                         const pProb = stats.P / stats.total;
                         const bProb = stats.B / stats.total;
-                        newWeights[key][value] = pProb - bProb; // Positive favors P, negative favors B
+                        newWeights[key][value] = pProb - bProb;
                     }
                 }
                 this.weights = newWeights;
             }
 
-            // Predicts the outcome based on current features and learned weights
-            predict(currentHistory) {
+            predict(currentHistory, sortedSessionKeys) {
                 if (Object.keys(this.weights).length === 0) {
                     return { prediction: null, confidence: 0, analysisText: `Cần thêm dữ liệu để huấn luyện mô hình...` };
                 }
-
                 const features = this.extractFeatures(currentHistory);
                 if (!features) {
                      return { prediction: null, confidence: 0, analysisText: `Cần thêm dữ liệu để trích xuất đặc điểm...` };
                 }
-
                 let score = 0;
                 let featureInfluence = {};
+                
+                // Historical Weighting Logic
+                const currentSessionKey = sortedSessionKeys[0];
+                const recentSessionKey = sortedSessionKeys[1];
 
                 for (const key in features) {
                     const value = features[key];
                     if (this.weights[key] && this.weights[key][value]) {
-                        const weight = this.weights[key][value];
-                        score += weight;
-                        featureInfluence[key] = weight;
+                        let weight = this.weights[key][value];
+                        // This is a simplified weighting for demonstration. A real model would do this during training.
+                        // Here we just apply a multiplier to the final score contribution.
+                        let weightMultiplier = 1.0;
+                        if (state.sessions[currentSessionKey] && state.sessions[currentSessionKey].history.join('').includes(value)) {
+                            weightMultiplier = 1.5;
+                        } else if (recentSessionKey && state.sessions[recentSessionKey] && state.sessions[recentSessionKey].history.join('').includes(value)) {
+                            weightMultiplier = 1.2;
+                        }
+                        
+                        const weightedScore = weight * weightMultiplier;
+                        score += weightedScore;
+                        featureInfluence[key] = weightedScore;
                     }
                 }
 
-                // Sigmoid function to convert score to probability (0 to 1)
                 const probabilityP = 1 / (1 + Math.exp(-score));
-                const confidence = Math.max(probabilityP, 1 - probabilityP) * 100; // True confidence %
-                
+                const confidence = Math.max(probabilityP, 1 - probabilityP) * 100;
                 const prediction = probabilityP > 0.5 ? 'P' : 'B';
-                
                 const analysisText = `Mô hình học máy dự đoán với độ tin cậy ${confidence.toFixed(1)}%.`;
-
                 return { prediction, confidence, analysisText, featureInfluence };
             }
         }
@@ -422,7 +427,8 @@
 
         function updateAnalysisUI() {
             const currentHistory = state.sessions[state.currentSessionId]?.history || [];
-            let { prediction, confidence, analysisText, featureInfluence } = state.model.predict(currentHistory);
+            const sortedSessionKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
+            let { prediction, confidence, analysisText, featureInfluence } = state.model.predict(currentHistory, sortedSessionKeys);
             
             state.accuracyTracker.makePrediction(prediction, confidence);
 
@@ -491,7 +497,7 @@
         function updateAllUI() {
             updateBigRoadUI();
             updateAccuracyUI();
-            updateChotStatsUI(); // New function call
+            updateChotStatsUI();
             updateAnalysisUI();
         }
 
@@ -505,7 +511,8 @@
             currentSession.history.push(result);
             
             const fullHistoryForAllSessions = Object.values(state.sessions).flatMap(s => s.history);
-            state.model.train(fullHistoryForAllSessions);
+            const sortedSessionKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
+            state.model.train(fullHistoryForAllSessions, sortedSessionKeys);
 
             saveSessions();
             updateAllUI();
@@ -518,7 +525,8 @@
             state.accuracyTracker.predictions.pop();
             
             const fullHistoryForAllSessions = Object.values(state.sessions).flatMap(s => s.history);
-            state.model.train(fullHistoryForAllSessions);
+            const sortedSessionKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
+            state.model.train(fullHistoryForAllSessions, sortedSessionKeys);
 
             saveSessions();
             updateAllUI();
@@ -531,7 +539,8 @@
                 state.accuracyTracker.reset();
 
                 const fullHistoryForAllSessions = Object.values(state.sessions).flatMap(s => s.history);
-                state.model.train(fullHistoryForAllSessions);
+                const sortedSessionKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
+                state.model.train(fullHistoryForAllSessions, sortedSessionKeys);
 
                 saveSessions();
                 updateAllUI();
@@ -596,7 +605,8 @@
                 localStorage.setItem('lastActiveMLSession_v1', state.currentSessionId);
                 
                 const fullHistoryForAllSessions = Object.values(state.sessions).flatMap(s => s.history);
-                state.model.train(fullHistoryForAllSessions);
+                const sortedSessionKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
+                state.model.train(fullHistoryForAllSessions, sortedSessionKeys);
 
                 updateSessionSelector();
                 updateAllUI();
