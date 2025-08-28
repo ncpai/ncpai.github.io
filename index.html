@@ -59,6 +59,13 @@
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
         }
+        @keyframes pulse-gold {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+        }
+        .chot-hand-glow {
+            animation: pulse-gold 2s infinite;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -126,7 +133,7 @@
         <div class="space-y-6">
             <!-- Accuracy Stats -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-green-300">🎯 Thống Kê Độ Chính Xác</h2>
+                <h2 class="text-xl font-semibold mb-4 text-green-300">🎯 Thống Kê Tổng Quan</h2>
                 <div class="space-y-4">
                     <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
                         <span class="font-medium text-gray-300">Tỷ Lệ Thắng</span>
@@ -138,6 +145,25 @@
                             <span id="correctPredictions" class="text-lg font-semibold text-white">0</span>
                             <span class="text-gray-400">/</span>
                             <span id="totalPredictions" class="text-lg font-semibold text-white">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chot Hand Stats -->
+            <div class="bg-yellow-900 border border-yellow-500 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-yellow-300">🔥 Thống Kê Tay Chốt (>90%)</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-yellow-800 bg-opacity-50 p-4 rounded-lg">
+                        <span class="font-medium text-yellow-200">Tỷ Lệ Thắng Chốt</span>
+                        <span id="chotAccuracyRate" class="text-2xl font-bold text-yellow-300">0.0%</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-yellow-800 bg-opacity-50 p-4 rounded-lg">
+                        <span class="font-medium text-yellow-200">Thắng / Tổng Chốt</span>
+                        <div>
+                            <span id="chotCorrectPredictions" class="text-lg font-semibold text-white">0</span>
+                            <span class="text-gray-400">/</span>
+                            <span id="chotTotalPredictions" class="text-lg font-semibold text-white">0</span>
                         </div>
                     </div>
                 </div>
@@ -285,7 +311,7 @@
 
                 // Sigmoid function to convert score to probability (0 to 1)
                 const probabilityP = 1 / (1 + Math.exp(-score));
-                const confidence = Math.abs(probabilityP - 0.5) * 200; // Scale to ~50-100%
+                const confidence = Math.max(probabilityP, 1 - probabilityP) * 100; // True confidence %
                 
                 const prediction = probabilityP > 0.5 ? 'P' : 'B';
                 
@@ -318,6 +344,13 @@
                 const total = this.predictions.length;
                 if (total === 0) return { rate: 0, correct: 0, total: 0 };
                 const correct = this.predictions.filter(p => p.predicted === p.actual).length;
+                return { rate: (correct / total) * 100, correct, total };
+            }
+            getChotStats() {
+                const chotPredictions = this.predictions.filter(p => p.confidence >= 90);
+                const total = chotPredictions.length;
+                if (total === 0) return { rate: 0, correct: 0, total: 0 };
+                const correct = chotPredictions.filter(p => p.predicted === p.actual).length;
                 return { rate: (correct / total) * 100, correct, total };
             }
             reset() {
@@ -379,6 +412,13 @@
             document.getElementById('correctPredictions').textContent = stats.correct;
             document.getElementById('totalPredictions').textContent = stats.total;
         }
+        
+        function updateChotStatsUI() {
+            const stats = state.accuracyTracker.getChotStats();
+            document.getElementById('chotAccuracyRate').textContent = `${stats.rate.toFixed(1)}%`;
+            document.getElementById('chotCorrectPredictions').textContent = stats.correct;
+            document.getElementById('chotTotalPredictions').textContent = stats.total;
+        }
 
         function updateAnalysisUI() {
             const currentHistory = state.sessions[state.currentSessionId]?.history || [];
@@ -388,9 +428,16 @@
 
             const analysisResultDiv = document.getElementById('analysisResult');
             const analysisCard = document.getElementById('analysis-card');
-            analysisCard.classList.remove('card-glow-p', 'card-glow-b');
+            analysisCard.classList.remove('card-glow-p', 'card-glow-b', 'chot-hand-glow');
 
             if (prediction) {
+                const isChotHand = confidence >= 90;
+                let recommendationNote = '';
+                if (isChotHand) {
+                    recommendationNote = `<div class="mt-2 p-2 text-center bg-yellow-800 bg-opacity-50 rounded-lg text-sm text-yellow-300 font-extrabold tracking-widest">🔥 TAY CHỐT 🔥</div>`;
+                    analysisCard.classList.add('chot-hand-glow');
+                }
+
                 analysisResultDiv.innerHTML = `
                     <div class="bg-gray-700 p-4 rounded-lg">
                         <p class="text-gray-300 whitespace-pre-wrap">${analysisText}</p>
@@ -398,6 +445,7 @@
                     <div class="text-center bg-gray-900 py-6 rounded-lg border-2 ${prediction === 'P' ? 'border-blue-500' : 'border-red-500'}">
                         <p class="text-lg text-gray-400 mb-2">Đề xuất:</p>
                         <p class="text-4xl font-bold mt-2">${prediction === 'P' ? '👤 PLAYER' : '🏦 BANKER'}</p>
+                        ${recommendationNote}
                     </div>
                 `;
                 analysisCard.classList.add(prediction === 'P' ? 'card-glow-p' : 'card-glow-b');
@@ -443,6 +491,7 @@
         function updateAllUI() {
             updateBigRoadUI();
             updateAccuracyUI();
+            updateChotStatsUI(); // New function call
             updateAnalysisUI();
         }
 
@@ -450,10 +499,8 @@
         function addResult(result) {
             if (!state.currentSessionId) return;
             
-            // Record accuracy for the previous state BEFORE adding the new result
             state.accuracyTracker.recordActualResult(result);
             
-            // Add new result and retrain the model
             const currentSession = state.sessions[state.currentSessionId];
             currentSession.history.push(result);
             
@@ -548,7 +595,6 @@
                 state.accuracyTracker.reset(); // Accuracy is session-specific
                 localStorage.setItem('lastActiveMLSession_v1', state.currentSessionId);
                 
-                // Retrain model with all historical data up to this point
                 const fullHistoryForAllSessions = Object.values(state.sessions).flatMap(s => s.history);
                 state.model.train(fullHistoryForAllSessions);
 
