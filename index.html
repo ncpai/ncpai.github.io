@@ -114,7 +114,8 @@
             
             <!-- Analysis Settings -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-purple-300">⚙️ Cài Đặt Phân Tích</h2>
+                <h2 class="text-xl font-semibold mb-4 text-purple-300">⚙️ Cài Đặt Phân Tích (Thủ công)</h2>
+                <p class="text-sm text-gray-400 mb-4">Cài đặt này chỉ được sử dụng khi hệ thống chưa tìm thấy chiều dài cầu tối ưu.</p>
                 <div class="space-y-4">
                     <div>
                         <label for="minPatternLength" class="block text-sm font-medium text-gray-300 mb-1">Độ dài cầu tối thiểu để so sánh</label>
@@ -224,7 +225,8 @@
 
             findPatternOccurrences(pattern, allHistory) {
                 const occurrences = [];
-                if (pattern.length < this.MIN_PATTERN_LENGTH) return occurrences;
+                // This check is now more dynamic, so we rely on the calling function's length checks
+                // if (pattern.length < this.MIN_PATTERN_LENGTH) return occurrences;
                 const reversedPattern = [...pattern].reverse();
 
                 for (const session of allHistory) {
@@ -243,6 +245,29 @@
                     }
                 }
                 return occurrences;
+            }
+
+            getPredictionForPattern(pattern, allHistoricalSessions) {
+                 const occurrences = this.findPatternOccurrences(pattern, allHistoricalSessions);
+        
+                if (occurrences.length === 0) {
+                    return { prediction: null };
+                }
+
+                const votes = { P: 0, B: 0 };
+                occurrences.forEach(match => {
+                    if (votes[match.next] !== undefined) votes[match.next] += match.similarity;
+                });
+
+                const totalVotes = votes.P + votes.B;
+                if (totalVotes === 0) {
+                    return { prediction: null };
+                }
+                
+                const predictedWinner = votes.P > votes.B ? 'P' : 'B';
+                const confidence = (Math.max(votes.P, votes.B) / totalVotes) * 100;
+                
+                return { prediction: predictedWinner, confidence, votes, totalOccurrences: occurrences.length };
             }
             
             findCertainPrediction(currentHistory, allHistoricalSessions) {
@@ -298,11 +323,30 @@
                 }
             }
 
-            getPrediction(currentHistory, allHistoricalSessions) {
+            getPrediction(currentHistory, allHistoricalSessions, { optimalLength = null, lengthPerformance = {} } = {}) {
                 if (currentHistory.length < this.MIN_HISTORY_FOR_ANALYSIS) {
                     return { prediction: null, analysisText: `Cần ít nhất ${this.MIN_HISTORY_FOR_ANALYSIS} kết quả...`, confidence: 0, isCertain: false };
                 }
                 
+                // --- NEW: Optimal Length Logic ---
+                if (optimalLength && currentHistory.length >= optimalLength) {
+                    const pattern = currentHistory.slice(-optimalLength);
+                    const result = this.getPredictionForPattern(pattern, allHistoricalSessions);
+                    if (result.prediction) {
+                        const perf = lengthPerformance[optimalLength] || { wins: 0, total: 0 };
+                        const rate = perf.total > 0 ? (perf.wins / perf.total * 100).toFixed(1) : 'N/A';
+                        const analysisText = `Sử dụng chiều dài cầu tối ưu: ${optimalLength} ván.\n(Tỷ lệ thắng của chiều dài này: ${rate}% - ${perf.wins}/${perf.total})\n\nLịch sử cho thấy:\n- PLAYER: ${result.votes.P.toFixed(1)} điểm\n- BANKER: ${result.votes.B.toFixed(1)} điểm`;
+                        return { 
+                            prediction: result.prediction, 
+                            recommendation: 'THEO CHIỀU DÀI TỐI ƯU',
+                            analysisText, 
+                            confidence: result.confidence,
+                            isCertain: false
+                        };
+                    }
+                }
+                
+                // --- FALLBACK: Original Logic ---
                 const certainPrediction = this.findCertainPrediction(currentHistory, allHistoricalSessions);
                 if (certainPrediction) {
                     return certainPrediction;
@@ -319,7 +363,7 @@
                 }
 
                 if (allMatches.length === 0) {
-                    return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự.', confidence: 0, isCertain: false };
+                    return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự (chế độ thủ công).', confidence: 0, isCertain: false };
                 }
 
                 const votes = { P: 0, B: 0 };
@@ -329,7 +373,7 @@
 
                 const totalVotes = votes.P + votes.B;
                 if (totalVotes === 0) {
-                    return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự.', confidence: 0, isCertain: false };
+                    return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự (chế độ thủ công).', confidence: 0, isCertain: false };
                 }
 
                 const confidenceP = (votes.P / totalVotes) * 100;
@@ -430,9 +474,14 @@
         }
 
         function updateAnalysisUI() {
-            const currentHistory = state.sessions[state.currentSessionId]?.history || [];
+            const session = state.sessions[state.currentSessionId] || { history: [], optimalLength: null, lengthPerformance: {} };
+            const currentHistory = session.history;
             const allHistory = Object.values(state.sessions);
-            let { prediction, recommendation, analysisText, confidence, isCertain } = state.matcher.getPrediction(currentHistory, allHistory);
+
+            let { prediction, recommendation, analysisText, confidence, isCertain } = state.matcher.getPrediction(currentHistory, allHistory, {
+                optimalLength: session.optimalLength,
+                lengthPerformance: session.lengthPerformance
+            });
             
             state.currentPrediction = { prediction, confidence };
 
@@ -463,6 +512,14 @@
             const analysisCard = document.getElementById('analysis-card');
             analysisCard.classList.remove('card-glow-p', 'card-glow-b', 'card-glow-certain');
 
+            let optimalLengthDisplay = '';
+            if (session.optimalLength) {
+                optimalLengthDisplay = `<div class="mb-4 p-3 bg-gray-900 rounded-lg text-center text-cyan-300 text-sm">
+                    <span class="font-semibold">Chiều dài cầu tối ưu đang áp dụng:</span>
+                    <span class="text-lg font-bold ml-2">${session.optimalLength}</span>
+                </div>`;
+            }
+
             if (finalPrediction) {
                 let predictionBlockHTML = '';
                 if (isCertain) {
@@ -487,6 +544,7 @@
                 }
 
                 analysisResultDiv.innerHTML = `
+                    ${optimalLengthDisplay}
                     <div class="bg-gray-700 p-4 rounded-lg">
                         <p class="text-gray-300 whitespace-pre-wrap">${analysisText}</p>
                     </div>
@@ -494,7 +552,10 @@
                 `;
 
             } else {
-                analysisResultDiv.innerHTML = `<p class="text-gray-400 text-center py-8 whitespace-pre-wrap">${analysisText}</p>`;
+                analysisResultDiv.innerHTML = `
+                    ${optimalLengthDisplay}
+                    <p class="text-gray-400 text-center py-8 whitespace-pre-wrap">${analysisText}</p>
+                `;
             }
         }
         
@@ -546,12 +607,12 @@
                             trendIndicator = `<span class="flex items-center text-green-400 ml-1.5">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
                                 <span class="font-bold text-xs">${streak}</span>
-                              </span>`;
+                                </span>`;
                         } else {
                             trendIndicator = `<span class="flex items-center text-red-400 ml-1.5">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                                 <span class="font-bold text-xs">${streak}</span>
-                              </span>`;
+                                </span>`;
                         }
                     }
                 }
@@ -614,9 +675,17 @@
         // --- EVENT HANDLERS & ACTIONS ---
         function addResult(result) {
             if (!state.currentSessionId) return;
+            const session = state.sessions[state.currentSessionId];
+            const historyBeforeAdd = [...session.history];
+            const allSessions = Object.values(state.sessions);
 
+            // New logic: Update stats and find optimal length based on the result being added
+            const newOptimalLength = updateLengthPerformanceAndFindOptimal(historyBeforeAdd, allSessions, result);
+            session.optimalLength = newOptimalLength;
+
+            // Original logic: Store the last prediction vs actual result
             if (state.currentPrediction && state.currentPrediction.prediction) {
-                state.sessions[state.currentSessionId].predictions.push({ 
+                session.predictions.push({ 
                     predicted: state.currentPrediction.prediction, 
                     actual: result,
                     confidence: state.currentPrediction.confidence
@@ -624,15 +693,72 @@
             }
             state.currentPrediction = null; 
 
-            state.sessions[state.currentSessionId].history.push(result);
+            session.history.push(result);
             
             saveSessions();
             updateAllUI();
         }
 
+        // --- NEW: Optimal Length Finder ---
+        function updateLengthPerformanceAndFindOptimal(history, allSessions, newResult) {
+            const session = state.sessions[state.currentSessionId];
+            if (!session.lengthPerformance) {
+                session.lengthPerformance = {};
+            }
+
+            const candidates = [];
+
+            for (let len = 10; len <= 20; len++) {
+                if (history.length < len) continue;
+
+                const pattern = history.slice(-len);
+                const { prediction } = state.matcher.getPredictionForPattern(pattern, allSessions);
+
+                if (prediction) {
+                    // Initialize stats if not present
+                    if (!session.lengthPerformance[len]) {
+                        session.lengthPerformance[len] = { wins: 0, total: 0 };
+                    }
+                    
+                    // Update stats for this length based on its prediction for the newResult
+                    const stats = session.lengthPerformance[len];
+                    stats.total++;
+                    if (prediction === newResult) {
+                        stats.wins++;
+                    }
+                    
+                    // Check if this length is a candidate for being the new optimal
+                    // A length is a candidate if its prediction for the previous hand matched the new result
+                    if (prediction === newResult) {
+                        candidates.push({
+                            length: len,
+                            rate: stats.wins / stats.total,
+                            total: stats.total
+                        });
+                    }
+                }
+            }
+            
+            if (candidates.length === 0) {
+                return session.optimalLength; // Keep the old one if no candidates found
+            }
+
+            // Sort by rate desc, then total desc
+            candidates.sort((a, b) => {
+                if (b.rate !== a.rate) {
+                    return b.rate - a.rate;
+                }
+                return b.total - a.total;
+            });
+            
+            return candidates[0].length; // The new optimal length
+        }
+
         function undoLast() {
             if (!state.currentSessionId || state.sessions[state.currentSessionId].history.length === 0) return;
             
+            // This is complex with the new logic, so a simple pop is best.
+            // Re-calculating optimal length on undo is too intensive.
             state.sessions[state.currentSessionId].history.pop();
             
             const predictions = state.sessions[state.currentSessionId].predictions;
@@ -647,8 +773,11 @@
         function clearCurrentSessionHistory() {
             if (!state.currentSessionId) return;
             if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử và thống kê của phiên này không?')) {
-                state.sessions[state.currentSessionId].history = [];
-                state.sessions[state.currentSessionId].predictions = [];
+                const session = state.sessions[state.currentSessionId];
+                session.history = [];
+                session.predictions = [];
+                session.lengthPerformance = {};
+                session.optimalLength = null;
                 saveSessions();
                 updateAllUI();
             }
@@ -699,7 +828,9 @@
             state.sessions[newId] = { 
                 name: `Phiên ${new Date().toLocaleString('vi-VN')}`, 
                 history: [],
-                predictions: []
+                predictions: [],
+                lengthPerformance: {},
+                optimalLength: null
             };
             saveSessions();
             updateSessionSelector();
@@ -796,9 +927,10 @@
                         if(!session.name || !Array.isArray(session.history)) {
                              throw new Error("Invalid session data");
                         }
-                        if (!session.predictions) {
-                            session.predictions = [];
-                        }
+                        // Add new fields if they don't exist in the imported file
+                        if (!session.predictions) session.predictions = [];
+                        if (!session.lengthPerformance) session.lengthPerformance = {};
+                        if (session.optimalLength === undefined) session.optimalLength = null;
                     }
 
                     if (confirm('Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc muốn tiếp tục?')) {
@@ -822,6 +954,13 @@
         function initializeApp() {
             loadSettings();
             state.sessions = getSessions();
+            
+            // Ensure all loaded sessions have the new properties
+            Object.values(state.sessions).forEach(session => {
+                if (!session.lengthPerformance) session.lengthPerformance = {};
+                if (session.optimalLength === undefined) session.optimalLength = null;
+            });
+
             const lastActiveId = localStorage.getItem('lastActiveSession_v4');
 
             if (Object.keys(state.sessions).length === 0) {
@@ -838,4 +977,3 @@
     </script>
 </body>
 </html>
-
