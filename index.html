@@ -87,7 +87,7 @@
             font-size: 1rem;
         }
         
-        /* --- NEW STYLES for Confidence Stats Chart --- */
+        /* --- STYLES for Confidence Stats Chart --- */
         .bar-chart-container {
             display: flex;
             justify-content: center;
@@ -115,6 +115,36 @@
             border-width: 2px !important;
             border-style: dashed !important;
             border-color: #a78bfa !important; /* violet-400 */
+        }
+
+        /* --- NEW STYLES for Prediction Streak Chart --- */
+        #predictionStreakChart {
+            display: flex;
+            gap: 2px;
+            height: 50px;
+            align-items: flex-end;
+            padding: 8px;
+            background-color: #1f2937; /* gray-800 */
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none; /* Hide scrollbar for FF */
+        }
+        #predictionStreakChart::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Chrome, Safari, Opera */
+        }
+        .streak-bar {
+            flex: 1 0 5px; /* Flex-grow, flex-shrink, flex-basis */
+            min-width: 5px;
+            border-radius: 2px 2px 0 0;
+            transition: all 0.3s ease;
+        }
+        .streak-win {
+            height: 100%;
+            background-color: #3b82f6; /* blue-500 */
+        }
+        .streak-loss {
+            height: 30%;
+            background-color: #ef4444; /* red-500 */
         }
     </style>
 </head>
@@ -221,6 +251,13 @@
                             <span id="correctPredictions" class="text-lg font-semibold text-white">0</span>
                             <span class="text-gray-400">/</span>
                             <span id="totalPredictions" class="text-lg font-semibold text-white">0</span>
+                        </div>
+                    </div>
+                    <!-- NEW: Prediction Streak Chart -->
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-400 mb-2 text-center">Chuỗi Thắng/Thua (40 Ván Gần Nhất)</p>
+                        <div id="predictionStreakChart">
+                             <p class="w-full text-center text-gray-500 text-sm">Chưa có phán đoán nào.</p>
                         </div>
                     </div>
                 </div>
@@ -459,11 +496,35 @@
             roadDiv.scrollLeft = roadDiv.scrollWidth;
         }
 
+        function updatePredictionStreakChart() {
+            const chartDiv = document.getElementById('predictionStreakChart');
+            const predictions = state.accuracyTracker.predictions;
+            
+            if (predictions.length === 0) {
+                chartDiv.innerHTML = `<p class="w-full text-center text-gray-500 text-sm">Chưa có phán đoán nào.</p>`;
+                return;
+            }
+
+            const MAX_BARS = 40;
+            const recentPredictions = predictions.slice(-MAX_BARS);
+            
+            chartDiv.innerHTML = recentPredictions.map(p => {
+                const isWin = p.predicted === p.actual;
+                const barClass = isWin ? 'streak-win' : 'streak-loss';
+                const title = `Dự đoán: ${p.predicted}, Thực tế: ${p.actual} -> ${isWin ? 'ĐÚNG' : 'SAI'}`;
+                return `<div class="streak-bar ${barClass}" title="${title}"></div>`;
+            }).join('');
+
+            // Scroll to the end of the chart
+            chartDiv.scrollLeft = chartDiv.scrollWidth;
+        }
+
         function updateAccuracyUI() {
             const stats = state.accuracyTracker.getStats();
             document.getElementById('accuracyRate').textContent = `${stats.rate.toFixed(1)}%`;
             document.getElementById('correctPredictions').textContent = stats.correct;
             document.getElementById('totalPredictions').textContent = stats.total;
+            updatePredictionStreakChart();
         }
 
         function displayPrediction(predictionPath) {
