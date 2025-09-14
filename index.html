@@ -116,8 +116,8 @@
                     <div>
                         <label for="modelSelector" class="block text-sm font-medium text-gray-300 mb-1">Chọn Mô Hình AI</label>
                         <select id="modelSelector" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none main-control">
-                            <option value="gemini-2.5-flash-preview-05-20">Flash (Nhanh, Hiệu quả)</option>
-                            <option value="gemini-2.5-pro-preview-05-14">Pro (Thông minh, Phân tích sâu)</option>
+                            <option value="gemini-1.5-flash-preview-0514">Flash (Nhanh, Hiệu quả)</option>
+                            <option value="gemini-1.5-pro-preview-0514">Pro (Thông minh, Chính xác cao)</option>
                         </select>
                     </div>
                 </div>
@@ -307,6 +307,7 @@
                 console.error(`API call failed:`, error);
                 if (error.name === 'AbortError') return { error: "Yêu cầu tới AI đã hết thời gian chờ." };
                 if (error.cause === 400) return { error: "Yêu cầu không hợp lệ. Kiểm tra lại API Key (Lỗi 400)." };
+                if (error.cause === 404) return { error: `Mô hình AI đã chọn không tồn tại (Lỗi 404).` };
                 if (error.cause === 503) return { error: "Dịch vụ AI hiện đang quá tải (Lỗi 503)." };
                 if (error.cause === 429) return { error: "Quá nhiều yêu cầu tới AI (Lỗi 429)." };
                 return { error: "Lỗi kết nối tới AI." };
@@ -550,10 +551,10 @@
 
         // --- EVENT HANDLERS & ACTIONS ---
         function addResult(result) {
-            if (!state.currentSessionId || state.isSimulating || state.isCalculating) return;
+            if (!state.currentSessionId || state.isSimulating) return;
             
             const currentPrediction = {
-                prediction: state.predictedPath?.predicted_path[0],
+                prediction: state.predictedPath?.predicted_path?.[0],
                 confidence: state.predictedPath?.confidence
             };
             state.accuracyTracker.record(currentPrediction, result);
@@ -563,10 +564,15 @@
             
             displayPrediction(state.predictedPath);
 
-            const pathIsCorrect = state.predictedPath && state.predictedPath.predicted_path[0] === result;
+            const pathIsCorrect = state.predictedPath && state.predictedPath.predicted_path && state.predictedPath.predicted_path[0] === result;
             if (pathIsCorrect) {
                 state.predictedPath.predicted_path.shift();
-                updateAIStatusUI('ready');
+                if (state.predictedPath.predicted_path.length === 0) {
+                     state.predictedPath = null;
+                     preCalculateNextPath();
+                } else {
+                    updateAIStatusUI('ready');
+                }
             } else {
                 state.predictedPath = null;
                 preCalculateNextPath();
@@ -633,6 +639,7 @@
                     apiKeyMessage.className = 'text-sm mt-2 font-semibold text-green-400';
                 } else {
                     if (response.status === 400) apiKeyMessage.textContent = '❌ Lỗi: API Key không hợp lệ hoặc đã bị vô hiệu hóa.';
+                    else if (response.status === 404) apiKeyMessage.textContent = '❌ Lỗi: Mô hình AI đã chọn không tồn tại hoặc đã lỗi thời (Lỗi 404).';
                     else apiKeyMessage.textContent = `❌ Lỗi kết nối: ${response.statusText} (Mã: ${response.status})`;
                     apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
                 }
@@ -858,7 +865,6 @@
         function saveModelSelection() {
             const model = document.getElementById('modelSelector').value;
             localStorage.setItem('geminiModel_v7', model);
-            // After changing the model, immediately recalculate the path
             if (!state.isCalculating && state.currentSessionId) {
                 preCalculateNextPath();
             }
