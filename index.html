@@ -102,14 +102,25 @@
 
             <!-- API Key Management -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-orange-300">🔑 Quản Lý API Key</h2>
-                <p class="text-gray-400 text-sm mb-3">Lấy API Key miễn phí từ <a href="https://ai.google.dev/" target="_blank" class="text-blue-400 hover:underline font-semibold">Google AI Studio</a> và dán vào đây.</p>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <input type="password" id="apiKeyInput" placeholder="Dán API Key của bạn vào đây" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none">
-                    <button onclick="saveApiKey()" class="btn main-control w-full sm:w-auto bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-lg whitespace-nowrap">Lưu Key</button>
-                    <button onclick="testApiKey()" class="btn main-control w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg whitespace-nowrap">Chẩn Đoán</button>
+                <h2 class="text-xl font-semibold mb-4 text-orange-300">🔑 Cài Đặt AI</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="apiKeyInput" class="block text-sm font-medium text-gray-300 mb-1">API Key (Lấy từ <a href="https://ai.google.dev/" target="_blank" class="text-blue-400 hover:underline font-semibold">Google AI Studio</a>)</label>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <input type="password" id="apiKeyInput" placeholder="Dán API Key của bạn vào đây" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                            <button onclick="saveApiKey()" class="btn main-control w-full sm:w-auto bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-lg whitespace-nowrap">Lưu Key</button>
+                            <button onclick="testApiKey()" class="btn main-control w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg whitespace-nowrap">Chẩn Đoán</button>
+                        </div>
+                        <p id="apiKeyMessage" class="text-sm mt-2 font-semibold"></p>
+                    </div>
+                    <div>
+                        <label for="modelSelector" class="block text-sm font-medium text-gray-300 mb-1">Chọn Mô Hình AI</label>
+                        <select id="modelSelector" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none main-control">
+                            <option value="gemini-2.5-flash-preview-05-20">Flash (Nhanh, Hiệu quả)</option>
+                            <option value="gemini-2.5-pro-preview-05-14">Pro (Thông minh, Phân tích sâu)</option>
+                        </select>
+                    </div>
                 </div>
-                 <p id="apiKeyMessage" class="text-sm mt-2 font-semibold"></p>
             </div>
 
             <!-- Session Management -->
@@ -245,8 +256,8 @@
             required: ["predicted_path", "reasoning", "confidence"]
         };
 
-        async function callGeminiAPI(currentHistory, historicalContext, apiKey) {
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        async function callGeminiAPI(currentHistory, historicalContext, apiKey, model) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             
             let userPrompt;
             if (historicalContext && historicalContext.length > 0) {
@@ -306,6 +317,8 @@
             const apiKey = document.getElementById('apiKeyInput').value;
             if (!apiKey) return { error: 'Vui lòng nhập API Key.' };
             
+            const model = document.getElementById('modelSelector').value;
+
             const MIN_HISTORY_FOR_ANALYSIS = 5;
             if (currentHistory.length < MIN_HISTORY_FOR_ANALYSIS) {
                 return { error: `Cần ít nhất ${MIN_HISTORY_FOR_ANALYSIS} kết quả...` };
@@ -320,7 +333,7 @@
             const MAX_CURRENT_HISTORY = 75;
             const limitedCurrentHistory = currentHistory.slice(-MAX_CURRENT_HISTORY);
 
-            return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, apiKey);
+            return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, apiKey, model);
         }
 
         // --- ACCURACY TRACKER ---
@@ -609,7 +622,8 @@
             apiKeyMessage.textContent = 'Đang chẩn đoán kết nối...';
             apiKeyMessage.className = 'text-sm mt-2 font-semibold text-yellow-400';
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${key}`;
+            const model = document.getElementById('modelSelector').value;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
             const payload = { contents: [{ parts: [{ text: "hello" }] }] };
 
             try {
@@ -634,7 +648,7 @@
             const apiKeyMessage = document.getElementById('apiKeyMessage');
             const key = apiKeyInput.value.trim();
             if (key) {
-                localStorage.setItem('geminiApiKey_v6', key);
+                localStorage.setItem('geminiApiKey_v7', key);
                 apiKeyMessage.textContent = 'Lưu API Key thành công!';
                 apiKeyMessage.className = 'text-sm mt-2 font-semibold text-green-400';
                 setTimeout(() => apiKeyMessage.textContent = '', 3000);
@@ -646,19 +660,19 @@
         }
 
         function loadApiKey() {
-            const savedKey = localStorage.getItem('geminiApiKey_v6');
+            const savedKey = localStorage.getItem('geminiApiKey_v7');
             if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
         }
 
         // --- SESSION MANAGEMENT ---
         function getSessions() {
-            try { return JSON.parse(localStorage.getItem('baccaratAISessions_v6')) || {}; }
+            try { return JSON.parse(localStorage.getItem('baccaratAISessions_v7')) || {}; }
             catch (e) { return {}; }
         }
 
         function saveSessions() {
-            localStorage.setItem('baccaratAISessions_v6', JSON.stringify(state.sessions));
-            localStorage.setItem('lastActiveAISession_v6', state.currentSessionId);
+            localStorage.setItem('baccaratAISessions_v7', JSON.stringify(state.sessions));
+            localStorage.setItem('lastActiveAISession_v7', state.currentSessionId);
         }
 
         function updateSessionSelector() {
@@ -690,7 +704,7 @@
             if (confirm('Bạn có chắc muốn xóa phiên này không?')) {
                 delete state.sessions[state.currentSessionId];
                 state.currentSessionId = null;
-                localStorage.removeItem('lastActiveAISession_v6');
+                localStorage.removeItem('lastActiveAISession_v7');
                 saveSessions();
                 initializeApp();
             }
@@ -744,7 +758,7 @@
                     if (confirm('Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc muốn tiếp tục?')) {
                         state.sessions = importedSessions;
                         state.currentSessionId = null;
-                        localStorage.removeItem('lastActiveAISession_v6');
+                        localStorage.removeItem('lastActiveAISession_v7');
                         saveSessions();
                         initializeApp();
                         alert('Nhập dữ liệu thành công!');
@@ -840,18 +854,39 @@
             }
         }
         
+        // --- MODEL SELECTION ---
+        function saveModelSelection() {
+            const model = document.getElementById('modelSelector').value;
+            localStorage.setItem('geminiModel_v7', model);
+            // After changing the model, immediately recalculate the path
+            if (!state.isCalculating && state.currentSessionId) {
+                preCalculateNextPath();
+            }
+        }
+        
+        function loadModelSelection() {
+            const savedModel = localStorage.getItem('geminiModel_v7');
+            const modelSelector = document.getElementById('modelSelector');
+            if (savedModel) {
+                modelSelector.value = savedModel;
+            }
+            modelSelector.addEventListener('change', saveModelSelection);
+        }
+
         function initializeApp() {
             // Cleanup old data
-            const versionsToClean = ['v1', 'v2', 'v3', 'v4', 'v5'];
+            const versionsToClean = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6'];
             versionsToClean.forEach(v => {
                  localStorage.removeItem(`geminiApiKey_${v}`);
                  localStorage.removeItem(`baccaratAISessions_${v}`);
                  localStorage.removeItem(`lastActiveAISession_${v}`);
+                 localStorage.removeItem(`geminiModel_${v}`);
             });
 
             loadApiKey();
+            loadModelSelection();
             state.sessions = getSessions();
-            const lastActiveId = localStorage.getItem('lastActiveAISession_v6');
+            const lastActiveId = localStorage.getItem('lastActiveAISession_v7');
             if (Object.keys(state.sessions).length === 0) {
                 createNewSession();
             } else {
