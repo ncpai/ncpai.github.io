@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Phân Tích Cầu (Thống Kê Nâng Cao)</title>
+    <title>Hệ Thống Phân Tích Cầu (AI Gemini)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -16,18 +16,38 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        .btn:active {
+        .btn:active:not(:disabled) {
             transform: translateY(1px);
         }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .card-glow-p {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
         }
         .card-glow-b {
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+        }
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #f59e0b; /* amber-500 */
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 1s linear infinite;
+        }
+        .spinner-lg {
+            width: 40px;
+            height: 40px;
+            border-width: 4px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         /* Big Road Styles */
         #bigRoadDisplay {
@@ -37,6 +57,8 @@
             gap: 2px;
             overflow-x: auto;
             padding: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1f2937;
         }
         .road-col {
             display: grid;
@@ -69,25 +91,40 @@
         <div class="lg:col-span-2 space-y-6">
             <!-- Header -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg text-center">
-                <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-400">Hệ Thống Phân Tích Hình Cầu</h1>
-                <p class="text-gray-400 mt-2">Ghi nhớ - Đối chiếu - Phán đoán</p>
+                <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-400">Hệ Thống Phân Tích Cầu AI</h1>
+                <p class="text-gray-400 mt-2">AI dự đoán trước - Sẵn sàng cho thực chiến</p>
+            </div>
+
+            <!-- API Key Management -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-orange-300">🔑 Quản Lý API Key</h2>
+                <p class="text-gray-400 text-sm mb-3">Lấy API Key miễn phí từ <a href="https://ai.google.dev/" target="_blank" class="text-blue-400 hover:underline font-semibold">Google AI Studio</a> và dán vào đây.</p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <input type="password" id="apiKeyInput" placeholder="Dán API Key của bạn vào đây" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                    <button onclick="saveApiKey()" class="btn main-control w-full sm:w-auto bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-lg whitespace-nowrap">Lưu Key</button>
+                    <button onclick="testApiKey()" class="btn main-control w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg whitespace-nowrap">Chẩn Đoán</button>
+                </div>
+                 <p id="apiKeyMessage" class="text-sm mt-2 font-semibold"></p>
             </div>
 
             <!-- Session Management -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
                 <h2 class="text-xl font-semibold mb-4 text-blue-300">📁 Quản Lý Phiên</h2>
                 <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                    <select id="sessionSelector" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    <select id="sessionSelector" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none main-control"></select>
                     <div class="flex gap-4">
-                        <button onclick="createNewSession()" class="btn w-full sm:w-auto bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg">➕ Phiên Mới</button>
-                        <button onclick="deleteSelectedSession()" class="btn w-full sm:w-auto bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa Phiên</button>
+                        <button onclick="createNewSession()" class="btn main-control w-full sm:w-auto bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg">➕ Phiên Mới</button>
+                        <button onclick="deleteSelectedSession()" class="btn main-control w-full sm:w-auto bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa Phiên</button>
                     </div>
                 </div>
                  <!-- Import/Export -->
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button onclick="exportData()" class="btn w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-lg">📤 Xuất Dữ Liệu</button>
-                    <button onclick="document.getElementById('fileInput').click()" class="btn w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded-lg">📥 Nhập Dữ Liệu</button>
-                    <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
+                    <button onclick="exportData()" class="btn main-control w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-lg">📤 Xuất Dữ Liệu</button>
+                    <button onclick="document.getElementById('fileInput').click()" class="btn main-control w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded-lg">📥 Nhập Dữ Liệu</button>
+                    <input type="file" id="fileInput" class="hidden main-control" accept=".json" onchange="importData(event)">
+                </div>
+                 <div class="mt-4">
+                    <button onclick="runSimulation()" class="btn main-control w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-4 rounded-lg">🚀 Chạy Mô Phỏng Độ Chính Xác</button>
                 </div>
             </div>
 
@@ -95,16 +132,16 @@
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
                 <h2 class="text-xl font-semibold mb-4 text-blue-300">🎲 Nhập Kết Quả Ván Hiện Tại</h2>
                 <div class="grid grid-cols-2 gap-4 mb-4">
-                    <button onclick="addResult('P')" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 rounded-lg text-2xl">
+                    <button onclick="addResult('P')" class="btn main-control bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 rounded-lg text-2xl">
                         <span>👤</span> PLAYER
                     </button>
-                    <button onclick="addResult('B')" class="btn bg-red-600 hover:bg-red-500 text-white font-bold py-6 rounded-lg text-2xl">
+                    <button onclick="addResult('B')" class="btn main-control bg-red-600 hover:bg-red-500 text-white font-bold py-6 rounded-lg text-2xl">
                         <span>🏦</span> BANKER
                     </button>
                 </div>
                 <div class="flex gap-4">
-                     <button onclick="undoLast()" class="btn flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">↩️ Hoàn Tác</button>
-                     <button onclick="clearCurrentSessionHistory()" class="btn flex-1 bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa Lịch Sử</button>
+                     <button onclick="undoLast()" class="btn main-control flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">↩️ Hoàn Tác</button>
+                     <button onclick="clearCurrentSessionHistory()" class="btn main-control flex-1 bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa Lịch Sử</button>
                 </div>
             </div>
 
@@ -126,7 +163,7 @@
         <div class="space-y-6">
             <!-- Accuracy Stats -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-green-300">🎯 Thống Kê Độ Chính Xác</h2>
+                <h2 class="text-xl font-semibold mb-4 text-green-300">🎯 Thống Kê Độ Chính Xác (AI)</h2>
                 <div class="space-y-4">
                     <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
                         <span class="font-medium text-gray-300">Tỷ Lệ Thắng</span>
@@ -144,10 +181,13 @@
             </div>
 
             <!-- Pattern Analysis -->
-            <div id="analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow duration-500">
-                <h2 class="text-xl font-semibold mb-4 text-yellow-300">🧠 Phân Tích & Đề Xuất</h2>
-                <div id="analysisResult" class="space-y-4">
-                    <p class="text-gray-400 text-center py-8">Cần ít nhất 10 kết quả để bắt đầu phân tích...</p>
+            <div id="analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow duration-500 flex flex-col min-h-[280px]">
+                <h2 class="text-xl font-semibold text-yellow-300 mb-4">🔮 Đề Xuất Cho Ván Tới</h2>
+                <div id="analysisResult" class="space-y-4 flex-grow flex flex-col justify-center">
+                    <p class="text-gray-400 text-center">Nhập kết quả để bắt đầu nhận đề xuất...</p>
+                </div>
+                <div id="predictionStatusFooter" class="mt-4 pt-3 border-t border-gray-700">
+                    <!-- AI Status updated by JS -->
                 </div>
             </div>
             
@@ -156,148 +196,162 @@
                 <h2 class="text-xl font-semibold mb-2 text-green-300">📊 Thống Kê Theo Độ Tin Cậy</h2>
                 <div id="confidenceRecommendation" class="mb-4 p-3 bg-gray-900 rounded-lg text-center"></div>
                 <div class="space-y-2" id="confidenceStatsTable">
-                    <!-- Rows will be generated by JS -->
+                     <!-- Rows will be generated by JS -->
                 </div>
             </div>
 
         </div>
     </div>
+    
+    <!-- Simulation Result Modal -->
+    <div id="simulationModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 w-full max-w-md text-white border border-gray-700">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-teal-300">Kết Quả Mô Phỏng</h2>
+                <button onclick="hideSimulationModal()" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div id="simulationResultContent" class="space-y-4">
+                <!-- Results will be injected here by JS -->
+            </div>
+            <button onclick="hideSimulationModal()" class="btn w-full mt-6 bg-indigo-600 hover:bg-indigo-500">Đóng</button>
+        </div>
+    </div>
 
     <script>
-        // --- CORE LOGIC: PATTERN MATCHER ---
-        class PatternMatcher {
-            constructor() {
-                this.MIN_HISTORY_FOR_ANALYSIS = 10;
-                this.MIN_PATTERN_LENGTH = 10;
-                this.MAX_PATTERN_LENGTH = 15;
-            }
+        // --- CORE LOGIC: GEMINI API INTEGRATION ---
+        
+        const systemInstruction = {
+            parts: [{
+                text: "Bạn là một chuyên gia phân tích Baccarat. Nhiệm vụ của bạn là học hỏi quy luật từ dữ liệu lịch sử, sau đó áp dụng kiến thức đó để phân tích chuỗi kết quả hiện tại. Hãy dự đoán kết quả tiếp theo (prediction), và đồng thời đưa ra dự đoán cho 2 kịch bản có thể xảy ra: ván tiếp theo sẽ là gì nếu ván này ra P (prediction_if_P), và ván tiếp theo sẽ là gì nếu ván này ra B (prediction_if_B). Luôn trả lời bằng định dạng JSON theo schema đã cho."
+            }]
+        };
 
-            calculateSimilarity(arr1, arr2) {
-                if (arr1.length !== arr2.length || arr1.length === 0) return 0;
-                const matches = arr1.filter((item, index) => item === arr2[index]).length;
-                return matches / arr1.length;
-            }
+        const responseSchema = {
+            type: "OBJECT",
+            properties: {
+                prediction: { type: "STRING" },
+                reasoning: { type: "STRING" },
+                confidence: { type: "NUMBER" },
+                prediction_if_P: { type: "STRING" },
+                prediction_if_B: { type: "STRING" }
+            },
+            required: ["prediction", "reasoning", "confidence", "prediction_if_P", "prediction_if_B"]
+        };
 
-            findPatternOccurrences(pattern, allHistory) {
-                const occurrences = [];
-                if (pattern.length < this.MIN_PATTERN_LENGTH) return occurrences;
-                const reversedPattern = [...pattern].reverse();
-                for (const sessionHistory of allHistory) {
-                    if (sessionHistory.length < pattern.length + 1) continue;
-                    for (let i = 0; i <= sessionHistory.length - pattern.length - 1; i++) {
-                        const segment = sessionHistory.slice(i, i + pattern.length);
-                        const nextResult = sessionHistory[i + pattern.length];
-                        const similarity = this.calculateSimilarity(pattern, segment);
-                        // REMOVED WEIGHT
-                        if (similarity >= 0.9) occurrences.push({ type: 'similar', next: nextResult, similarity });
-                        const reverseSimilarity = this.calculateSimilarity(reversedPattern, segment);
-                        if (reverseSimilarity >= 0.9) occurrences.push({ type: 'reversed', next: nextResult, similarity: reverseSimilarity });
-                    }
-                }
-                return occurrences;
+        async function callGeminiAPI(currentHistory, historicalContext, apiKey) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            let userPrompt;
+            if (historicalContext && historicalContext.length > 0) {
+                 userPrompt = `Dữ liệu lịch sử: [${historicalContext.join(', ')}]. Phân tích ván hiện tại: [${currentHistory.join(', ')}] và dự đoán kết quả tiếp theo cùng 2 kịch bản.`;
+            } else {
+                 userPrompt = `Phân tích ván Baccarat: [${currentHistory.join(', ')}] và dự đoán kết quả tiếp theo cùng 2 kịch bản.`;
             }
+            
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: systemInstruction,
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema,
+                    temperature: 0.8,
+                }
+            };
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
 
-            analyzeCurrentStreak(currentHistory) {
-                if (currentHistory.length < 2) return { type: 'none', length: currentHistory.length };
-                const last = currentHistory[currentHistory.length - 1];
-                const secondLast = currentHistory[currentHistory.length - 2];
-                if (last === secondLast) {
-                    let length = 0;
-                    for (let i = currentHistory.length - 1; i >= 0; i--) {
-                        if (currentHistory[i] === last) length++; else break;
-                    }
-                    return { type: 'bệt', length, value: last };
-                } else {
-                     let length = 0;
-                     for (let i = currentHistory.length - 1; i >= 1; i--) {
-                        if (currentHistory[i] !== currentHistory[i-1]) length++; else break;
-                    }
-                    return { type: '1-1', length: length + 1 };
-                }
-            }
-
-            getPrediction(currentHistory, allHistoricalSessions) {
-                if (currentHistory.length < this.MIN_HISTORY_FOR_ANALYSIS) {
-                    return { prediction: null, analysisText: `Cần ít nhất ${this.MIN_HISTORY_FOR_ANALYSIS} kết quả...`, confidence: 0 };
-                }
-                const allMatches = [];
-                for (let len = Math.min(this.MAX_PATTERN_LENGTH, currentHistory.length); len >= this.MIN_PATTERN_LENGTH; len--) {
-                    const pattern = currentHistory.slice(-len);
-                    const occurrences = this.findPatternOccurrences(pattern, allHistoricalSessions);
-                    if (occurrences.length > 0) {
-                        allMatches.push(...occurrences);
-                        break;
-                    }
-                }
-                if (allMatches.length === 0) {
-                    return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự.', confidence: 0 };
-                }
-                const votes = { P: 0, B: 0 };
-                allMatches.forEach(match => {
-                    // REMOVED WEIGHT
-                    if (votes[match.next] !== undefined) votes[match.next] += match.similarity;
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
                 });
-                const totalVotes = votes.P + votes.B;
-                if (totalVotes === 0) {
-                     return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự.', confidence: 0 };
+                
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    const error = new Error(`HTTP error! status: ${response.status}`);
+                    error.status = response.status;
+                    throw error;
                 }
-                const confidenceP = (votes.P / totalVotes) * 100;
-                const confidenceB = (votes.B / totalVotes) * 100;
-                const maxConfidence = Math.max(confidenceP, confidenceB);
-                const predictedWinner = votes.P > votes.B ? 'P' : 'B';
-                const analysisTextPrefix = `Tìm thấy ${allMatches.length} hình cầu tương tự. Lịch sử cho thấy:\n- PLAYER: ${votes.P.toFixed(1)} điểm\n- BANKER: ${votes.B.toFixed(1)} điểm`;
                 
-                const streakInfo = this.analyzeCurrentStreak(currentHistory);
-                let recommendation = '';
-                if (streakInfo.type === 'bệt' && predictedWinner === streakInfo.value) recommendation = `THEO CẦU BỆT (${streakInfo.value} x${streakInfo.length})`;
-                else if (streakInfo.type === 'bệt' && predictedWinner !== streakInfo.value) recommendation = `BẺ CẦU BỆT (${streakInfo.value} x${streakInfo.length})`;
-                else if (streakInfo.type === '1-1' && predictedWinner !== currentHistory[currentHistory.length - 1]) recommendation = `THEO CẦU 1-1 (Dài ${streakInfo.length})`;
-                else if (streakInfo.type === '1-1' && predictedWinner === currentHistory[currentHistory.length - 1]) recommendation = `BẺ CẦU 1-1 (Dài ${streakInfo.length})`;
-                else recommendation = `THEO PHÂN TÍCH LỊCH SỬ`;
-                
-                const analysisText = `${analysisTextPrefix}\n\n🏆 Độ tin cậy: ${maxConfidence.toFixed(1)}%`;
-                return { prediction: predictedWinner, recommendation, analysisText, confidence: maxConfidence };
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const parsedJson = JSON.parse(candidate.content.parts[0].text);
+                    if (['P', 'B'].includes(parsedJson.prediction) && ['P', 'B'].includes(parsedJson.prediction_if_P) && ['P', 'B'].includes(parsedJson.prediction_if_B)) {
+                       return parsedJson;
+                    }
+                }
+                throw new Error("Phản hồi từ AI không hợp lệ.");
+
+            } catch (error) {
+                clearTimeout(timeoutId);
+                console.error(`API call failed:`, error);
+                if (error.name === 'AbortError') return { error: "Yêu cầu tới AI đã hết thời gian chờ. Vui lòng kiểm tra lại mạng Internet." };
+                if (error.status === 503) return { error: "Dịch vụ AI hiện đang quá tải (Lỗi 503)." };
+                if (error.status === 400) return { error: "Yêu cầu không hợp lệ. Kiểm tra lại API Key (Lỗi 400)." };
+                if (error.status === 429) return { error: "Quá nhiều yêu cầu tới AI (Lỗi 429)." };
+                return { error: "Lỗi kết nối tới AI." };
             }
+        }
+        
+        async function getAIPrediction(currentHistory, allSessions, currentSessionId) {
+            const apiKey = document.getElementById('apiKeyInput').value;
+            if (!apiKey) return { error: 'Vui lòng nhập API Key.' };
+            
+            const MIN_HISTORY_FOR_ANALYSIS = 5;
+            if (currentHistory.length < MIN_HISTORY_FOR_ANALYSIS) {
+                return { error: `Cần ít nhất ${MIN_HISTORY_FOR_ANALYSIS} kết quả...` };
+            }
+            
+            const historicalContext = Object.keys(allSessions)
+                .filter(id => id !== currentSessionId)
+                .flatMap(id => allSessions[id].history);
+
+            const MAX_HISTORICAL_CONTEXT = 500;
+            const limitedHistoricalContext = historicalContext.slice(-MAX_HISTORICAL_CONTEXT);
+            const MAX_CURRENT_HISTORY = 75;
+            const limitedCurrentHistory = currentHistory.slice(-MAX_CURRENT_HISTORY);
+
+            return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, apiKey);
         }
 
         // --- ACCURACY TRACKER ---
         class AccuracyTracker {
-            constructor() {
-                this.predictions = [];
-                this.currentPrediction = null;
-            }
-            makePrediction(prediction, confidence) { 
-                this.currentPrediction = { prediction, confidence };
-            }
-            recordActualResult(actual) {
-                if (this.currentPrediction && this.currentPrediction.prediction) {
-                    this.predictions.push({ 
-                        predicted: this.currentPrediction.prediction, 
-                        actual: actual,
-                        confidence: this.currentPrediction.confidence
+            constructor() { this.predictions = []; }
+            record(prediction, actualResult) {
+                if (prediction && prediction.prediction) {
+                    this.predictions.push({
+                        predicted: prediction.prediction,
+                        actual: actualResult,
+                        confidence: prediction.confidence
                     });
                 }
-                this.currentPrediction = null;
             }
             getStats() {
-                const total = this.predictions.length;
-                if (total === 0) return { rate: 0, correct: 0, total: 0 };
+                if (this.predictions.length === 0) return { rate: 0, correct: 0, total: 0 };
                 const correct = this.predictions.filter(p => p.predicted === p.actual).length;
-                return { rate: (correct / total) * 100, correct, total };
+                return {
+                    rate: (correct / this.predictions.length) * 100,
+                    correct,
+                    total: this.predictions.length
+                };
             }
-            reset() {
-                this.predictions = [];
-                this.currentPrediction = null;
-            }
+            reset() { this.predictions = []; }
         }
 
         // --- GLOBAL STATE ---
         let state = {
             currentSessionId: null,
             sessions: {},
-            matcher: new PatternMatcher(),
             accuracyTracker: new AccuracyTracker(),
-            goldenRange: null 
+            nextPrediction: null, 
+            isCalculating: false,
+            isSimulating: false,
         };
 
         // --- UI UPDATE FUNCTIONS ---
@@ -316,11 +370,8 @@
             if (history.length > 0) {
                 let currentCol = [history[0]];
                 for (let i = 1; i < history.length; i++) {
-                    if (history[i] === history[i-1]) currentCol.push(history[i]);
-                    else {
-                        columns.push(currentCol);
-                        currentCol = [history[i]];
-                    }
+                    if (history[i] === history[i - 1]) currentCol.push(history[i]);
+                    else { columns.push(currentCol); currentCol = [history[i]]; }
                 }
                 columns.push(currentCol);
             }
@@ -329,8 +380,7 @@
                 colDiv.className = 'road-col';
                 colData.forEach(item => {
                     const itemDiv = document.createElement('div');
-                    const bgColor = item === 'P' ? 'bg-blue-600' : 'bg-red-600';
-                    itemDiv.className = `road-item ${bgColor}`;
+                    itemDiv.className = `road-item ${item === 'P' ? 'bg-blue-600' : 'bg-red-600'}`;
                     itemDiv.textContent = item;
                     colDiv.appendChild(itemDiv);
                 });
@@ -346,85 +396,94 @@
             document.getElementById('totalPredictions').textContent = stats.total;
         }
 
-        function updateAnalysisUI() {
-            const currentHistory = state.sessions[state.currentSessionId]?.history || [];
-            const allHistory = Object.values(state.sessions).map(s => s.history);
-            let { prediction, recommendation, analysisText, confidence } = state.matcher.getPrediction(currentHistory, allHistory);
-            
-            let finalPrediction = prediction;
-            let finalRecommendation = recommendation;
-            let recommendationNote = '';
-
-            if (prediction) { // Only proceed if there is a prediction
-                let isInGoldenRange = false;
-                if (state.goldenRange) {
-                    if (confidence >= state.goldenRange.min && confidence <= state.goldenRange.max) {
-                        isInGoldenRange = true;
-                    }
-                }
-
-                if (isInGoldenRange) {
-                    if (state.goldenRange.rate < 30) {
-                        // Invert the prediction
-                        finalPrediction = prediction === 'P' ? 'B' : 'P';
-                        finalRecommendation = `ĐỀ XUẤT NGƯỢC (Tỷ lệ thấp)`;
-                        recommendationNote = `<div class="mt-2 p-2 text-center bg-red-800 bg-opacity-50 rounded-lg text-sm text-red-300 font-semibold">⚠️ Đảo ngược! Khoảng vàng (${state.goldenRange.min}-${state.goldenRange.max}%) có tỷ lệ thắng chỉ ${state.goldenRange.rate.toFixed(1)}%.</div>`;
-                    } else {
-                        recommendationNote = `<div class="mt-2 p-2 text-center bg-green-800 bg-opacity-50 rounded-lg text-sm text-green-300 font-semibold">✨ Phán đoán này nằm trong KHOẢNG VÀNG!</div>`;
-                    }
-                } else if (state.goldenRange) {
-                    recommendationNote = `<div class="mt-2 p-2 text-center bg-yellow-800 bg-opacity-50 rounded-lg text-sm text-yellow-300 font-semibold">⚠️ Cẩn trọng: Không thuộc Khoảng Vàng.</div>`;
-                }
-            }
-            
-            // We still pass the original prediction to the tracker for accurate stats
-            state.accuracyTracker.makePrediction(prediction, confidence);
-
+        function displayPrediction(predictionData) {
             const analysisResultDiv = document.getElementById('analysisResult');
             const analysisCard = document.getElementById('analysis-card');
             analysisCard.classList.remove('card-glow-p', 'card-glow-b');
 
-            if (finalPrediction) {
-                analysisResultDiv.innerHTML = `
-                    <div class="bg-gray-700 p-4 rounded-lg">
-                        <p class="text-gray-300 whitespace-pre-wrap">${analysisText}</p>
+            if (predictionData && predictionData.prediction) {
+                const pColor = 'text-blue-400';
+                const bColor = 'text-red-400';
+                 analysisResultDiv.innerHTML = `
+                    <div class="text-center bg-gray-900 py-4 rounded-lg border-2 ${predictionData.prediction === 'P' ? 'border-blue-500' : 'border-red-500'}">
+                        <p class="text-4xl font-bold ${predictionData.prediction === 'P' ? pColor : bColor}">${predictionData.prediction === 'P' ? '👤 PLAYER' : '🏦 BANKER'}</p>
+                        <p class="text-sm text-gray-400 italic mt-1">"${predictionData.reasoning}"</p>
+                        <p class="font-semibold text-yellow-400 mt-2">Độ tin cậy: ${predictionData.confidence.toFixed(1)}%</p>
                     </div>
-                    <div class="text-center bg-gray-900 py-6 rounded-lg border-2 ${finalPrediction === 'P' ? 'border-blue-500' : 'border-red-500'}">
-                        <p class="text-lg text-gray-400 mb-2">Đề xuất:</p>
-                        <p class="text-3xl font-extrabold ${finalPrediction === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalRecommendation}</p>
-                        <p class="text-4xl font-bold mt-2">${finalPrediction === 'P' ? '👤 PLAYER' : '🏦 BANKER'}</p>
-                        ${recommendationNote}
+                    <div class="bg-gray-700/50 p-3 rounded-lg text-sm">
+                        <p class="text-gray-300 font-semibold mb-2 text-center">Kịch bản có thể xảy ra:</p>
+                        <div class="flex justify-around">
+                             <p><span class="font-medium">Nếu ván này ra P ➔</span> <span class="font-bold ${predictionData.prediction_if_P === 'P' ? pColor : bColor}">${predictionData.prediction_if_P}</span></p>
+                             <p><span class="font-medium">Nếu ván này ra B ➔</span> <span class="font-bold ${predictionData.prediction_if_B === 'P' ? pColor : bColor}">${predictionData.prediction_if_B}</span></p>
+                        </div>
                     </div>
                 `;
-                analysisCard.classList.add(finalPrediction === 'P' ? 'card-glow-p' : 'card-glow-b');
+                analysisCard.classList.add(predictionData.prediction === 'P' ? 'card-glow-p' : 'card-glow-b');
             } else {
-                analysisResultDiv.innerHTML = `<p class="text-gray-400 text-center py-8 whitespace-pre-wrap">${analysisText}</p>`;
+                 analysisResultDiv.innerHTML = `<p class="text-gray-400 text-center py-8 whitespace-pre-wrap">${predictionData ? predictionData.error : 'Nhập kết quả để bắt đầu...'}</p>`;
             }
         }
         
+        function updateAIStatusUI(status) {
+             const statusDiv = document.getElementById('predictionStatusFooter');
+             switch(status) {
+                case 'calculating':
+                    statusDiv.innerHTML = `<div class="flex items-center justify-center gap-2 text-sm"><div class="spinner"></div><span class="text-yellow-400">Đang chuẩn bị đề xuất kế tiếp...</span></div>`;
+                    break;
+                case 'ready':
+                    statusDiv.innerHTML = `<div class="flex items-center justify-center gap-2 text-sm"><span class="text-xl">✅</span><span class="text-green-400 font-semibold">Sẵn sàng cho ván tới</span></div>`;
+                    break;
+                default:
+                    statusDiv.innerHTML = ``;
+             }
+        }
+
+        async function preCalculateNextPrediction() {
+            if (state.isCalculating) return;
+            state.isCalculating = true;
+            
+            const currentHistory = state.sessions[state.currentSessionId]?.history || [];
+            const isInitialCalculation = currentHistory.length < 5;
+
+            if (isInitialCalculation) {
+                const analysisResultDiv = document.getElementById('analysisResult');
+                analysisResultDiv.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full">
+                        <div class="spinner spinner-lg"></div>
+                        <p class="text-gray-400 mt-4">AI đang thực hiện phân tích đầu tiên...</p>
+                    </div>`;
+                updateAIStatusUI();
+            } else {
+                 updateAIStatusUI('calculating');
+            }
+
+            state.nextPrediction = await getAIPrediction(currentHistory, state.sessions, state.currentSessionId);
+            
+            state.isCalculating = false;
+
+            if(isInitialCalculation && state.nextPrediction.error) {
+                 displayPrediction(state.nextPrediction);
+            } else if (isInitialCalculation) {
+                const analysisResultDiv = document.getElementById('analysisResult');
+                analysisResultDiv.innerHTML = `<p class="text-gray-400 text-center py-8">Đề xuất đã sẵn sàng. Vui lòng nhập kết quả ván đầu tiên.</p>`
+            }
+            
+            if (state.nextPrediction.prediction) {
+                 updateAIStatusUI('ready');
+            }
+        }
+
         function updateConfidenceStatsUI() {
             const ranges = [
-                {min: 50, max: 60, total: 0, wins: 0},
-                {min: 60, max: 70, total: 0, wins: 0},
-                {min: 70, max: 80, total: 0, wins: 0},
-                {min: 80, max: 90, total: 0, wins: 0},
-                {min: 90, max: 100, total: 0, wins: 0},
-            ];
+                {min: 50, max: 60}, {min: 60, max: 70}, {min: 70, max: 80},
+                {min: 80, max: 90}, {min: 90, max: 101}
+            ].map(r => ({...r, total: 0, wins: 0}));
+
             state.accuracyTracker.predictions.forEach(p => {
-                const confidence = p.confidence;
-                if (confidence) {
-                    for (const range of ranges) {
-                        if (confidence >= range.min && confidence < range.max) {
-                            range.total++;
-                            if (p.predicted === p.actual) range.wins++;
-                            break;
-                        }
-                    }
-                    if (confidence >= 100) {
-                        const lastRange = ranges[ranges.length - 1];
-                        lastRange.total++;
-                        if (p.predicted === p.actual) lastRange.wins++;
-                    }
+                const range = ranges.find(r => p.confidence >= r.min && p.confidence < r.max);
+                if (range) {
+                    range.total++;
+                    if (p.predicted === p.actual) range.wins++;
                 }
             });
 
@@ -434,98 +493,164 @@
             let bestRange = null;
             let maxRate = -1;
             ranges.forEach(range => {
-                const rate = range.total > 0 ? ((range.wins / range.total) * 100) : -1;
+                const rate = range.total > 0 ? (range.wins / range.total) * 100 : -1;
                 if (range.total >= 3 && rate > maxRate) {
                     maxRate = rate;
                     bestRange = range;
                 }
             });
-            
-            // Add rate to each range object for later use
-            ranges.forEach(range => {
-                range.rate = range.total > 0 ? ((range.wins / range.total) * 100) : -1;
-            });
-
-            state.goldenRange = bestRange; 
 
             if (bestRange) {
-                recommendationDiv.innerHTML = `<p class="text-sm text-yellow-300"><span class="font-bold">✨ Khoảng Vàng:</span> Tỷ lệ thắng cao nhất là <b class="text-green-400">${maxRate.toFixed(1)}%</b> trong khoảng <b class="text-white">${bestRange.min}%-${bestRange.max}%</b>.</p>`;
+                recommendationDiv.innerHTML = `<p class="text-sm text-yellow-300"><span class="font-bold">✨ Khoảng Vàng:</span> Tỷ lệ thắng cao nhất là <b class="text-green-400">${maxRate.toFixed(1)}%</b> trong khoảng <b class="text-white">${bestRange.min}%-${bestRange.max === 101 ? '100' : bestRange.max-1}%</b>.</p>`;
             } else {
-                recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm ra khoảng vàng (cần tối thiểu 3 phán đoán trong 1 khoảng).</p>`;
+                recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm ra khoảng vàng.</p>`;
             }
 
             let html = `
                 <div class="grid grid-cols-4 gap-4 text-sm font-semibold text-gray-400 px-3">
-                    <span>Khoảng Tin Cậy</span>
-                    <span class="text-center">Tổng Số</span>
-                    <span class="text-center">Thắng</span>
-                    <span class="text-right">Tỷ Lệ</span>
-                </div>
-            `;
+                    <span>Khoảng Tin Cậy</span><span class="text-center">Tổng Số</span>
+                    <span class="text-center">Thắng</span><span class="text-right">Tỷ Lệ</span>
+                </div>`;
+            
             if (state.accuracyTracker.predictions.length === 0) {
                 tableDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Chưa có dữ liệu thống kê.</p>';
                 return;
             }
+
             ranges.forEach(range => {
-                const rate = range.rate;
+                const rate = range.total > 0 ? (range.wins / range.total) * 100 : -1;
                 const isBest = range === bestRange;
-                const highlightClass = isBest ? 'bg-green-800 bg-opacity-40 border border-green-500' : 'bg-gray-700 bg-opacity-50';
                 html += `
-                    <div class="grid grid-cols-4 gap-4 items-center ${highlightClass} p-3 rounded-lg mt-2 transition-all duration-300">
-                        <span class="font-medium text-gray-300">${range.min}%-${range.max}%</span>
+                    <div class="grid grid-cols-4 gap-4 items-center ${isBest ? 'bg-green-800/40 border border-green-500' : 'bg-gray-700/50'} p-3 rounded-lg mt-2">
+                        <span class="font-medium text-gray-300">${range.min}%-${range.max === 101 ? '100' : range.max-1}%</span>
                         <span class="text-center text-white font-semibold">${range.total}</span>
                         <span class="text-center text-green-400 font-semibold">${range.wins}</span>
                         <span class="text-right font-bold ${rate >= 70 ? 'text-green-400' : (rate >= 50 ? 'text-yellow-400' : 'text-red-400')}">${rate > -1 ? rate.toFixed(1) + '%' : '-'}</span>
-                    </div>
-                `;
+                    </div>`;
             });
             tableDiv.innerHTML = html;
         }
 
-        function updateAllUI() {
-            updateBigRoadUI();
-            updateAccuracyUI();
-            updateConfidenceStatsUI(); 
-            updateAnalysisUI();
-        }
-
         // --- EVENT HANDLERS & ACTIONS ---
         function addResult(result) {
-            if (!state.currentSessionId) return;
-            state.accuracyTracker.recordActualResult(result);
+            if (!state.currentSessionId || state.isSimulating) return;
+            
+            state.accuracyTracker.record(state.nextPrediction, result);
             state.sessions[state.currentSessionId].history.push(result);
             saveSessions();
-            updateAllUI();
+            
+            displayPrediction(state.nextPrediction);
+            state.nextPrediction = null;
+
+            updateBigRoadUI();
+            updateAccuracyUI();
+            updateConfidenceStatsUI();
+
+            preCalculateNextPrediction();
         }
 
         function undoLast() {
-            if (!state.currentSessionId || state.sessions[state.currentSessionId].history.length === 0) return;
+            if (!state.currentSessionId || state.sessions[state.currentSessionId].history.length === 0 || state.isSimulating) return;
             state.sessions[state.currentSessionId].history.pop();
             state.accuracyTracker.predictions.pop();
             saveSessions();
-            updateAllUI();
+            
+            updateBigRoadUI();
+            updateAccuracyUI();
+            updateConfidenceStatsUI();
+            
+            displayPrediction(null);
+            preCalculateNextPrediction();
         }
 
         function clearCurrentSessionHistory() {
-            if (!state.currentSessionId) return;
+            if (!state.currentSessionId || state.isSimulating) return;
             if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử của phiên này không?')) {
                 state.sessions[state.currentSessionId].history = [];
                 state.accuracyTracker.reset();
+                state.nextPrediction = null;
                 saveSessions();
-                updateAllUI();
+                updateBigRoadUI();
+                updateAccuracyUI();
+                updateConfidenceStatsUI();
+                displayPrediction(null);
+                preCalculateNextPrediction();
             }
+        }
+        
+        // --- API KEY MANAGEMENT ---
+        async function testApiKey() {
+            if (state.isSimulating) return;
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const apiKeyMessage = document.getElementById('apiKeyMessage');
+            const key = apiKeyInput.value.trim();
+
+            if (!key) {
+                apiKeyMessage.textContent = 'Vui lòng nhập API Key để kiểm tra.';
+                apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
+                return;
+            }
+
+            apiKeyMessage.textContent = 'Đang chẩn đoán kết nối...';
+            apiKeyMessage.className = 'text-sm mt-2 font-semibold text-yellow-400';
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${key}`;
+            const payload = { contents: [{ parts: [{ text: "hello" }] }] };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    apiKeyMessage.textContent = '✅ Kết nối thành công! API Key hợp lệ.';
+                    apiKeyMessage.className = 'text-sm mt-2 font-semibold text-green-400';
+                } else {
+                    if (response.status === 400) apiKeyMessage.textContent = '❌ Lỗi: API Key không hợp lệ hoặc đã bị vô hiệu hóa.';
+                    else if (response.status === 503) apiKeyMessage.textContent = '❌ Lỗi: Dịch vụ AI đang quá tải. Vui lòng thử lại sau.';
+                    else apiKeyMessage.textContent = `❌ Lỗi kết nối: ${response.statusText} (Mã: ${response.status})`;
+                    apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
+                }
+            } catch (error) {
+                console.error("API Test Error:", error);
+                apiKeyMessage.textContent = '❌ Lỗi: Không thể kết nối tới máy chủ. Vui lòng kiểm tra mạng Internet.';
+                apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
+            }
+        }
+
+        function saveApiKey() {
+            if (state.isSimulating) return;
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const apiKeyMessage = document.getElementById('apiKeyMessage');
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                localStorage.setItem('geminiApiKey_v5', key);
+                apiKeyMessage.textContent = 'Lưu API Key thành công!';
+                apiKeyMessage.className = 'text-sm mt-2 font-semibold text-green-400';
+                setTimeout(() => apiKeyMessage.textContent = '', 3000);
+                preCalculateNextPrediction();
+            } else {
+                 apiKeyMessage.textContent = 'Vui lòng nhập một API Key.';
+                 apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
+            }
+        }
+
+        function loadApiKey() {
+            const savedKey = localStorage.getItem('geminiApiKey_v5');
+            if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
         }
 
         // --- SESSION MANAGEMENT ---
         function getSessions() {
-            try {
-                return JSON.parse(localStorage.getItem('baccaratPatternSessions_v3')) || {};
-            } catch (e) { return {}; }
+            try { return JSON.parse(localStorage.getItem('baccaratAISessions_v5')) || {}; }
+            catch (e) { return {}; }
         }
 
         function saveSessions() {
-            localStorage.setItem('baccaratPatternSessions_v3', JSON.stringify(state.sessions));
-            localStorage.setItem('lastActiveSession_v3', state.currentSessionId);
+            localStorage.setItem('baccaratAISessions_v5', JSON.stringify(state.sessions));
+            localStorage.setItem('lastActiveAISession_v5', state.currentSessionId);
         }
 
         function updateSessionSelector() {
@@ -547,21 +672,17 @@
             const newId = `session-${Date.now()}`;
             state.currentSessionId = newId;
             state.sessions[newId] = { name: `Phiên ${new Date().toLocaleString('vi-VN')}`, history: [] };
-            state.accuracyTracker.reset();
-            saveSessions();
-            updateSessionSelector();
-            updateAllUI();
+            loadSession(newId);
         }
 
         function deleteSelectedSession() {
             if (!state.currentSessionId || Object.keys(state.sessions).length <= 1) {
-                alert('Không thể xóa phiên cuối cùng.');
-                return;
+                alert('Không thể xóa phiên cuối cùng.'); return;
             }
             if (confirm('Bạn có chắc muốn xóa phiên này không?')) {
                 delete state.sessions[state.currentSessionId];
                 state.currentSessionId = null;
-                localStorage.removeItem('lastActiveSession_v3');
+                localStorage.removeItem('lastActiveAISession_v5');
                 saveSessions();
                 initializeApp();
             }
@@ -571,23 +692,29 @@
             if (state.sessions[sessionId]) {
                 state.currentSessionId = sessionId;
                 state.accuracyTracker.reset();
-                localStorage.setItem('lastActiveSession_v3', state.currentSessionId);
+                state.nextPrediction = null;
+                saveSessions();
+
                 updateSessionSelector();
-                updateAllUI();
+                updateBigRoadUI();
+                updateAccuracyUI();
+                updateConfidenceStatsUI();
+                displayPrediction(null);
+                
+                preCalculateNextPrediction();
             }
         }
         
         // --- IMPORT / EXPORT ---
         function exportData() {
             if (Object.keys(state.sessions).length === 0) {
-                alert("Không có dữ liệu để xuất.");
-                return;
+                alert("Không có dữ liệu để xuất."); return;
             }
             const dataStr = JSON.stringify(state.sessions, null, 2);
             const dataBlob = new Blob([dataStr], {type: "application/json"});
             const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
-            link.download = `baccarat_backup_${new Date().toISOString().slice(0,10)}.json`;
+            link.download = `baccarat_ai_backup_${new Date().toISOString().slice(0,10)}.json`;
             link.href = url;
             link.click();
             URL.revokeObjectURL(url);
@@ -609,13 +736,13 @@
                     if (confirm('Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc muốn tiếp tục?')) {
                         state.sessions = importedSessions;
                         state.currentSessionId = null;
-                        localStorage.removeItem('lastActiveSession_v3');
+                        localStorage.removeItem('lastActiveAISession_v5');
                         saveSessions();
                         initializeApp();
                         alert('Nhập dữ liệu thành công!');
                     }
                 } catch (error) {
-                    alert('Lỗi: File dữ liệu không hợp lệ. Vui lòng kiểm tra lại file.');
+                    alert('Lỗi: File dữ liệu không hợp lệ.');
                     console.error("Import error:", error);
                 } finally {
                     event.target.value = '';
@@ -624,9 +751,105 @@
             reader.readAsText(file);
         }
 
+        // --- SIMULATION ---
+        function disableMainControls() {
+            document.querySelectorAll('.main-control').forEach(btn => btn.disabled = true);
+        }
+
+        function enableMainControls() {
+            document.querySelectorAll('.main-control').forEach(btn => btn.disabled = false);
+        }
+
+        function showSimulationResults(stats, totalHands) {
+            const modal = document.getElementById('simulationModal');
+            const content = document.getElementById('simulationResultContent');
+            
+            content.innerHTML = `
+                <p class="text-gray-400">AI đã phân tích và dự đoán lại <span class="font-bold text-white">${stats.total}</span> ván (từ ván 6 đến ván ${totalHands}).</p>
+                <div class="bg-gray-700 p-4 rounded-lg space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-300">Tỷ Lệ Thắng</span>
+                        <span class="text-3xl font-bold text-green-400">${stats.rate.toFixed(1)}%</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-300">Số Phán Đoán Đúng</span>
+                        <span class="text-xl font-semibold text-white">${stats.correct}</span>
+                    </div>
+                     <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-300">Tổng Số Phán Đoán</span>
+                        <span class="text-xl font-semibold text-white">${stats.total}</span>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function hideSimulationModal() {
+            document.getElementById('simulationModal').classList.add('hidden');
+        }
+
+        async function runSimulation() {
+            if (state.isCalculating || state.isSimulating) return;
+
+            const currentHistory = state.sessions[state.currentSessionId]?.history;
+            if (!currentHistory || currentHistory.length < 6) {
+                alert("Cần ít nhất 6 ván trong lịch sử để chạy mô phỏng.");
+                return;
+            }
+
+            state.isSimulating = true;
+            disableMainControls();
+            const analysisResultDiv = document.getElementById('analysisResult');
+            const simulationTracker = new AccuracyTracker(); // Use a temporary tracker
+
+            try {
+                for (let i = 5; i < currentHistory.length; i++) {
+                    const historyForPrediction = currentHistory.slice(0, i);
+                    const actualResult = currentHistory[i];
+
+                    analysisResultDiv.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <div class="spinner spinner-lg"></div>
+                            <p class="text-gray-400 mt-4">Đang mô phỏng ván ${i + 1} / ${currentHistory.length}</p>
+                        </div>`;
+                    
+                    const prediction = await getAIPrediction(historyForPrediction, state.sessions, state.currentSessionId);
+                    
+                    if (prediction.error) {
+                        throw new Error(prediction.error);
+                    }
+                    
+                    if (prediction && prediction.prediction) {
+                         simulationTracker.record({
+                            prediction: prediction.prediction,
+                            confidence: prediction.confidence
+                        }, actualResult);
+                    }
+                }
+                showSimulationResults(simulationTracker.getStats(), currentHistory.length);
+
+            } catch (error) {
+                console.error("Simulation failed:", error);
+                alert(`Mô phỏng thất bại: ${error.message}`);
+            } finally {
+                state.isSimulating = false;
+                enableMainControls();
+                displayPrediction(state.nextPrediction); 
+            }
+        }
+        
         function initializeApp() {
+            // Cleanup old data
+            const versionsToClean = ['v1', 'v2', 'v3', 'v4'];
+            versionsToClean.forEach(v => {
+                 localStorage.removeItem(`geminiApiKey_${v}`);
+                 localStorage.removeItem(`baccaratAISessions_${v}`);
+                 localStorage.removeItem(`lastActiveAISession_${v}`);
+            });
+
+            loadApiKey();
             state.sessions = getSessions();
-            const lastActiveId = localStorage.getItem('lastActiveSession_v3');
+            const lastActiveId = localStorage.getItem('lastActiveAISession_v5');
             if (Object.keys(state.sessions).length === 0) {
                 createNewSession();
             } else {
@@ -641,3 +864,4 @@
     </script>
 </body>
 </html>
+
