@@ -148,6 +148,12 @@
             background-color: rgba(107, 114, 128, 0.15);
         }
 
+        /* --- RHYTHM ANALYZER STYLES --- */
+        .rhythm-card { transition: all 0.3s ease; }
+        .status-good { border: 2px solid #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
+        .status-medium { border: 2px solid #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+        .status-bad { border: 2px solid #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -239,6 +245,16 @@
 
         <!-- Right Column: Analysis & Stats -->
         <div class="space-y-6">
+            <!-- NEW: AI Rhythm Analyzer -->
+            <div id="aiRhythmAnalyzer" class="bg-gray-800 p-6 rounded-2xl shadow-lg rhythm-card">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300">🌀 Phân Tích Nhịp Cầu AI</h2>
+                <div class="text-center">
+                    <p class="text-gray-400 text-sm">Độ ổn định (20 ván gần nhất)</p>
+                    <p id="rhythmScore" class="text-4xl font-bold my-2 text-white">-</p>
+                    <p id="rhythmDescription" class="font-semibold text-lg h-8">-</p>
+                </div>
+            </div>
+
             <!-- Accuracy Stats -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
                 <h2 class="text-xl font-semibold mb-4 text-green-300">🎯 Thống Kê Độ Chính Xác (AI)</h2>
@@ -549,6 +565,52 @@
              }
         }
 
+        function updateAiRhythmAnalyzer() {
+            const card = document.getElementById('aiRhythmAnalyzer');
+            const scoreEl = document.getElementById('rhythmScore');
+            const descEl = document.getElementById('rhythmDescription');
+            
+            const predictions = state.sessions[state.currentSessionId]?.predictions || [];
+            const RHYTHM_WINDOW = 20;
+            const MIN_PREDICTIONS = 5;
+
+            card.className = 'bg-gray-800 p-6 rounded-2xl shadow-lg rhythm-card'; // Reset class
+
+            if (predictions.length < MIN_PREDICTIONS) {
+                scoreEl.textContent = '-';
+                descEl.textContent = 'Cần thêm dữ liệu...';
+                descEl.className = 'font-semibold text-lg h-8 text-gray-500';
+                return;
+            }
+
+            const recentPredictions = predictions.slice(-RHYTHM_WINDOW);
+            let breaks = 0;
+            for (let i = 1; i < recentPredictions.length; i++) {
+                const currentWin = recentPredictions[i].predicted === recentPredictions[i].actual;
+                const prevWin = recentPredictions[i-1].predicted === recentPredictions[i-1].actual;
+                if (currentWin !== prevWin) {
+                    breaks++;
+                }
+            }
+
+            const stabilityScore = Math.round((1 - (breaks / (recentPredictions.length - 1))) * 100);
+            scoreEl.textContent = `${stabilityScore}`;
+
+            if (stabilityScore >= 80) {
+                descEl.textContent = 'Rất ổn định! (Cầu Thuận/Nghịch)';
+                descEl.className = 'font-semibold text-lg h-8 text-green-400';
+                card.classList.add('status-good');
+            } else if (stabilityScore >= 60) {
+                descEl.textContent = 'Tương đối ổn định';
+                descEl.className = 'font-semibold text-lg h-8 text-yellow-400';
+                card.classList.add('status-medium');
+            } else {
+                descEl.textContent = 'Cầu loạn - Nên cẩn trọng!';
+                descEl.className = 'font-semibold text-lg h-8 text-red-400';
+                card.classList.add('status-bad');
+            }
+        }
+
         async function preCalculateNextPath() {
             if (state.isCalculating) return;
             state.isCalculating = true;
@@ -694,6 +756,7 @@
             updateBigRoadUI();
             updateAccuracyUI();
             updateConfidenceStatsUI(); 
+            updateAiRhythmAnalyzer();
             
             // Step 4: Asynchronously get the prediction for the *next* hand.
             await preCalculateNextPath();
@@ -710,6 +773,7 @@
             updateBigRoadUI();
             updateAccuracyUI();
             updateConfidenceStatsUI();
+            updateAiRhythmAnalyzer();
             preCalculateNextPath();
         }
 
@@ -726,6 +790,7 @@
                 updateBigRoadUI();
                 updateAccuracyUI();
                 updateConfidenceStatsUI();
+                updateAiRhythmAnalyzer();
                 preCalculateNextPath();
             }
         }
@@ -853,6 +918,7 @@
                 updateBigRoadUI();
                 updateAccuracyUI();
                 updateConfidenceStatsUI();
+                updateAiRhythmAnalyzer();
                 
                 preCalculateNextPath();
             }
