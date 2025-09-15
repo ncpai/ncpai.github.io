@@ -106,7 +106,6 @@
             border-radius: 2px 2px 0 0;
             transition: all 0.3s ease;
         }
-        /* UPDATED: Changed from blue to green */
         .streak-win { height: 100%; background-color: #22c55e; } /* green-500 */
         .streak-loss { height: 30%; background-color: #ef4444; }
 
@@ -132,7 +131,6 @@
             border-radius: 2px;
             transition: all 0.3s ease;
         }
-        /* UPDATED: Changed from blue to green */
         .bar.win { height: 100%; background-color: #22c55e; } /* green-500 */
         .bar.loss { height: 40%; background-color: #ef4444; }
         
@@ -556,16 +554,9 @@
             state.isCalculating = true;
             
             const currentHistory = state.sessions[state.currentSessionId]?.history || [];
-            const isInitialCalculation = currentHistory.length < 5;
-
-            // Show a loading state in the prediction box.
-            if (isInitialCalculation) {
-                const analysisResultDiv = document.getElementById('analysisResult');
-                analysisResultDiv.innerHTML = `<div class="flex flex-col items-center justify-center h-full"><div class="spinner spinner-lg"></div><p class="text-gray-400 mt-4">AI đang phân tích lần đầu...</p></div>`;
-                updateAIStatusUI();
-            } else {
-                 updateAIStatusUI('calculating');
-            }
+            
+            updateAIStatusUI('calculating');
+            displayPrediction(null); // Clear old prediction
 
             state.predictedPath = await getAIPathPrediction(currentHistory, state.sessions, state.currentSessionId);
             state.isCalculating = false;
@@ -574,8 +565,7 @@
             displayPrediction(state.predictedPath);
             if (state.predictedPath.predicted_path) {
                 updateAIStatusUI('ready');
-                // This second call adds the "Hiện tại" highlight.
-                updateConfidenceStatsUI();
+                updateConfidenceStatsUI(); // This call ONLY updates highlights now.
             }
         }
         
@@ -584,7 +574,7 @@
             const recommendationDiv = document.getElementById('confidenceRecommendation');
             const predictions = state.sessions[state.currentSessionId]?.predictions || [];
             
-            if (predictions.length === 0) {
+            if (predictions.length === 0 && !state.predictedPath?.confidence) {
                 container.innerHTML = '<p class="text-gray-500 text-center py-4">Chưa có dữ liệu thống kê.</p>';
                 recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm ra khoảng vàng.</p>`;
                 return;
@@ -638,7 +628,7 @@
                 let badgeHtml = '';
                 
                 const isCurrent = currentConfidence && currentConfidence >= range.min && currentConfidence < range.max;
-                const isPrevious = previousConfidence && previousConfidence >= range.min && previousConfidence < range.max;
+                const isPrevious = previousConfidence && previousConfidence >= range.min && previousConfidence < range.max && !isCurrent;
 
                 if (isCurrent) {
                     highlightClass += ' current-method-highlight';
@@ -686,6 +676,7 @@
         async function addResult(result) {
             if (!state.currentSessionId || state.isSimulating || state.isCalculating) return;
 
+            // Step 1: Record the outcome of the just-finished hand.
             if (state.predictedPath && state.predictedPath.predicted_path) {
                 state.sessions[state.currentSessionId].predictions.push({
                     predicted: state.predictedPath.predicted_path[0],
@@ -694,16 +685,17 @@
                 });
             }
 
+            // Step 2: Update history and clear the used prediction.
             state.sessions[state.currentSessionId].history.push(result);
             state.predictedPath = null;
             saveSessions(); 
 
+            // Step 3: Update all UI elements to reflect the state of the hand that just finished.
             updateBigRoadUI();
             updateAccuracyUI();
             updateConfidenceStatsUI(); 
-            displayPrediction(null);
-
-            // Use await to ensure we don't allow another click until the next prediction is ready.
+            
+            // Step 4: Asynchronously get the prediction for the *next* hand.
             await preCalculateNextPath();
         }
 
@@ -714,11 +706,10 @@
             if (session.predictions) session.predictions.pop();
             saveSessions();
 
+            // Rerun the whole UI update and prediction flow
             updateBigRoadUI();
             updateAccuracyUI();
             updateConfidenceStatsUI();
-            
-            displayPrediction(null);
             preCalculateNextPath();
         }
 
@@ -730,10 +721,11 @@
                 session.predictions = [];
                 state.predictedPath = null;
                 saveSessions();
+                
+                // Rerun the whole UI update and prediction flow
                 updateBigRoadUI();
                 updateAccuracyUI();
                 updateConfidenceStatsUI();
-                displayPrediction(null);
                 preCalculateNextPath();
             }
         }
@@ -785,7 +777,7 @@
                 apiKeyMessage.textContent = 'Lưu API Key thành công!';
                 apiKeyMessage.className = 'text-sm mt-2 font-semibold text-green-400';
                 setTimeout(() => apiKeyMessage.textContent = '', 3000);
-                preCalculateNextPath();
+                if (state.currentSessionId) preCalculateNextPath();
             } else {
                  apiKeyMessage.textContent = 'Vui lòng nhập một API Key.';
                  apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
@@ -861,7 +853,6 @@
                 updateBigRoadUI();
                 updateAccuracyUI();
                 updateConfidenceStatsUI();
-                displayPrediction(null);
                 
                 preCalculateNextPath();
             }
