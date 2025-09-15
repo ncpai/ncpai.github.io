@@ -284,6 +284,7 @@
             <!-- Pattern Analysis -->
             <div id="analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow duration-500 flex flex-col min-h-[280px]">
                 <h2 class="text-xl font-semibold text-yellow-300 mb-4">🔮 Đề Xuất Cho Ván Tới</h2>
+                <div id="historicalAnalysisAlert" class="mb-4"></div>
                 <div id="analysisResult" class="space-y-4 flex-grow flex flex-col justify-center">
                     <p class="text-gray-400 text-center">Nhập kết quả để bắt đầu nhận đề xuất...</p>
                 </div>
@@ -323,7 +324,7 @@
         
         const systemInstruction = {
             parts: [{
-                text: "Bạn là một AI phân tích Baccarat cấp cao với khả năng tự phân tích sâu. Quy trình tư duy của bạn gồm 3 bước:\n1. **Phân tích Cầu Baccarat:** Dựa vào lịch sử ván chơi (`P`, `B`), đưa ra một dự đoán ban đầu và độ tin cậy.\n2. **Phân tích Chuỗi Thắng/Thua:** Nhìn vào lịch sử kết quả (`Đúng`, `Sai`) của chính mình. Nếu bạn đang ở trong một chuỗi thắng dài (ví dụ: 4+ `Đúng`), hãy tăng độ tin cậy. Nếu trong chuỗi thua dài (ví dụ: 3+ `Sai`), hãy cân nhắc đảo ngược dự đoán của Bước 1.\n3. **Phân tích Chu Kỳ (Pattern):** Đây là bước quan trọng nhất. Hãy tìm kiếm các chu kỳ lặp lại trong lịch sử kết quả của mình (ví dụ: `Đúng, Sai, Đúng, Sai...` hoặc `Đúng, Đúng, Sai, Đúng, Đúng, Sai...`). Dựa vào chu kỳ nhận diện được, hãy dự đoán kết quả tiếp theo của **chính bạn** (bạn sẽ `Đúng` hay `Sai`?).\n**Quyết định cuối cùng:** Kết hợp cả 3 bước phân tích để đưa ra `predicted_path` cuối cùng. Nếu Bước 2 hoặc 3 khiến bạn thay đổi dự đoán của Bước 1, hãy giải thích rõ ràng trong `meta_reasoning`. Luôn trả lời bằng định dạng JSON."
+                text: "Bạn là một AI phân tích Baccarat cấp cao với khả năng tự phân tích sâu. Quy trình tư duy của bạn gồm 4 bước:\n1. **Phân tích Cầu Baccarat:** Dựa vào lịch sử ván chơi (`P`, `B`), đưa ra một dự đoán ban đầu và độ tin cậy.\n2. **Phân tích Chuỗi Thắng/Thua:** Nhìn vào lịch sử kết quả (`Đúng`, `Sai`) của chính mình. Nếu bạn đang ở trong một chuỗi thắng dài, hãy tăng độ tin cậy. Nếu trong chuỗi thua dài, hãy cân nhắc đảo ngược dự đoán.\n3. **Phân tích Chu Kỳ (Pattern):** Tìm kiếm các chu kỳ lặp lại trong lịch sử kết quả của mình (ví dụ: `Đúng, Sai, Đúng, Sai...`). Dựa vào chu kỳ, dự đoán kết quả tiếp theo của chính bạn.\n4. **Phân tích Lịch sử (Historical Precedent):** Rà soát toàn bộ lịch sử ván chơi. Tìm những đoạn cầu (khoảng 10-15 ván) gần giống nhất với hiện tại. Nếu ở đoạn đó hiệu suất của bạn rất cao (>80%), xác định là 'tay vàng'. Nếu hiệu suất rất thấp (<30%), xác định là 'tay gãy'.\n**Quyết định cuối cùng:** Kết hợp cả 4 bước phân tích để đưa ra `predicted_path` cuối cùng. Giải thích mọi sự điều chỉnh trong `meta_reasoning`. Báo cáo kết quả của Bước 4 trong `historical_analysis`. Luôn trả lời bằng định dạng JSON."
             }]
         };
 
@@ -332,12 +333,20 @@
             properties: {
                 predicted_path: {
                     type: "ARRAY",
-                    description: "Một mảng chứa chuỗi 10 dự đoán tiếp theo. Ví dụ: ['P', 'B', 'B', 'P', 'P', 'B', 'P', 'B', 'P', 'P']",
+                    description: "Một mảng chứa chuỗi 10 dự đoán tiếp theo.",
                     items: { "type": "STRING" }
                 },
-                reasoning: { type: "STRING", description: "Giải thích ngắn gọn cho lộ trình dự đoán, dựa trên phân tích cầu Baccarat." },
-                confidence: { type: "NUMBER", description: "Độ tin cậy tổng thể cho dự đoán ĐẦU TIÊN trong chuỗi (từ 50-100)." },
-                meta_reasoning: { type: "STRING", description: "Giải thích về quá trình tự phân tích và tự điều chỉnh. Ví dụ: 'Dự đoán ban đầu là P, nhưng tôi đang theo chu kỳ Đúng-Sai và lần trước đã Đúng, nên lần này tôi đảo ngược thành B'." }
+                reasoning: { type: "STRING", description: "Giải thích cho dự đoán, dựa trên phân tích cầu Baccarat." },
+                confidence: { type: "NUMBER", description: "Độ tin cậy cho dự đoán ĐẦU TIÊN (50-100)." },
+                meta_reasoning: { type: "STRING", description: "Giải thích về quá trình tự phân tích và tự điều chỉnh (Bước 2 & 3)." },
+                historical_analysis: {
+                    type: "OBJECT",
+                    description: "Phân tích dựa trên các ván bài tương tự trong quá khứ (Bước 4).",
+                    properties: {
+                        type: { type: "STRING", "enum": ["golden", "warning"], description: "'golden' cho tay vàng (hiệu suất cao trong quá khứ) hoặc 'warning' cho tay gãy (hiệu suất thấp)." },
+                        reason: { type: "STRING", description: "Lý do, ví dụ: 'Cầu hiện tại giống một đoạn trong quá khứ nơi tôi đã đúng 9/10 lần.'" }
+                    }
+                }
             },
             required: ["predicted_path", "reasoning", "confidence"]
         };
@@ -532,9 +541,48 @@
         function displayPrediction(predictionPath) {
             const analysisResultDiv = document.getElementById('analysisResult');
             const analysisCard = document.getElementById('analysis-card');
+            const historicalAlertDiv = document.getElementById('historicalAnalysisAlert');
+
+            historicalAlertDiv.innerHTML = ''; // Clear previous alert
             analysisCard.classList.remove('card-glow-p', 'card-glow-b');
 
             if (predictionPath && predictionPath.predicted_path) {
+                // Display historical analysis alert
+                if (predictionPath.historical_analysis) {
+                    const analysis = predictionPath.historical_analysis;
+                    let alertHtml = '';
+                    if (analysis.type === 'golden') {
+                        alertHtml = `
+                            <div class="p-4 rounded-lg bg-yellow-900/50 border-2 border-yellow-400">
+                                <div class="flex items-center gap-3">
+                                    <div class="text-yellow-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5zM6.374 1 4.168 8.5H7.5a.5.5 0 0 1 .478.658L5.342 15l6.11-7.5H9a.5.5 0 0 1-.474-.658L10.626 1H6.374z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-yellow-300">⚡️ Tay Vàng Tiềm Năng!</h3>
+                                        <p class="text-sm text-yellow-200">${analysis.reason}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (analysis.type === 'warning') {
+                        alertHtml = `
+                            <div class="p-4 rounded-lg bg-red-900/50 border-2 border-red-500">
+                                <div class="flex items-center gap-3">
+                                    <div class="text-red-400">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-red-400">⚠️ Cảnh Báo Tay Gãy!</h3>
+                                        <p class="text-sm text-red-300">${analysis.reason}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    historicalAlertDiv.innerHTML = alertHtml;
+                }
+
                 const pColor = 'text-blue-400';
                 const bColor = 'text-red-400';
                 const nextMove = predictionPath.predicted_path[0];
