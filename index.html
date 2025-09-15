@@ -323,7 +323,7 @@
         
         const systemInstruction = {
             parts: [{
-                text: "Bạn là một chuyên gia phân tích Baccarat. Nhiệm vụ của bạn là học hỏi quy luật từ dữ liệu lịch sử, sau đó áp dụng kiến thức đó để phân tích chuỗi kết quả hiện tại. Hãy dự đoán một lộ trình 10 ván tiếp theo (predicted_path) có khả năng xảy ra nhất. Luôn trả lời bằng định dạng JSON theo schema đã cho."
+                text: "Bạn là một AI phân tích Baccarat cấp cao với khả năng tự phân tích sâu. Quy trình tư duy của bạn gồm 3 bước:\n1. **Phân tích Cầu Baccarat:** Dựa vào lịch sử ván chơi (`P`, `B`), đưa ra một dự đoán ban đầu và độ tin cậy.\n2. **Phân tích Chuỗi Thắng/Thua:** Nhìn vào lịch sử kết quả (`Đúng`, `Sai`) của chính mình. Nếu bạn đang ở trong một chuỗi thắng dài (ví dụ: 4+ `Đúng`), hãy tăng độ tin cậy. Nếu trong chuỗi thua dài (ví dụ: 3+ `Sai`), hãy cân nhắc đảo ngược dự đoán của Bước 1.\n3. **Phân tích Chu Kỳ (Pattern):** Đây là bước quan trọng nhất. Hãy tìm kiếm các chu kỳ lặp lại trong lịch sử kết quả của mình (ví dụ: `Đúng, Sai, Đúng, Sai...` hoặc `Đúng, Đúng, Sai, Đúng, Đúng, Sai...`). Dựa vào chu kỳ nhận diện được, hãy dự đoán kết quả tiếp theo của **chính bạn** (bạn sẽ `Đúng` hay `Sai`?).\n**Quyết định cuối cùng:** Kết hợp cả 3 bước phân tích để đưa ra `predicted_path` cuối cùng. Nếu Bước 2 hoặc 3 khiến bạn thay đổi dự đoán của Bước 1, hãy giải thích rõ ràng trong `meta_reasoning`. Luôn trả lời bằng định dạng JSON."
             }]
         };
 
@@ -335,20 +335,22 @@
                     description: "Một mảng chứa chuỗi 10 dự đoán tiếp theo. Ví dụ: ['P', 'B', 'B', 'P', 'P', 'B', 'P', 'B', 'P', 'P']",
                     items: { "type": "STRING" }
                 },
-                reasoning: { type: "STRING", description: "Giải thích ngắn gọn cho toàn bộ lộ trình dự đoán." },
-                confidence: { type: "NUMBER", description: "Độ tin cậy tổng thể cho dự đoán ĐẦU TIÊN trong chuỗi (từ 50-100)." }
+                reasoning: { type: "STRING", description: "Giải thích ngắn gọn cho lộ trình dự đoán, dựa trên phân tích cầu Baccarat." },
+                confidence: { type: "NUMBER", description: "Độ tin cậy tổng thể cho dự đoán ĐẦU TIÊN trong chuỗi (từ 50-100)." },
+                meta_reasoning: { type: "STRING", description: "Giải thích về quá trình tự phân tích và tự điều chỉnh. Ví dụ: 'Dự đoán ban đầu là P, nhưng tôi đang theo chu kỳ Đúng-Sai và lần trước đã Đúng, nên lần này tôi đảo ngược thành B'." }
             },
             required: ["predicted_path", "reasoning", "confidence"]
         };
 
-        async function callGeminiAPI(currentHistory, historicalContext, apiKey, model) {
+        async function callGeminiAPI(currentHistory, historicalContext, performanceSummary, apiKey, model) {
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             
+            const performanceText = performanceSummary ? ` Lịch sử kết quả dự đoán gần đây của tôi (mới nhất -> cũ nhất): [${performanceSummary}].` : '';
             let userPrompt;
             if (historicalContext && historicalContext.length > 0) {
-                 userPrompt = `Dữ liệu lịch sử: [${historicalContext.join(', ')}]. Phân tích ván hiện tại: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
+                 userPrompt = `Dữ liệu lịch sử: [${historicalContext.join(', ')}].${performanceText} Phân tích ván hiện tại: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
             } else {
-                 userPrompt = `Phân tích ván Baccarat: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
+                 userPrompt = `${performanceText} Phân tích ván Baccarat: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
             }
             
             const payload = {
@@ -416,7 +418,7 @@
             return { error: "AI đang rất bận, vui lòng thử lại sau giây lát (Lỗi 429)." };
         }
         
-        async function getAIPathPrediction(currentHistory, allSessions, currentSessionId) {
+        async function getAIPathPrediction(currentHistory, allSessions, currentSessionId, overridePredictions = null) {
             const apiKey = document.getElementById('apiKeyInput').value;
             if (!apiKey) return { error: 'Vui lòng nhập API Key.' };
             
@@ -431,12 +433,22 @@
                 .filter(id => id !== currentSessionId)
                 .flatMap(id => allSessions[id].history);
 
+            const predictions = overridePredictions || state.sessions[state.currentSessionId]?.predictions || [];
+            let performanceSummary = null;
+
+            if (predictions.length > 3) {
+                const recentPerformance = predictions
+                    .slice(-15) // Look at the last 15 results for patterns
+                    .map(p => p.predicted === p.actual ? 'Đúng' : 'Sai');
+                performanceSummary = recentPerformance.join(', ');
+            }
+
             const MAX_HISTORICAL_CONTEXT = 500;
             const limitedHistoricalContext = historicalContext.slice(-MAX_HISTORICAL_CONTEXT);
             const MAX_CURRENT_HISTORY = 75;
             const limitedCurrentHistory = currentHistory.slice(-MAX_CURRENT_HISTORY);
 
-            return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, apiKey, model);
+            return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, performanceSummary, apiKey, model);
         }
 
         // --- GLOBAL STATE ---
@@ -532,6 +544,21 @@
                     return `<div class="road-item path-item ${color}">${move}</div>`;
                 }).join('');
 
+                let metaHtml = '';
+                if (predictionPath.meta_reasoning) {
+                    metaHtml = `
+                        <div class="mt-3 bg-gray-900/70 p-3 rounded-lg border-l-4 border-cyan-400">
+                            <p class="flex items-center gap-2 text-sm font-semibold text-cyan-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                  <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5z"/>
+                                </svg>
+                                AI Tự Phân Tích
+                            </p>
+                            <p class="text-sm text-gray-300 italic mt-1 pl-2">${predictionPath.meta_reasoning}</p>
+                        </div>
+                    `;
+                }
+
                  analysisResultDiv.innerHTML = `
                     <div class="text-center bg-gray-900 py-4 rounded-lg border-2 ${nextMove === 'P' ? 'border-blue-500' : 'border-red-500'}">
                         <p class="text-4xl font-bold ${nextMove === 'P' ? pColor : bColor}">${nextMove === 'P' ? '👤 PLAYER' : '🏦 BANKER'}</p>
@@ -544,6 +571,7 @@
                             ${remainingPath}
                         </div>
                     </div>
+                    ${metaHtml}
                 `;
                 analysisCard.classList.add(nextMove === 'P' ? 'card-glow-p' : 'card-glow-b');
             } else {
@@ -1032,7 +1060,7 @@
 
                     analysisResultDiv.innerHTML = `<div class="flex flex-col items-center justify-center h-full"><div class="spinner spinner-lg"></div><p class="text-gray-400 mt-4">Đang mô phỏng ván ${i + 1} / ${currentHistory.length}</p></div>`;
                     
-                    const prediction = await getAIPathPrediction(historyForPrediction, state.sessions, state.currentSessionId);
+                    const prediction = await getAIPathPrediction(historyForPrediction, state.sessions, state.currentSessionId, simulationPredictions);
                     
                     if (prediction.error) throw new Error(prediction.error);
                     
