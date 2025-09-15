@@ -324,7 +324,7 @@
         
         const systemInstruction = {
             parts: [{
-                text: "Bạn là một AI phân tích Baccarat cấp cao với khả năng tự phân tích sâu. Quy trình tư duy của bạn gồm 4 bước:\n1. **Phân tích Cầu Baccarat:** Dựa vào lịch sử ván chơi (`P`, `B`), đưa ra một dự đoán ban đầu và độ tin cậy.\n2. **Phân tích Chuỗi Thắng/Thua:** Nhìn vào lịch sử kết quả (`Đúng`, `Sai`) của chính mình. Nếu bạn đang ở trong một chuỗi thắng dài, hãy tăng độ tin cậy. Nếu trong chuỗi thua dài, hãy cân nhắc đảo ngược dự đoán.\n3. **Phân tích Chu Kỳ (Pattern):** Tìm kiếm các chu kỳ lặp lại trong lịch sử kết quả của mình (ví dụ: `Đúng, Sai, Đúng, Sai...`). Dựa vào chu kỳ, dự đoán kết quả tiếp theo của chính bạn.\n4. **Phân tích Lịch sử (Historical Precedent):** Rà soát toàn bộ lịch sử ván chơi. Tìm những đoạn cầu (khoảng 10-15 ván) gần giống nhất với hiện tại. Nếu ở đoạn đó hiệu suất của bạn rất cao (>80%), xác định là 'tay vàng'. Nếu hiệu suất rất thấp (<30%), xác định là 'tay gãy'.\n**Quyết định cuối cùng:** Kết hợp cả 4 bước phân tích để đưa ra `predicted_path` cuối cùng. Giải thích mọi sự điều chỉnh trong `meta_reasoning`. Báo cáo kết quả của Bước 4 trong `historical_analysis`. Luôn trả lời bằng định dạng JSON."
+                text: "Bạn là một AI phân tích Baccarat cấp cao với khả năng tự phân tích sâu. Quy trình tư duy của bạn gồm 6 bước:\n1. **Phân tích Cầu Baccarat:** Dựa vào lịch sử ván chơi (`P`, `B`), đưa ra một dự đoán ban đầu và độ tin cậy.\n2. **Phân tích Chuỗi Thắng/Thua:** Nhìn vào lịch sử kết quả (`Đúng`, `Sai`) của chính mình. Nếu bạn đang ở trong một chuỗi thắng dài, hãy tăng độ tin cậy. Nếu trong chuỗi thua dài, hãy cân nhắc đảo ngược dự đoán.\n3. **Phân tích Chu Kỳ (Pattern):** Tìm kiếm các chu kỳ lặp lại trong lịch sử kết quả của mình (ví dụ: `Đúng, Sai, Đúng, Sai...`). Dựa vào chu kỳ, dự đoán kết quả tiếp theo của chính bạn.\n4. **Phân tích Lịch sử (Historical Precedent):** Rà soát toàn bộ lịch sử ván chơi. Tìm những đoạn cầu (khoảng 10-15 ván) gần giống nhất với hiện tại. Nếu ở đoạn đó hiệu suất của bạn rất cao (>80%), xác định là 'tay vàng'. Nếu hiệu suất rất thấp (<30%), xác định là 'tay gãy'.\n5. **Phân tích Chiều dài Cầu:** Nhận diện cầu bệt hiện tại. Rà soát lịch sử để tìm chiều dài của các cầu bệt cùng loại trước đó. Dựa vào quy luật chiều dài, dự đoán xem cầu hiện tại có khả năng tiếp tục hay gãy.\n6. **Phân tích Bất Đối Xứng:** Tìm các 'cột bản lề' trong Big Road. Dựa vào quy luật đối xứng và bất đối xứng giữa các cột xung quanh bản lề, đưa ra nhận định.\n**Quyết định cuối cùng:** Kết hợp cả 6 bước phân tích để đưa ra `predicted_path` cuối cùng. Giải thích mọi sự điều chỉnh trong `meta_reasoning`. Báo cáo kết quả của các bước phân tích cao cấp trong các trường tương ứng. Luôn trả lời bằng định dạng JSON."
             }]
         };
 
@@ -343,23 +343,41 @@
                     type: "OBJECT",
                     description: "Phân tích dựa trên các ván bài tương tự trong quá khứ (Bước 4).",
                     properties: {
-                        type: { type: "STRING", "enum": ["golden", "warning"], description: "'golden' cho tay vàng (hiệu suất cao trong quá khứ) hoặc 'warning' cho tay gãy (hiệu suất thấp)." },
+                        type: { type: "STRING", "enum": ["golden", "warning"], description: "'golden' cho tay vàng hoặc 'warning' cho tay gãy." },
                         reason: { type: "STRING", description: "Lý do, ví dụ: 'Cầu hiện tại giống một đoạn trong quá khứ nơi tôi đã đúng 9/10 lần.'" }
+                    }
+                },
+                streak_length_analysis: {
+                     type: "OBJECT",
+                     description: "Phân tích dựa trên chiều dài của các cầu bệt tương tự trong quá khứ (Bước 5).",
+                     properties: {
+                         verdict: { type: "STRING", "enum": ["continue", "break", "inconclusive"], description: "'continue' nếu cầu có khả năng tiếp tục, 'break' nếu có khả năng gãy." },
+                         reason: { type: "STRING", description: "Lý do, ví dụ: 'Cầu P hiện tại dài 4 tay, tương tự 2 cầu P trước đó đã gãy ở tay thứ 4.'" }
+                     }
+                },
+                asymmetry_analysis: {
+                    type: "OBJECT",
+                    description: "Phân tích dựa trên cấu trúc cột bất đối xứng trong Big Road (Bước 6).",
+                    properties: {
+                        active: { type: "BOOLEAN", description: "True nếu một quy luật bất đối xứng đang hoạt động." },
+                        reason: { type: "STRING", description: "Lý do, ví dụ: 'Phát hiện cột bản lề. Cột bên phải đang đi ngược lại với cột bên trái.'" }
                     }
                 }
             },
             required: ["predicted_path", "reasoning", "confidence"]
         };
 
-        async function callGeminiAPI(currentHistory, historicalContext, performanceSummary, apiKey, model) {
+        async function callGeminiAPI(currentHistory, historicalContext, performanceSummary, bigRoadColumns, apiKey, model) {
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             
             const performanceText = performanceSummary ? ` Lịch sử kết quả dự đoán gần đây của tôi (mới nhất -> cũ nhất): [${performanceSummary}].` : '';
+            const bigRoadText = bigRoadColumns ? ` Cấu trúc cột Big Road hiện tại: ${JSON.stringify(bigRoadColumns)}.` : '';
+
             let userPrompt;
             if (historicalContext && historicalContext.length > 0) {
-                 userPrompt = `Dữ liệu lịch sử: [${historicalContext.join(', ')}].${performanceText} Phân tích ván hiện tại: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
+                 userPrompt = `Dữ liệu lịch sử: [${historicalContext.join(', ')}].${performanceText}${bigRoadText} Phân tích ván hiện tại: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
             } else {
-                 userPrompt = `${performanceText} Phân tích ván Baccarat: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
+                 userPrompt = `${performanceText}${bigRoadText} Phân tích ván Baccarat: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
             }
             
             const payload = {
@@ -451,13 +469,15 @@
                     .map(p => p.predicted === p.actual ? 'Đúng' : 'Sai');
                 performanceSummary = recentPerformance.join(', ');
             }
+            
+            const bigRoadColumns = getBigRoadColumns(currentHistory);
 
             const MAX_HISTORICAL_CONTEXT = 500;
             const limitedHistoricalContext = historicalContext.slice(-MAX_HISTORICAL_CONTEXT);
             const MAX_CURRENT_HISTORY = 75;
             const limitedCurrentHistory = currentHistory.slice(-MAX_CURRENT_HISTORY);
 
-            return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, performanceSummary, apiKey, model);
+            return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, performanceSummary, bigRoadColumns, apiKey, model);
         }
 
         // --- GLOBAL STATE ---
@@ -470,26 +490,37 @@
         };
 
         // --- UI UPDATE FUNCTIONS ---
+        function getBigRoadColumns(history) {
+            if (!history || history.length === 0) return [];
+            const columns = [];
+            let currentCol = [history[0]];
+            for (let i = 1; i < history.length; i++) {
+                if (history[i] === history[i - 1]) {
+                    currentCol.push(history[i]);
+                } else {
+                    columns.push(currentCol);
+                    currentCol = [history[i]];
+                }
+            }
+            columns.push(currentCol);
+            return columns;
+        }
+
         function updateBigRoadUI() {
             const history = state.sessions[state.currentSessionId]?.history || [];
             const roadDiv = document.getElementById('bigRoadDisplay');
             document.getElementById('totalGames').textContent = history.length;
-            if (history.length === 0) {
-                roadDiv.innerHTML = '<p class="text-gray-500 p-4">Chưa có kết quả...</p>';
-                roadDiv.style.display = 'block';
-                return;
+            
+            roadDiv.innerHTML = '';
+            const columns = getBigRoadColumns(history);
+
+            if (columns.length === 0) {
+                 roadDiv.innerHTML = '<p class="text-gray-500 p-4">Chưa có kết quả...</p>';
+                 roadDiv.style.display = 'block';
+                 return;
             }
             roadDiv.style.display = 'grid';
-            roadDiv.innerHTML = '';
-            const columns = [];
-            if (history.length > 0) {
-                let currentCol = [history[0]];
-                for (let i = 1; i < history.length; i++) {
-                    if (history[i] === history[i - 1]) currentCol.push(history[i]);
-                    else { columns.push(currentCol); currentCol = [history[i]]; }
-                }
-                columns.push(currentCol);
-            }
+
             columns.forEach(colData => {
                 const colDiv = document.createElement('div');
                 colDiv.className = 'road-col';
@@ -591,10 +622,11 @@
                     const color = move === 'P' ? 'bg-blue-600' : 'bg-red-600';
                     return `<div class="road-item path-item ${color}">${move}</div>`;
                 }).join('');
-
-                let metaHtml = '';
+                
+                let extraAnalysesHtml = '';
+                
                 if (predictionPath.meta_reasoning) {
-                    metaHtml = `
+                    extraAnalysesHtml += `
                         <div class="mt-3 bg-gray-900/70 p-3 rounded-lg border-l-4 border-cyan-400">
                             <p class="flex items-center gap-2 text-sm font-semibold text-cyan-300">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -606,6 +638,36 @@
                         </div>
                     `;
                 }
+
+                if (predictionPath.streak_length_analysis) {
+                    const streak = predictionPath.streak_length_analysis;
+                    const icon = streak.verdict === 'break' ? `...` : (streak.verdict === 'continue' ? `...` : `...`);
+                    const borderColor = streak.verdict === 'break' ? 'border-red-500' : (streak.verdict === 'continue' ? 'border-green-500' : 'border-gray-500');
+                    const textColor = streak.verdict === 'break' ? 'text-red-400' : (streak.verdict === 'continue' ? 'text-green-400' : 'text-gray-400');
+                    const title = streak.verdict === 'break' ? 'Dự Báo Gãy Cầu!' : (streak.verdict === 'continue' ? 'Dự Báo Cầu Bệt' : 'Phân Tích Chiều Dài Cầu');
+                    
+                     extraAnalysesHtml += `
+                        <div class="mt-3 bg-gray-900/70 p-3 rounded-lg border-l-4 ${borderColor}">
+                            <p class="flex items-center gap-2 text-sm font-semibold ${textColor}">
+                                📏 ${title}
+                            </p>
+                            <p class="text-sm text-gray-300 italic mt-1 pl-2">${streak.reason}</p>
+                        </div>
+                    `;
+                }
+                
+                if (predictionPath.asymmetry_analysis && predictionPath.asymmetry_analysis.active) {
+                    const asymmetry = predictionPath.asymmetry_analysis;
+                     extraAnalysesHtml += `
+                        <div class="mt-3 bg-gray-900/70 p-3 rounded-lg border-l-4 border-purple-400">
+                            <p class="flex items-center gap-2 text-sm font-semibold text-purple-300">
+                                📐 Phân Tích Bất Đối Xứng
+                            </p>
+                            <p class="text-sm text-gray-300 italic mt-1 pl-2">${asymmetry.reason}</p>
+                        </div>
+                    `;
+                }
+
 
                  analysisResultDiv.innerHTML = `
                     <div class="text-center bg-gray-900 py-4 rounded-lg border-2 ${nextMove === 'P' ? 'border-blue-500' : 'border-red-500'}">
@@ -619,7 +681,7 @@
                             ${remainingPath}
                         </div>
                     </div>
-                    ${metaHtml}
+                    ${extraAnalysesHtml}
                 `;
                 analysisCard.classList.add(nextMove === 'P' ? 'card-glow-p' : 'card-glow-b');
             } else {
@@ -1138,14 +1200,14 @@
         // --- MODEL SELECTION ---
         function saveModelSelection() {
             const model = document.getElementById('modelSelector').value;
-            localStorage.setItem('geminiModel_v7', model);
+            localStorage.setItem('geminiApiKey_v7', model);
             if (!state.isCalculating && state.currentSessionId) {
                 preCalculateNextPath();
             }
         }
         
         function loadModelSelection() {
-            const savedModel = localStorage.getItem('geminiModel_v7');
+            const savedModel = localStorage.getItem('geminiApiKey_v7');
             const modelSelector = document.getElementById('modelSelector');
             if (savedModel) {
                 modelSelector.value = savedModel;
