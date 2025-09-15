@@ -106,11 +106,12 @@
             border-radius: 2px 2px 0 0;
             transition: all 0.3s ease;
         }
-        .streak-win { height: 100%; background-color: #3b82f6; }
+        /* UPDATED: Changed from blue to green */
+        .streak-win { height: 100%; background-color: #22c55e; } /* green-500 */
         .streak-loss { height: 30%; background-color: #ef4444; }
 
         /* --- NEW STYLES FROM ASYMMETRY ANALYZER --- */
-         .bar-chart-container {
+        .bar-chart-container {
             display: flex;
             gap: 2px;
             height: 40px;
@@ -131,9 +132,10 @@
             border-radius: 2px;
             transition: all 0.3s ease;
         }
-        .bar.win { height: 100%; background-color: #3b82f6; }
+        /* UPDATED: Changed from blue to green */
+        .bar.win { height: 100%; background-color: #22c55e; } /* green-500 */
         .bar.loss { height: 40%; background-color: #ef4444; }
-       
+        
         .method-highlight-base {
             transition: all 0.3s ease;
             border: 2px solid transparent;
@@ -369,7 +371,7 @@
                         if (candidate && candidate.content?.parts?.[0]?.text) {
                             const parsedJson = JSON.parse(candidate.content.parts[0].text);
                             if (Array.isArray(parsedJson.predicted_path) && parsedJson.predicted_path.length > 0 && parsedJson.predicted_path.every(item => ['P', 'B'].includes(item))) {
-                               return parsedJson; // Successful response
+                                return parsedJson; // Successful response
                             }
                         }
                         throw new Error("Phản hồi từ AI không hợp lệ.");
@@ -423,36 +425,11 @@
             return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, apiKey, model);
         }
 
-        // --- ACCURACY TRACKER ---
-        class AccuracyTracker {
-            constructor() { this.predictions = []; }
-            record(prediction, actualResult) {
-                if (prediction && prediction.prediction) {
-                    this.predictions.push({
-                        predicted: prediction.prediction,
-                        actual: actualResult,
-                        confidence: prediction.confidence
-                    });
-                }
-            }
-            getStats() {
-                if (this.predictions.length === 0) return { rate: 0, correct: 0, total: 0 };
-                const correct = this.predictions.filter(p => p.predicted === p.actual).length;
-                return {
-                    rate: (correct / this.predictions.length) * 100,
-                    correct,
-                    total: this.predictions.length
-                };
-            }
-            reset() { this.predictions = []; }
-        }
-
         // --- GLOBAL STATE ---
         let state = {
             currentSessionId: null,
-            sessions: {},
-            accuracyTracker: new AccuracyTracker(),
-            predictedPath: null, 
+            sessions: {}, 
+            predictedPath: null,
             isCalculating: false,
             isSimulating: false,
         };
@@ -494,7 +471,7 @@
 
         function updatePredictionStreakChart() {
             const chartDiv = document.getElementById('predictionStreakChart');
-            const predictions = state.accuracyTracker.predictions;
+            const predictions = state.sessions[state.currentSessionId]?.predictions || [];
             
             if (predictions.length === 0) {
                 chartDiv.innerHTML = `<p class="w-full text-center text-gray-500 text-sm">Chưa có phán đoán nào.</p>`;
@@ -515,10 +492,14 @@
         }
 
         function updateAccuracyUI() {
-            const stats = state.accuracyTracker.getStats();
-            document.getElementById('accuracyRate').textContent = `${stats.rate.toFixed(1)}%`;
-            document.getElementById('correctPredictions').textContent = stats.correct;
-            document.getElementById('totalPredictions').textContent = stats.total;
+            const predictions = state.sessions[state.currentSessionId]?.predictions || [];
+            const total = predictions.length;
+            const correct = predictions.filter(p => p.predicted === p.actual).length;
+            const rate = total > 0 ? (correct / total) * 100 : 0;
+
+            document.getElementById('accuracyRate').textContent = `${rate.toFixed(1)}%`;
+            document.getElementById('correctPredictions').textContent = correct;
+            document.getElementById('totalPredictions').textContent = total;
             updatePredictionStreakChart();
         }
 
@@ -577,6 +558,7 @@
             const currentHistory = state.sessions[state.currentSessionId]?.history || [];
             const isInitialCalculation = currentHistory.length < 5;
 
+            // Show a loading state in the prediction box.
             if (isInitialCalculation) {
                 const analysisResultDiv = document.getElementById('analysisResult');
                 analysisResultDiv.innerHTML = `<div class="flex flex-col items-center justify-center h-full"><div class="spinner spinner-lg"></div><p class="text-gray-400 mt-4">AI đang phân tích lần đầu...</p></div>`;
@@ -588,23 +570,21 @@
             state.predictedPath = await getAIPathPrediction(currentHistory, state.sessions, state.currentSessionId);
             state.isCalculating = false;
 
-            if(isInitialCalculation && state.predictedPath.error) {
-                 displayPrediction(state.predictedPath);
-            } else if (isInitialCalculation) {
-                const analysisResultDiv = document.getElementById('analysisResult');
-                analysisResultDiv.innerHTML = `<p class="text-gray-400 text-center py-8">Lộ trình đã sẵn sàng. Vui lòng nhập kết quả ván đầu tiên.</p>`
-            }
-            
+            // Update UI with the new prediction.
+            displayPrediction(state.predictedPath);
             if (state.predictedPath.predicted_path) {
-                 updateAIStatusUI('ready');
+                updateAIStatusUI('ready');
+                // This second call adds the "Hiện tại" highlight.
+                updateConfidenceStatsUI();
             }
         }
         
         function updateConfidenceStatsUI() {
             const container = document.getElementById('confidenceStatsTable');
             const recommendationDiv = document.getElementById('confidenceRecommendation');
+            const predictions = state.sessions[state.currentSessionId]?.predictions || [];
             
-            if (state.accuracyTracker.predictions.length === 0) {
+            if (predictions.length === 0) {
                 container.innerHTML = '<p class="text-gray-500 text-center py-4">Chưa có dữ liệu thống kê.</p>';
                 recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm ra khoảng vàng.</p>`;
                 return;
@@ -616,7 +596,7 @@
                 {min: 90, max: 101, name: '90-100%'}
             ].map(r => ({...r, predictions: []}));
 
-            state.accuracyTracker.predictions.forEach(p => {
+            predictions.forEach(p => {
                 const range = ranges.find(r => p.confidence >= r.min && p.confidence < r.max);
                 if (range) {
                     range.predictions.push(p);
@@ -625,7 +605,7 @@
 
             // Determine current and previous ranges for highlighting
             const currentConfidence = state.predictedPath?.confidence;
-            const previousPrediction = state.accuracyTracker.predictions.at(-1);
+            const previousPrediction = predictions.at(-1);
             const previousConfidence = previousPrediction?.confidence;
 
             let bestRange = null;
@@ -703,47 +683,37 @@
 
 
         // --- EVENT HANDLERS & ACTIONS ---
-        function addResult(result) {
-            if (!state.currentSessionId || state.isSimulating) return;
-            
-            if (state.predictedPath && state.predictedPath.predicted_path) {
-                const currentPrediction = {
-                    prediction: state.predictedPath.predicted_path[0],
-                    confidence: state.predictedPath.confidence
-                };
-                state.accuracyTracker.record(currentPrediction, result);
-            }
-            
-            state.sessions[state.currentSessionId].history.push(result);
-            saveSessions();
-            
-            displayPrediction(state.predictedPath);
+        async function addResult(result) {
+            if (!state.currentSessionId || state.isSimulating || state.isCalculating) return;
 
-            const pathIsCorrect = state.predictedPath && state.predictedPath.predicted_path && state.predictedPath.predicted_path[0] === result;
-            if (pathIsCorrect) {
-                state.predictedPath.predicted_path.shift();
-                if (state.predictedPath.predicted_path.length === 0) {
-                     state.predictedPath = null;
-                     preCalculateNextPath();
-                } else {
-                     updateAIStatusUI('ready');
-                }
-            } else {
-                state.predictedPath = null;
-                preCalculateNextPath();
+            if (state.predictedPath && state.predictedPath.predicted_path) {
+                state.sessions[state.currentSessionId].predictions.push({
+                    predicted: state.predictedPath.predicted_path[0],
+                    actual: result,
+                    confidence: state.predictedPath.confidence
+                });
             }
+
+            state.sessions[state.currentSessionId].history.push(result);
+            state.predictedPath = null;
+            saveSessions(); 
 
             updateBigRoadUI();
             updateAccuracyUI();
-            updateConfidenceStatsUI();
+            updateConfidenceStatsUI(); 
+            displayPrediction(null);
+
+            // Use await to ensure we don't allow another click until the next prediction is ready.
+            await preCalculateNextPath();
         }
 
         function undoLast() {
             if (!state.currentSessionId || state.sessions[state.currentSessionId].history.length === 0 || state.isSimulating) return;
-            state.sessions[state.currentSessionId].history.pop();
-            state.accuracyTracker.predictions.pop();
+            const session = state.sessions[state.currentSessionId];
+            session.history.pop();
+            if (session.predictions) session.predictions.pop();
             saveSessions();
-            
+
             updateBigRoadUI();
             updateAccuracyUI();
             updateConfidenceStatsUI();
@@ -755,8 +725,9 @@
         function clearCurrentSessionHistory() {
             if (!state.currentSessionId || state.isSimulating) return;
             if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử của phiên này không?')) {
-                state.sessions[state.currentSessionId].history = [];
-                state.accuracyTracker.reset();
+                const session = state.sessions[state.currentSessionId];
+                session.history = [];
+                session.predictions = [];
                 state.predictedPath = null;
                 saveSessions();
                 updateBigRoadUI();
@@ -855,7 +826,11 @@
         function createNewSession() {
             const newId = `session-${Date.now()}`;
             state.currentSessionId = newId;
-            state.sessions[newId] = { name: `Phiên ${new Date().toLocaleString('vi-VN')}`, history: [] };
+            state.sessions[newId] = { 
+                name: `Phiên ${new Date().toLocaleString('vi-VN')}`, 
+                history: [],
+                predictions: [] // Initialize predictions array
+            };
             loadSession(newId);
         }
 
@@ -875,8 +850,11 @@
         function loadSession(sessionId) {
             if (state.sessions[sessionId]) {
                 state.currentSessionId = sessionId;
-                state.accuracyTracker.reset();
                 state.predictedPath = null;
+                // Backwards compatibility: if loading an old session without predictions, create an empty array.
+                if (!state.sessions[sessionId].predictions) {
+                    state.sessions[sessionId].predictions = [];
+                }
                 saveSessions();
 
                 updateSessionSelector();
@@ -915,6 +893,10 @@
                     for(const key in importedSessions) {
                         if(!importedSessions[key].name || !Array.isArray(importedSessions[key].history)) {
                              throw new Error("Invalid session data");
+                        }
+                        // Backwards compatibility for importing old data
+                        if (!importedSessions[key].predictions) {
+                            importedSessions[key].predictions = [];
                         }
                     }
                     if (confirm('Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc muốn tiếp tục?')) {
@@ -984,7 +966,7 @@
             state.isSimulating = true;
             disableMainControls();
             const analysisResultDiv = document.getElementById('analysisResult');
-            const simulationTracker = new AccuracyTracker(); 
+            const simulationPredictions = [];
 
             try {
                 for (let i = 5; i < currentHistory.length; i++) {
@@ -998,13 +980,17 @@
                     if (prediction.error) throw new Error(prediction.error);
                     
                     if (prediction && prediction.predicted_path) {
-                         simulationTracker.record({
-                             prediction: prediction.predicted_path[0],
+                         simulationPredictions.push({
+                             predicted: prediction.predicted_path[0],
+                             actual: actualResult,
                              confidence: prediction.confidence
-                         }, actualResult);
+                         });
                     }
                 }
-                showSimulationResults(simulationTracker.getStats(), currentHistory.length);
+                const total = simulationPredictions.length;
+                const correct = simulationPredictions.filter(p => p.predicted === p.actual).length;
+                const rate = total > 0 ? (correct / total) * 100 : 0;
+                showSimulationResults({ total, correct, rate }, currentHistory.length);
 
             } catch (error) {
                 console.error("Simulation failed:", error);
