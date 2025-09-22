@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Phân Tích Cầu (AI Gemini)</title>
+    <title>Hệ Thống Phân Tích Cầu (Thống Kê Nâng Cao)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -16,40 +16,16 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .btn:hover:not(:disabled) {
+        .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        .btn:active:not(:disabled) {
+        .btn:active {
             transform: translateY(1px);
         }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .card-glow-p {
-            box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
-        }
-        .card-glow-b {
-            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
-        }
-        .spinner {
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-left-color: #f59e0b; /* amber-500 */
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            animation: spin 1s linear infinite;
-        }
-        .spinner-lg {
-            width: 40px;
-            height: 40px;
-            border-width: 4px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        /* Big Road Styles */
+        .card-glow-p { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .card-glow-b { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+        .card-glow-certain { box-shadow: 0 0 25px rgba(250, 204, 21, 0.7); }
         #bigRoadDisplay {
             display: grid;
             grid-auto-flow: column;
@@ -58,7 +34,7 @@
             overflow-x: auto;
             padding: 8px;
             scrollbar-width: thin;
-            scrollbar-color: #4b5563 #1f2937;
+            scrollbar-color: #4B5563 #1F2937;
         }
         .road-col {
             display: grid;
@@ -66,1181 +42,764 @@
             gap: 2px;
         }
         .road-item {
-            width: 2.5rem; /* 40px */
-            height: 2.5rem; /* 40px */
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.125rem; /* 18px */
-            color: white;
+            width: 2.5rem; height: 2.5rem; border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.125rem; color: white;
             animation: fadeIn 0.5s ease;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
         }
-        .path-item {
-            width: 2rem;
-            height: 2rem;
-            font-size: 1rem;
+        /* Modal and Toast styles */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50; animation: fadeIn 0.3s ease;
         }
-        
-        /* --- Prediction Streak Chart --- */
-        #predictionStreakChart {
-            display: flex;
-            gap: 2px;
-            height: 50px;
-            align-items: flex-end;
-            padding: 8px;
+        .modal-content {
             background-color: #1f2937; /* gray-800 */
-            border-radius: 0.5rem;
-            overflow-x: auto;
-            scrollbar-width: none; 
+            padding: 1.5rem; border-radius: 1rem;
+            width: 90%; max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+            border: 1px solid #374151; /* gray-700 */
         }
-        #predictionStreakChart::-webkit-scrollbar { display: none; }
-        .streak-bar {
-            flex: 1 0 5px; 
-            min-width: 5px;
-            border-radius: 2px 2px 0 0;
-            transition: all 0.3s ease;
+        .toast-notification {
+            position: fixed; top: 20px; right: 20px;
+            background-color: #1f2937; color: white;
+            padding: 1rem 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            z-index: 100; animation: slideDown 0.5s ease;
+            border-left: 4px solid;
         }
-        .streak-win { height: 100%; background-color: #22c55e; } /* green-500 */
-        .streak-loss { height: 30%; background-color: #ef4444; }
-
-        /* --- NEW STYLES FROM ASYMMETRY ANALYZER --- */
-        .bar-chart-container {
-            display: flex;
-            gap: 2px;
-            height: 40px;
-            align-items: flex-end;
-            background-color: rgba(0,0,0,0.2);
-            border-radius: 4px;
-            padding: 4px;
-            overflow-x: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #4b5563 #1f2937;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .bar-chart-container::-webkit-scrollbar { height: 4px; }
-        .bar-chart-container::-webkit-scrollbar-track { background: #1f2937; }
-        .bar-chart-container::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 2px; }
-        .bar {
-            width: 6px;
-            flex-shrink: 0;
-            border-radius: 2px;
-            transition: all 0.3s ease;
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-100%); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .bar.win { height: 100%; background-color: #22c55e; } /* green-500 */
-        .bar.loss { height: 40%; background-color: #ef4444; }
-        
-        .method-highlight-base {
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-        .current-method-highlight {
-            border-color: #facc15; /* yellow-400 */
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
-            background-color: rgba(74, 58, 20, 0.3);
-        }
-        .previous-method-highlight {
-            border-color: #9ca3af; /* gray-400 */
-            background-color: rgba(107, 114, 128, 0.15);
-        }
-
-        /* --- RHYTHM ANALYZER STYLES --- */
-        .rhythm-card { transition: all 0.3s ease; }
-        .status-good { border: 2px solid #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
-        .status-medium { border: 2px solid #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
-        .status-bad { border: 2px solid #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
-
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div id="modal-container"></div>
+<div id="toast-container"></div>
 
-        <!-- Left Column: Input & History -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Header -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg text-center">
-                <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-400">Hệ Thống Phân Tích Cầu AI</h1>
-                <p class="text-gray-400 mt-2">AI dự đoán lộ trình - Sẵn sàng cho thực chiến</p>
-            </div>
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <!-- API Key Management -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-orange-300">🔑 Cài Đặt AI</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label for="apiKeyInput" class="block text-sm font-medium text-gray-300 mb-1">API Key (Lấy từ <a href="https://ai.google.dev/" target="_blank" class="text-blue-400 hover:underline font-semibold">Google AI Studio</a>)</label>
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <input type="password" id="apiKeyInput" placeholder="Dán API Key của bạn vào đây" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none">
-                            <button onclick="saveApiKey()" class="btn main-control w-full sm:w-auto bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-lg whitespace-nowrap">Lưu Key</button>
-                            <button onclick="testApiKey()" class="btn main-control w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg whitespace-nowrap">Chẩn Đoán</button>
-                        </div>
-                        <p id="apiKeyMessage" class="text-sm mt-2 font-semibold"></p>
-                    </div>
-                    <div>
-                        <label for="modelSelector" class="block text-sm font-medium text-gray-300 mb-1">Chọn Mô Hình AI</label>
-                        <select id="modelSelector" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none main-control">
-                            <option value="gemini-1.5-flash-latest">Flash (Nhanh, Hiệu quả)</option>
-                            <option value="gemini-1.5-pro-latest">Pro (Thông minh, Chính xác cao)</option>
-                        </select>
-                    </div>
+    <!-- Left Column: Input & History -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Header -->
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg text-center">
+            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-400">Hệ Thống Phân Tích Hình Cầu</h1>
+            <p class="text-gray-400 mt-2">Ghi nhớ - Đối chiếu - Phán đoán</p>
+        </div>
+
+        <!-- Session Management -->
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 text-blue-300">📁 Quản Lý Phiên</h2>
+            <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                <select id="sessionSelector" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <button onclick="createNewSession()" class="btn w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg">➕ Mới</button>
+                    <button onclick="renameSession()" class="btn w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg">✏️ Đổi Tên</button>
+                    <button onclick="deleteSelectedSession()" class="btn w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa</button>
                 </div>
             </div>
-
-            <!-- Session Management -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-blue-300">📁 Quản Lý Phiên</h2>
-                <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                    <select id="sessionSelector" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none main-control"></select>
-                    <div class="flex gap-4">
-                        <button onclick="createNewSession()" class="btn main-control w-full sm:w-auto bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg">➕ Phiên Mới</button>
-                        <button onclick="deleteSelectedSession()" class="btn main-control w-full sm:w-auto bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa Phiên</button>
-                    </div>
-                </div>
-                 <!-- Import/Export -->
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button onclick="exportData()" class="btn main-control w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-lg">📤 Xuất Dữ Liệu</button>
-                    <button onclick="document.getElementById('fileInput').click()" class="btn main-control w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded-lg">📥 Nhập Dữ Liệu</button>
-                    <input type="file" id="fileInput" class="hidden main-control" accept=".json" onchange="importData(event)">
-                </div>
-                 <div class="mt-4">
-                    <button onclick="runSimulation()" class="btn main-control w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-4 rounded-lg">🚀 Chạy Mô Phỏng Độ Chính Xác</button>
-                </div>
-            </div>
-
-            <!-- Input Section -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-blue-300">🎲 Nhập Kết Quả Ván Hiện Tại</h2>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <button onclick="addResult('P')" class="btn main-control bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 rounded-lg text-2xl">
-                        <span>👤</span> PLAYER
-                    </button>
-                    <button onclick="addResult('B')" class="btn main-control bg-red-600 hover:bg-red-500 text-white font-bold py-6 rounded-lg text-2xl">
-                        <span>🏦</span> BANKER
-                    </button>
-                </div>
-                <div class="flex gap-4">
-                     <button onclick="undoLast()" class="btn main-control flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">↩️ Hoàn Tác</button>
-                     <button onclick="clearCurrentSessionHistory()" class="btn main-control flex-1 bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa Lịch Sử</button>
-                </div>
-            </div>
-
-            <!-- History Display -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-blue-300">📜 Bảng Cầu Big Road</h2>
-                    <span class="text-gray-400 font-medium">Tổng: <span id="totalGames">0</span> ván</span>
-                </div>
-                <div class="bg-gray-900 rounded-lg min-h-[280px] border border-gray-700">
-                    <div id="bigRoadDisplay">
-                        <p class="text-gray-500 p-4">Chưa có kết quả...</p>
-                    </div>
-                </div>
+            <!-- Import/Export -->
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button onclick="exportData()" class="btn w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-lg">📤 Xuất Dữ Liệu</button>
+                <button onclick="document.getElementById('fileInput').click()" class="btn w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded-lg">📥 Nhập Dữ Liệu</button>
+                <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
             </div>
         </div>
 
-        <!-- Right Column: Analysis & Stats -->
-        <div class="space-y-6">
-            <!-- NEW: AI Rhythm Analyzer -->
-            <div id="aiRhythmAnalyzer" class="bg-gray-800 p-6 rounded-2xl shadow-lg rhythm-card">
-                <h2 class="text-xl font-semibold mb-4 text-cyan-300">🌀 Phân Tích Nhịp Cầu AI</h2>
-                <div class="text-center">
-                    <p class="text-gray-400 text-sm">Độ ổn định (20 ván gần nhất)</p>
-                    <p id="rhythmScore" class="text-4xl font-bold my-2 text-white">-</p>
-                    <p id="rhythmDescription" class="font-semibold text-lg h-8">-</p>
-                </div>
+        <!-- Input Section -->
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 text-blue-300">🎲 Nhập Kết Quả Ván Hiện Tại</h2>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <button onclick="addResult('P')" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 rounded-lg text-2xl"><span>👤</span> PLAYER</button>
+                <button onclick="addResult('B')" class="btn bg-red-600 hover:bg-red-500 text-white font-bold py-6 rounded-lg text-2xl"><span>🏦</span> BANKER</button>
             </div>
-
-            <!-- Accuracy Stats -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4 text-green-300">🎯 Thống Kê Độ Chính Xác (AI)</h2>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
-                        <span class="font-medium text-gray-300">Tỷ Lệ Thắng</span>
-                        <span id="accuracyRate" class="text-2xl font-bold text-green-400">0.0%</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
-                        <span class="font-medium text-gray-300">Thắng / Tổng Phán Đoán</span>
-                        <div>
-                            <span id="correctPredictions" class="text-lg font-semibold text-white">0</span>
-                            <span class="text-gray-400">/</span>
-                            <span id="totalPredictions" class="text-lg font-semibold text-white">0</span>
-                        </div>
-                    </div>
-                    <!-- Prediction Streak Chart -->
-                    <div class="mt-4">
-                        <p class="text-sm text-gray-400 mb-2 text-center">Chuỗi Thắng/Thua (40 Ván Gần Nhất)</p>
-                        <div id="predictionStreakChart">
-                             <p class="w-full text-center text-gray-500 text-sm">Chưa có phán đoán nào.</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="flex gap-4">
+                <button onclick="undoLast()" class="btn flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">↩️ Hoàn Tác</button>
+                <button onclick="showCustomConfirm('Bạn có chắc muốn xóa toàn bộ lịch sử và thống kê của phiên này không?', clearCurrentSessionHistory)" class="btn flex-1 bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa Lịch Sử</button>
             </div>
-
-            <!-- Pattern Analysis -->
-            <div id="analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow duration-500 flex flex-col min-h-[280px]">
-                <h2 class="text-xl font-semibold text-yellow-300 mb-4">🔮 Đề Xuất Cho Ván Tới</h2>
-                <div id="historicalAnalysisAlert" class="mb-4"></div>
-                <div id="analysisResult" class="space-y-4 flex-grow flex flex-col justify-center">
-                    <p class="text-gray-400 text-center">Nhập kết quả để bắt đầu nhận đề xuất...</p>
-                </div>
-                <div id="predictionStatusFooter" class="mt-4 pt-3 border-t border-gray-700">
-                    <!-- AI Status updated by JS -->
-                </div>
-            </div>
-            
-            <!-- Confidence Stats Table -->
-            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-2 text-purple-300">📊 Thống Kê Theo Độ Tin Cậy</h2>
-                <div id="confidenceRecommendation" class="mb-4 p-3 bg-gray-900 rounded-lg text-center"></div>
-                <div class="space-y-4" id="confidenceStatsTable">
-                     <!-- Rows will be generated by JS -->
-                </div>
-            </div>
-
         </div>
-    </div>
-    
-    <!-- Simulation Result Modal -->
-    <div id="simulationModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-gray-800 rounded-2xl shadow-lg p-6 w-full max-w-md text-white border border-gray-700">
+
+        <!-- Confidence Stats Table -->
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-2 text-green-300">📊 Thống Kê Độ Tin Cậy (Phiên)</h2>
+            <div id="confidenceRecommendation" class="my-4 p-3 bg-gray-900 rounded-lg text-center"></div>
+            <div class="space-y-2" id="confidenceStatsTable"></div>
+        </div>
+
+        <!-- History Display -->
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-teal-300">Kết Quả Mô Phỏng</h2>
-                <button onclick="hideSimulationModal()" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                <h2 class="text-xl font-semibold text-blue-300">📜 Bảng Cầu Big Road</h2>
+                <span class="text-gray-400 font-medium">Tổng: <span id="totalGames">0</span> ván</span>
             </div>
-            <div id="simulationResultContent" class="space-y-4">
-                <!-- Results will be injected here by JS -->
+            <div class="bg-gray-900 rounded-lg min-h-[280px] border border-gray-700">
+                <div id="bigRoadDisplay">
+                    <p class="text-gray-500 p-4">Chưa có kết quả...</p>
+                </div>
             </div>
-            <button onclick="hideSimulationModal()" class="btn w-full mt-6 bg-indigo-600 hover:bg-indigo-500">Đóng</button>
         </div>
     </div>
 
-    <script>
-        // --- CORE LOGIC: GEMINI API INTEGRATION ---
-        
-        const systemInstruction = {
-            parts: [{
-                text: "Bạn là một AI phân tích Baccarat cấp cao với khả năng tự phân tích sâu. Quy trình tư duy của bạn gồm 6 bước:\n1. **Phân tích Cầu Baccarat:** Dựa vào lịch sử ván chơi (`P`, `B`), đưa ra một dự đoán ban đầu và độ tin cậy.\n2. **Phân tích Chuỗi Thắng/Thua:** Nhìn vào lịch sử kết quả (`Đúng`, `Sai`) của chính mình. Nếu bạn đang ở trong một chuỗi thắng dài, hãy tăng độ tin cậy. Nếu trong chuỗi thua dài, hãy cân nhắc đảo ngược dự đoán.\n3. **Phân tích Chu Kỳ (Pattern):** Tìm kiếm các chu kỳ lặp lại trong lịch sử kết quả của mình (ví dụ: `Đúng, Sai, Đúng, Sai...`). Dựa vào chu kỳ, dự đoán kết quả tiếp theo của chính bạn.\n4. **Phân tích Lịch sử (Historical Precedent):** Rà soát toàn bộ lịch sử ván chơi. Tìm những đoạn cầu (khoảng 10-15 ván) gần giống nhất với hiện tại. Nếu ở đoạn đó hiệu suất của bạn rất cao (>80%), xác định là 'tay vàng'. Nếu hiệu suất rất thấp (<30%), xác định là 'tay gãy'.\n5. **Phân tích Chiều dài Cầu:** Nhận diện cầu bệt hiện tại. Rà soát lịch sử để tìm chiều dài của các cầu bệt cùng loại trước đó. Dựa vào quy luật chiều dài, dự đoán xem cầu hiện tại có khả năng tiếp tục hay gãy.\n6. **Phân tích Bất Đối Xứng:** Tìm các 'cột bản lề' trong Big Road. Dựa vào quy luật đối xứng và bất đối xứng giữa các cột xung quanh bản lề, đưa ra nhận định.\n**Quyết định cuối cùng:** Kết hợp cả 6 bước phân tích để đưa ra `predicted_path` cuối cùng. Giải thích mọi sự điều chỉnh trong `meta_reasoning`. Báo cáo kết quả của các bước phân tích cao cấp trong các trường tương ứng. Luôn trả lời bằng định dạng JSON."
-            }]
-        };
+    <!-- Right Column: Analysis & Stats -->
+    <div class="space-y-6">
+        <!-- Accuracy Stats -->
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 text-green-300">🎯 Thống Kê (Phiên Hiện Tại)</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
+                    <span class="font-medium text-gray-300">Tỷ Lệ Thắng</span>
+                    <span id="accuracyRate" class="text-2xl font-bold text-green-400">0.0%</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
+                    <span class="font-medium text-gray-300">Thắng / Tổng Phán Đoán</span>
+                    <div><span id="correctPredictions" class="text-lg font-semibold text-white">0</span><span class="text-gray-400">/</span><span id="totalPredictions" class="text-lg font-semibold text-white">0</span></div>
+                </div>
+            </div>
+        </div>
 
-        const responseSchema = {
-            type: "OBJECT",
-            properties: {
-                predicted_path: {
-                    type: "ARRAY",
-                    description: "Một mảng chứa chuỗi 10 dự đoán tiếp theo.",
-                    items: { "type": "STRING" }
-                },
-                reasoning: { type: "STRING", description: "Giải thích cho dự đoán, dựa trên phân tích cầu Baccarat." },
-                confidence: { type: "NUMBER", description: "Độ tin cậy cho dự đoán ĐẦU TIÊN (50-100)." },
-                meta_reasoning: { type: "STRING", description: "Giải thích về quá trình tự phân tích và tự điều chỉnh (Bước 2 & 3)." },
-                historical_analysis: {
-                    type: "OBJECT",
-                    description: "Phân tích dựa trên các ván bài tương tự trong quá khứ (Bước 4).",
-                    properties: {
-                        type: { type: "STRING", "enum": ["golden", "warning"], description: "'golden' cho tay vàng hoặc 'warning' cho tay gãy." },
-                        reason: { type: "STRING", description: "Lý do, ví dụ: 'Cầu hiện tại giống một đoạn trong quá khứ nơi tôi đã đúng 9/10 lần.'" }
-                    }
-                },
-                streak_length_analysis: {
-                     type: "OBJECT",
-                     description: "Phân tích dựa trên chiều dài của các cầu bệt tương tự trong quá khứ (Bước 5).",
-                     properties: {
-                         verdict: { type: "STRING", "enum": ["continue", "break", "inconclusive"], description: "'continue' nếu cầu có khả năng tiếp tục, 'break' nếu có khả năng gãy." },
-                         reason: { type: "STRING", description: "Lý do, ví dụ: 'Cầu P hiện tại dài 4 tay, tương tự 2 cầu P trước đó đã gãy ở tay thứ 4.'" }
-                     }
-                },
-                asymmetry_analysis: {
-                    type: "OBJECT",
-                    description: "Phân tích dựa trên cấu trúc cột bất đối xứng trong Big Road (Bước 6).",
-                    properties: {
-                        active: { type: "BOOLEAN", description: "True nếu một quy luật bất đối xứng đang hoạt động." },
-                        reason: { type: "STRING", description: "Lý do, ví dụ: 'Phát hiện cột bản lề. Cột bên phải đang đi ngược lại với cột bên trái.'" }
+        <!-- Global Accuracy Stats -->
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 text-cyan-300">🌐 Thống Kê (Toàn Cục)</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
+                    <span class="font-medium text-gray-300">Tỷ Lệ Thắng</span>
+                    <span id="globalAccuracyRate" class="text-2xl font-bold text-cyan-400">0.0%</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
+                    <span class="font-medium text-gray-300">Thắng / Tổng Phán Đoán</span>
+                    <div><span id="globalCorrectPredictions" class="text-lg font-semibold text-white">0</span><span class="text-gray-400">/</span><span id="globalTotalPredictions" class="text-lg font-semibold text-white">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pattern Analysis -->
+        <div id="analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow duration-500">
+            <h2 class="text-xl font-semibold mb-4 text-yellow-300">🧠 Phân Tích & Đề Xuất</h2>
+            <div id="analysisResult" class="space-y-4">
+                <p class="text-gray-400 text-center py-8">Cần ít nhất 10 kết quả để bắt đầu phân tích...</p>
+            </div>
+        </div>
+
+        <!-- Analysis Settings -->
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 text-purple-300">⚙️ Cài Đặt Phân Tích (Thủ công)</h2>
+            <p class="text-sm text-gray-400 mb-4">Cài đặt này chỉ được sử dụng khi hệ thống chưa tìm thấy chiều dài cầu tối ưu.</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="minPatternLength" class="block text-sm font-medium text-gray-300 mb-1">Độ dài cầu tối thiểu</label>
+                    <input type="number" id="minPatternLength" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+                <div>
+                    <label for="maxPatternLength" class="block text-sm font-medium text-gray-300 mb-1">Độ dài cầu tối đa</label>
+                    <input type="number" id="maxPatternLength" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+                <div>
+                    <label for="minCertainOccurrences" class="block text-sm font-medium text-gray-300 mb-1">Số lần lặp tối thiểu cho "Tay Chắc Chắn"</label>
+                    <input type="number" id="minCertainOccurrences" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+            </div>
+            <button onclick="saveSettings()" class="btn w-full mt-6 bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded-lg">Lưu Cài Đặt</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- CORE LOGIC: PATTERN MATCHER ---
+class PatternMatcher {
+    constructor() {
+        this.MIN_HISTORY_FOR_ANALYSIS = 10;
+        this.MIN_PATTERN_LENGTH = 10;
+        this.MAX_PATTERN_LENGTH = 15;
+        this.MIN_CERTAIN_OCCURRENCES = 2;
+    }
+    calculateSimilarity(arr1, arr2) {
+        if (arr1.length !== arr2.length || arr1.length === 0) return 0;
+        const matches = arr1.filter((item, index) => item === arr2[index]).length;
+        return matches / arr1.length;
+    }
+    findPatternOccurrences(pattern, allHistory) {
+        const occurrences = [];
+        const reversedPattern = [...pattern].reverse();
+        for (const session of allHistory) {
+            const sessionHistory = session.history || [];
+            if (sessionHistory.length < pattern.length + 1) continue;
+            for (let i = 0; i <= sessionHistory.length - pattern.length - 1; i++) {
+                const segment = sessionHistory.slice(i, i + pattern.length);
+                const nextResult = sessionHistory[i + pattern.length];
+                const similarity = this.calculateSimilarity(pattern, segment);
+                if (similarity >= 0.9) occurrences.push({ type: 'similar', next: nextResult, similarity });
+                const reverseSimilarity = this.calculateSimilarity(reversedPattern, segment);
+                if (reverseSimilarity >= 0.9) occurrences.push({ type: 'reversed', next: nextResult, similarity: reverseSimilarity });
+            }
+        }
+        return occurrences;
+    }
+    getPredictionForPattern(pattern, allHistoricalSessions) {
+        const occurrences = this.findPatternOccurrences(pattern, allHistoricalSessions);
+        if (occurrences.length === 0) return { prediction: null };
+        const votes = { P: 0, B: 0 };
+        occurrences.forEach(match => { if (votes[match.next] !== undefined) votes[match.next] += match.similarity; });
+        const totalVotes = votes.P + votes.B;
+        if (totalVotes === 0) return { prediction: null };
+        const predictedWinner = votes.P > votes.B ? 'P' : 'B';
+        const confidence = (Math.max(votes.P, votes.B) / totalVotes) * 100;
+        return { prediction: predictedWinner, confidence, votes, totalOccurrences: occurrences.length };
+    }
+    findCertainPrediction(currentHistory, allHistoricalSessions) {
+        for (let len = Math.min(this.MAX_PATTERN_LENGTH, currentHistory.length); len >= this.MIN_PATTERN_LENGTH; len--) {
+            const pattern = currentHistory.slice(-len);
+            const patternString = pattern.join('');
+            const occurrences = [];
+            for (const session of allHistoricalSessions) {
+                const sessionHistory = session.history || [];
+                if (sessionHistory.length < pattern.length + 1) continue;
+                for (let i = 0; i <= sessionHistory.length - pattern.length - 1; i++) {
+                    const segment = sessionHistory.slice(i, i + pattern.length);
+                    if (segment.join('') === patternString) {
+                        occurrences.push(sessionHistory[i + pattern.length]);
                     }
                 }
-            },
-            required: ["predicted_path", "reasoning", "confidence"]
-        };
+            }
+            if (occurrences.length >= this.MIN_CERTAIN_OCCURRENCES && new Set(occurrences).size === 1) {
+                return {
+                    prediction: occurrences[0],
+                    recommendation: 'TAY CHẮC CHẮN',
+                    analysisText: `Tìm thấy ${occurrences.length} lần xuất hiện chính xác của hình cầu này trong lịch sử.\nTất cả đều cho kết quả tiếp theo là: ${occurrences[0]}`,
+                    confidence: 100,
+                    isCertain: true
+                };
+            }
+        }
+        return null;
+    }
+    analyzeCurrentStreak(currentHistory) {
+        if (currentHistory.length < 2) return { type: 'none', length: currentHistory.length };
+        const last = currentHistory[currentHistory.length - 1];
+        if (last === currentHistory[currentHistory.length - 2]) {
+            let length = 0;
+            for (let i = currentHistory.length - 1; i >= 0; i--) {
+                if (currentHistory[i] === last) length++; else break;
+            }
+            return { type: 'bệt', length, value: last };
+        } else {
+            let length = 0;
+            for (let i = currentHistory.length - 1; i >= 1; i--) {
+                if (currentHistory[i] !== currentHistory[i-1]) length++; else break;
+            }
+            return { type: '1-1', length: length + 1 };
+        }
+    }
+    getPrediction(currentHistory, allHistoricalSessions, { optimalLength = null, lengthPerformance = {} } = {}) {
+        if (currentHistory.length < this.MIN_HISTORY_FOR_ANALYSIS) {
+            return { prediction: null, analysisText: `Cần ít nhất ${this.MIN_HISTORY_FOR_ANALYSIS} kết quả...`, confidence: 0, isCertain: false };
+        }
+        if (optimalLength && currentHistory.length >= optimalLength) {
+            const pattern = currentHistory.slice(-optimalLength);
+            const result = this.getPredictionForPattern(pattern, allHistoricalSessions);
+            if (result.prediction) {
+                const perf = lengthPerformance[optimalLength] || { wins: 0, total: 0 };
+                const rate = perf.total > 0 ? (perf.wins / perf.total * 100).toFixed(1) : 'N/A';
+                return {
+                    prediction: result.prediction, recommendation: 'THEO CHIỀU DÀI TỐI ƯU',
+                    analysisText: `Sử dụng chiều dài cầu tối ưu: ${optimalLength} ván.\n(Tỷ lệ thắng của chiều dài này: ${rate}% - ${perf.wins}/${perf.total})\n\nLịch sử cho thấy:\n- PLAYER: ${result.votes.P.toFixed(1)} điểm\n- BANKER: ${result.votes.B.toFixed(1)} điểm`,
+                    confidence: result.confidence, isCertain: false
+                };
+            }
+        }
+        const certainPrediction = this.findCertainPrediction(currentHistory, allHistoricalSessions);
+        if (certainPrediction) return certainPrediction;
+        const allMatches = [];
+        for (let len = Math.min(this.MAX_PATTERN_LENGTH, currentHistory.length); len >= this.MIN_PATTERN_LENGTH; len--) {
+            const pattern = currentHistory.slice(-len);
+            const occurrences = this.findPatternOccurrences(pattern, allHistoricalSessions);
+            if (occurrences.length > 0) {
+                allMatches.push(...occurrences);
+                break;
+            }
+        }
+        if (allMatches.length === 0) return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự (thủ công).', confidence: 0, isCertain: false };
+        const votes = { P: 0, B: 0 };
+        allMatches.forEach(match => { if (votes[match.next] !== undefined) votes[match.next] += match.similarity; });
+        const totalVotes = votes.P + votes.B;
+        if (totalVotes === 0) return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự (thủ công).', confidence: 0, isCertain: false };
+        const predictedWinner = votes.P > votes.B ? 'P' : 'B';
+        const maxConfidence = (Math.max(votes.P, votes.B) / totalVotes) * 100;
+        const analysisTextPrefix = `Tìm thấy ${allMatches.length} hình cầu tương tự. Lịch sử cho thấy:\n- PLAYER: ${votes.P.toFixed(1)} điểm\n- BANKER: ${votes.B.toFixed(1)} điểm`;
+        const streakInfo = this.analyzeCurrentStreak(currentHistory);
+        let recommendation = 'THEO PHÂN TÍCH LỊCH SỬ';
+        if (streakInfo.type === 'bệt') recommendation = predictedWinner === streakInfo.value ? `THEO BỆT (${streakInfo.value}x${streakInfo.length})` : `BẺ CẦU BỆT (${streakInfo.value}x${streakInfo.length})`;
+        else if (streakInfo.type === '1-1') recommendation = predictedWinner !== currentHistory[currentHistory.length - 1] ? `THEO CẦU 1-1 (Dài ${streakInfo.length})` : `BẺ CẦU 1-1 (Dài ${streakInfo.length})`;
+        return { prediction: predictedWinner, recommendation, analysisText: `${analysisTextPrefix}\n\n🏆 Độ tin cậy: ${maxConfidence.toFixed(1)}%`, confidence: maxConfidence, isCertain: false };
+    }
+}
 
-        async function callGeminiAPI(currentHistory, historicalContext, performanceSummary, bigRoadColumns, apiKey, model) {
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            
-            const performanceText = performanceSummary ? ` Lịch sử kết quả dự đoán gần đây của tôi (mới nhất -> cũ nhất): [${performanceSummary}].` : '';
-            const bigRoadText = bigRoadColumns ? ` Cấu trúc cột Big Road hiện tại: ${JSON.stringify(bigRoadColumns)}.` : '';
+// --- GLOBAL STATE ---
+let state = {
+    currentSessionId: null,
+    sessions: {},
+    matcher: new PatternMatcher(),
+    currentPrediction: null,
+    goldenRange: null
+};
 
-            let userPrompt;
-            if (historicalContext && historicalContext.length > 0) {
-                 userPrompt = `Dữ liệu lịch sử: [${historicalContext.join(', ')}].${performanceText}${bigRoadText} Phân tích ván hiện tại: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
+// --- STATS CALCULATION ---
+function getPredictionStats(predictions) {
+    const total = predictions.length;
+    if (total === 0) return { rate: 0, correct: 0, total: 0 };
+    const correct = predictions.filter(p => p.predicted === p.actual).length;
+    return { rate: (correct / total) * 100, correct, total };
+}
+
+// --- UI UPDATE FUNCTIONS ---
+function updateBigRoadUI() {
+    const history = state.sessions[state.currentSessionId]?.history || [];
+    const roadDiv = document.getElementById('bigRoadDisplay');
+    document.getElementById('totalGames').textContent = history.length;
+    if (history.length === 0) {
+        roadDiv.innerHTML = '<p class="text-gray-500 p-4">Chưa có kết quả...</p>';
+        roadDiv.style.display = 'block';
+        return;
+    }
+    roadDiv.style.display = 'grid';
+    roadDiv.innerHTML = '';
+    const columns = [];
+    if (history.length > 0) {
+        let currentCol = [history[0]];
+        for (let i = 1; i < history.length; i++) {
+            if (history[i] === history[i-1]) currentCol.push(history[i]);
+            else { columns.push(currentCol); currentCol = [history[i]]; }
+        }
+        columns.push(currentCol);
+    }
+    columns.forEach(colData => {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'road-col';
+        colData.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `road-item ${item === 'P' ? 'bg-blue-600' : 'bg-red-600'}`;
+            itemDiv.textContent = item;
+            colDiv.appendChild(itemDiv);
+        });
+        roadDiv.appendChild(colDiv);
+    });
+    roadDiv.scrollLeft = roadDiv.scrollWidth;
+}
+function updateAccuracyUI() {
+    const predictions = state.sessions[state.currentSessionId]?.predictions || [];
+    const stats = getPredictionStats(predictions);
+    document.getElementById('accuracyRate').textContent = `${stats.rate.toFixed(1)}%`;
+    document.getElementById('correctPredictions').textContent = stats.correct;
+    document.getElementById('totalPredictions').textContent = stats.total;
+}
+function updateGlobalAccuracyUI() {
+    const allPredictions = Object.values(state.sessions).flatMap(s => s.predictions || []);
+    const stats = getPredictionStats(allPredictions);
+    document.getElementById('globalAccuracyRate').textContent = `${stats.rate.toFixed(1)}%`;
+    document.getElementById('globalCorrectPredictions').textContent = stats.correct;
+    document.getElementById('globalTotalPredictions').textContent = stats.total;
+}
+function updateAnalysisUI() {
+    const session = state.sessions[state.currentSessionId] || { history: [], optimalLength: null, lengthPerformance: {} };
+    const { prediction, recommendation, analysisText, confidence, isCertain } = state.matcher.getPrediction(session.history, Object.values(state.sessions), {
+        optimalLength: session.optimalLength,
+        lengthPerformance: session.lengthPerformance
+    });
+    state.currentPrediction = { prediction, confidence };
+
+    let confidenceRangeString = '';
+    if (confidence) {
+        const ranges = [{min:50,max:60},{min:60,max:70},{min:70,max:80},{min:80,max:90},{min:90,max:100}];
+        const foundRange = ranges.find(r => confidence >= r.min && (confidence < r.max || (r.max === 100 && confidence >= 100)));
+        if (foundRange) {
+            confidenceRangeString = ` (Khoảng ${foundRange.min}-${foundRange.max}%)`;
+        }
+    }
+
+    let finalPrediction = prediction, finalRecommendation = recommendation, recommendationNote = '';
+    if (finalRecommendation === 'THEO CHIỀU DÀI TỐI ƯU') {
+        finalRecommendation += confidenceRangeString;
+    }
+
+    if (prediction && !isCertain && state.goldenRange) {
+        if (confidence >= state.goldenRange.min && confidence <= state.goldenRange.max) {
+            if (state.goldenRange.rate < 30) {
+                finalPrediction = prediction === 'P' ? 'B' : 'P';
+                finalRecommendation = `ĐỀ XUẤT NGƯỢC (Tỷ lệ thấp)`;
+                recommendationNote = `<div class="mt-2 p-2 text-center bg-red-800 bg-opacity-50 rounded-lg text-sm text-red-300 font-semibold">⚠️ Đảo ngược! Khoảng vàng (${state.goldenRange.min}-${state.goldenRange.max}%) có tỷ lệ thắng chỉ ${state.goldenRange.rate.toFixed(1)}%.</div>`;
             } else {
-                 userPrompt = `${performanceText}${bigRoadText} Phân tích ván Baccarat: [${currentHistory.join(', ')}] và dự đoán lộ trình 10 ván tiếp theo.`;
+                recommendationNote = `<div class="mt-2 p-2 text-center bg-green-800 bg-opacity-50 rounded-lg text-sm text-green-300 font-semibold">✨ Phán đoán này nằm trong KHOẢNG VÀNG!</div>`;
             }
-            
-            const payload = {
-                contents: [{ parts: [{ text: userPrompt }] }],
-                systemInstruction: systemInstruction,
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: responseSchema,
-                    temperature: 0.8,
-                }
-            };
-            
-            const MAX_RETRIES = 5;
-            let delay = 1000;
-
-            for (let i = 0; i < MAX_RETRIES; i++) {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                        signal: controller.signal
-                    });
-                    
-                    clearTimeout(timeoutId);
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        const candidate = result.candidates?.[0];
-
-                        if (candidate && candidate.content?.parts?.[0]?.text) {
-                            const parsedJson = JSON.parse(candidate.content.parts[0].text);
-                            if (Array.isArray(parsedJson.predicted_path) && parsedJson.predicted_path.length > 0 && parsedJson.predicted_path.every(item => ['P', 'B'].includes(item))) {
-                                return parsedJson; // Successful response
-                            }
-                        }
-                        throw new Error("Phản hồi từ AI không hợp lệ.");
-                    }
-
-                    if (response.status !== 429) {
-                        throw new Error(`HTTP error! status: ${response.status}`, { cause: response.status });
-                    }
-                    
-                    console.warn(`Rate limit (429). Attempt ${i + 1}/${MAX_RETRIES}. Retrying in ${delay}ms...`);
-
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    if (error.cause !== 429) { 
-                        console.error(`API call failed:`, error);
-                        if (error.name === 'AbortError') return { error: "Yêu cầu tới AI đã hết thời gian chờ." };
-                        if (error.cause === 400) return { error: "Yêu cầu không hợp lệ. Kiểm tra lại API Key (Lỗi 400)." };
-                        if (error.cause === 404) return { error: `Mô hình AI đã chọn không tồn tại (Lỗi 404).` };
-                        if (error.cause === 503) return { error: "Dịch vụ AI hiện đang quá tải (Lỗi 503)." };
-                        return { error: "Lỗi kết nối tới AI." };
-                    }
-                }
-                
-                await new Promise(resolve => setTimeout(resolve, delay));
-                delay *= 2; 
-            }
-            
-            return { error: "AI đang rất bận, vui lòng thử lại sau giây lát (Lỗi 429)." };
+        } else {
+            recommendationNote = `<div class="mt-2 p-2 text-center bg-yellow-800 bg-opacity-50 rounded-lg text-sm text-yellow-300 font-semibold">⚠️ Cẩn trọng: Không thuộc Khoảng Vàng.</div>`;
         }
-        
-        async function getAIPathPrediction(currentHistory, allSessions, currentSessionId, overridePredictions = null) {
-            const apiKey = document.getElementById('apiKeyInput').value;
-            if (!apiKey) return { error: 'Vui lòng nhập API Key.' };
-            
-            const model = document.getElementById('modelSelector').value;
-
-            const MIN_HISTORY_FOR_ANALYSIS = 5;
-            if (currentHistory.length < MIN_HISTORY_FOR_ANALYSIS) {
-                return { error: `Cần ít nhất ${MIN_HISTORY_FOR_ANALYSIS} kết quả...` };
-            }
-            
-            const historicalContext = Object.keys(allSessions)
-                .filter(id => id !== currentSessionId)
-                .flatMap(id => allSessions[id].history);
-
-            const predictions = overridePredictions || state.sessions[state.currentSessionId]?.predictions || [];
-            let performanceSummary = null;
-
-            if (predictions.length > 3) {
-                const recentPerformance = predictions
-                    .slice(-15) // Look at the last 15 results for patterns
-                    .map(p => p.predicted === p.actual ? 'Đúng' : 'Sai');
-                performanceSummary = recentPerformance.join(', ');
-            }
-            
-            const bigRoadColumns = getBigRoadColumns(currentHistory);
-
-            const MAX_HISTORICAL_CONTEXT = 500;
-            const limitedHistoricalContext = historicalContext.slice(-MAX_HISTORICAL_CONTEXT);
-            const MAX_CURRENT_HISTORY = 75;
-            const limitedCurrentHistory = currentHistory.slice(-MAX_CURRENT_HISTORY);
-
-            return await callGeminiAPI(limitedCurrentHistory, limitedHistoricalContext, performanceSummary, bigRoadColumns, apiKey, model);
+    }
+    const analysisResultDiv = document.getElementById('analysisResult'), analysisCard = document.getElementById('analysis-card');
+    analysisCard.classList.remove('card-glow-p', 'card-glow-b', 'card-glow-certain');
+    let optimalLengthDisplay = session.optimalLength ? `<div class="mb-4 p-3 bg-gray-900 rounded-lg text-center text-cyan-300 text-sm"><span class="font-semibold">Chiều dài cầu tối ưu:</span><span class="text-lg font-bold ml-2">${session.optimalLength}</span></div>` : '';
+    if (finalPrediction) {
+        let predictionBlockHTML = '';
+        if (isCertain) {
+            predictionBlockHTML = `<div class="text-center bg-yellow-800 bg-opacity-50 py-6 rounded-lg border-2 border-yellow-400"><p class="text-lg text-yellow-300 mb-2 animate-pulse">Đề Xuất Chắc Chắn (Lịch sử):</p><p class="text-3xl font-extrabold text-yellow-300">${finalRecommendation}</p><p class="text-4xl font-bold mt-2">${finalPrediction === 'P' ? '👤 PLAYER' : '🏦 BANKER'}</p></div>`;
+            analysisCard.classList.add('card-glow-certain');
+        } else {
+            predictionBlockHTML = `<div class="text-center bg-gray-900 py-6 rounded-lg border-2 ${finalPrediction === 'P' ? 'border-blue-500' : 'border-red-500'}"><p class="text-lg text-gray-400 mb-2">Đề xuất:</p><p class="text-3xl font-extrabold ${finalPrediction === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalRecommendation}</p><p class="text-4xl font-bold mt-2">${finalPrediction === 'P' ? '👤 PLAYER' : '🏦 BANKER'}</p>${recommendationNote}</div>`;
+            analysisCard.classList.add(finalPrediction === 'P' ? 'card-glow-p' : 'card-glow-b');
         }
+        analysisResultDiv.innerHTML = `${optimalLengthDisplay}<div class="bg-gray-700 p-4 rounded-lg"><p class="text-gray-300 whitespace-pre-wrap">${analysisText}</p></div>${predictionBlockHTML}`;
+    } else {
+        analysisResultDiv.innerHTML = `${optimalLengthDisplay}<p class="text-gray-400 text-center py-8 whitespace-pre-wrap">${analysisText}</p>`;
+    }
+}
+function updateConfidenceStatsUI() {
+    if (!state.currentSessionId || !state.sessions[state.currentSessionId]) return;
+    
+    const currentConfidence = state.currentPrediction?.confidence;
+    const sessionPredictions = state.sessions[state.currentSessionId].predictions || [];
+    const previousConfidence = sessionPredictions.length > 0 ? sessionPredictions[sessionPredictions.length - 1].confidence : null;
 
-        // --- GLOBAL STATE ---
-        let state = {
-            currentSessionId: null,
-            sessions: {}, 
-            predictedPath: null,
-            isCalculating: false,
-            isSimulating: false,
-        };
-
-        // --- UI UPDATE FUNCTIONS ---
-        function getBigRoadColumns(history) {
-            if (!history || history.length === 0) return [];
-            const columns = [];
-            let currentCol = [history[0]];
-            for (let i = 1; i < history.length; i++) {
-                if (history[i] === history[i - 1]) {
-                    currentCol.push(history[i]);
-                } else {
-                    columns.push(currentCol);
-                    currentCol = [history[i]];
-                }
+    const ranges = [{min:50,max:60},{min:60,max:70},{min:70,max:80},{min:80,max:90},{min:90,max:100}].map(r => ({...r, total:0, wins:0}));
+    let bestRange = null, maxRate = -1;
+    ranges.forEach(range => {
+        const predictionsForRange = sessionPredictions.filter(p => p.confidence >= range.min && (p.confidence < range.max || (range.max === 100 && p.confidence >= 100)));
+        range.total = predictionsForRange.length;
+        range.wins = predictionsForRange.filter(p => p.predicted === p.actual).length;
+        range.rate = range.total > 0 ? ((range.wins / range.total) * 100) : -1;
+        let trendIndicator = '', streak = 0;
+        if (predictionsForRange.length >= 1) {
+            const lastWin = (predictionsForRange.slice(-1)[0].predicted === predictionsForRange.slice(-1)[0].actual);
+            for (let i = predictionsForRange.length - 1; i >= 0; i--) {
+                if ((predictionsForRange[i].predicted === predictionsForRange[i].actual) === lastWin) streak++; else break;
             }
-            columns.push(currentCol);
-            return columns;
+            if(streak >= 1) trendIndicator = `<span class="flex items-center ${lastWin ? 'text-green-400' : 'text-red-400'} ml-1.5">${lastWin ? '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>' : '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>'}<span class="font-bold text-xs">${streak}</span></span>`;
         }
-
-        function updateBigRoadUI() {
-            const history = state.sessions[state.currentSessionId]?.history || [];
-            const roadDiv = document.getElementById('bigRoadDisplay');
-            document.getElementById('totalGames').textContent = history.length;
+        range.trendIndicator = trendIndicator;
+        if (range.total >= 3 && range.rate > maxRate) { maxRate = range.rate; bestRange = range; }
+    });
+    state.goldenRange = bestRange;
+    const recommendationDiv = document.getElementById('confidenceRecommendation');
+    if (bestRange) recommendationDiv.innerHTML = `<p class="text-sm text-yellow-300"><span class="font-bold">✨ Khoảng Vàng:</span> Tỷ lệ thắng cao nhất là <b class="text-green-400">${maxRate.toFixed(1)}%</b> trong khoảng <b class="text-white">${bestRange.min}%-${bestRange.max}%</b>.</p>`;
+    else recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm khoảng vàng (cần tối thiểu 3 phán đoán trong 1 khoảng).</p>`;
+    const tableDiv = document.getElementById('confidenceStatsTable');
+    let html = `<div class="grid gap-x-2 text-xs font-semibold text-gray-400 px-3" style="grid-template-columns: 2fr 4fr 2fr 2fr 3fr;"><span>Khoảng</span><span class="text-center">Diễn Biến Gần Đây</span><span class="text-center">Tổng</span><span class="text-center">Thắng</span><span class="text-right">Tỷ Lệ</span></div>`;
+    if (sessionPredictions.length === 0 && !currentConfidence) {
+        tableDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Chưa có dữ liệu thống kê.</p>';
+    } else {
+        ranges.forEach(range => {
+            const highlightClass = range === bestRange ? 'bg-green-800 bg-opacity-40 border border-green-500' : 'bg-gray-700 bg-opacity-50';
             
-            roadDiv.innerHTML = '';
-            const columns = getBigRoadColumns(history);
-
-            if (columns.length === 0) {
-                 roadDiv.innerHTML = '<p class="text-gray-500 p-4">Chưa có kết quả...</p>';
-                 roadDiv.style.display = 'block';
-                 return;
+            let indicatorsHTML = '';
+            if (currentConfidence && currentConfidence >= range.min && (currentConfidence < range.max || (range.max === 100 && currentConfidence >= 100))) {
+                 indicatorsHTML += `<span class="ml-2 px-1.5 py-0.5 text-xs rounded font-semibold bg-blue-600 text-white" title="Phán đoán hiện tại">Hiện tại</span>`;
             }
-            roadDiv.style.display = 'grid';
-
-            columns.forEach(colData => {
-                const colDiv = document.createElement('div');
-                colDiv.className = 'road-col';
-                colData.forEach(item => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = `road-item ${item === 'P' ? 'bg-blue-600' : 'bg-red-600'}`;
-                    itemDiv.textContent = item;
-                    colDiv.appendChild(itemDiv);
-                });
-                roadDiv.appendChild(colDiv);
-            });
-            roadDiv.scrollLeft = roadDiv.scrollWidth;
-        }
-
-        function updatePredictionStreakChart() {
-            const chartDiv = document.getElementById('predictionStreakChart');
-            const predictions = state.sessions[state.currentSessionId]?.predictions || [];
-            
-            if (predictions.length === 0) {
-                chartDiv.innerHTML = `<p class="w-full text-center text-gray-500 text-sm">Chưa có phán đoán nào.</p>`;
-                return;
+            if (previousConfidence && previousConfidence >= range.min && (previousConfidence < range.max || (previousConfidence >= 100 && range.max === 100))) {
+                const marginLeft = indicatorsHTML ? 'ml-1' : 'ml-2';
+                indicatorsHTML += `<span class="${marginLeft} px-1.5 py-0.5 text-xs rounded font-semibold bg-gray-500 text-white" title="Phán đoán ván trước">Trước</span>`;
             }
 
-            const MAX_BARS = 40;
-            const recentPredictions = predictions.slice(-MAX_BARS);
-            
-            chartDiv.innerHTML = recentPredictions.map(p => {
-                const isWin = p.predicted === p.actual;
-                const barClass = isWin ? 'streak-win' : 'streak-loss';
-                const title = `Dự đoán: ${p.predicted}, Thực tế: ${p.actual} -> ${isWin ? 'ĐÚNG' : 'SAI'}`;
-                return `<div class="streak-bar ${barClass}" title="${title}"></div>`;
-            }).join('');
-
-            chartDiv.scrollLeft = chartDiv.scrollWidth;
-        }
-
-        function updateAccuracyUI() {
-            const predictions = state.sessions[state.currentSessionId]?.predictions || [];
-            const total = predictions.length;
-            const correct = predictions.filter(p => p.predicted === p.actual).length;
-            const rate = total > 0 ? (correct / total) * 100 : 0;
-
-            document.getElementById('accuracyRate').textContent = `${rate.toFixed(1)}%`;
-            document.getElementById('correctPredictions').textContent = correct;
-            document.getElementById('totalPredictions').textContent = total;
-            updatePredictionStreakChart();
-        }
-
-        function displayPrediction(predictionPath) {
-            const analysisResultDiv = document.getElementById('analysisResult');
-            const analysisCard = document.getElementById('analysis-card');
-            const historicalAlertDiv = document.getElementById('historicalAnalysisAlert');
-
-            historicalAlertDiv.innerHTML = ''; // Clear previous alert
-            analysisCard.classList.remove('card-glow-p', 'card-glow-b');
-
-            if (predictionPath && predictionPath.predicted_path) {
-                // Display historical analysis alert
-                if (predictionPath.historical_analysis) {
-                    const analysis = predictionPath.historical_analysis;
-                    let alertHtml = '';
-                    if (analysis.type === 'golden') {
-                        alertHtml = `
-                            <div class="p-4 rounded-lg bg-yellow-900/50 border-2 border-yellow-400">
-                                <div class="flex items-center gap-3">
-                                    <div class="text-yellow-300">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5zM6.374 1 4.168 8.5H7.5a.5.5 0 0 1 .478.658L5.342 15l6.11-7.5H9a.5.5 0 0 1-.474-.658L10.626 1H6.374z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-yellow-300">⚡️ Tay Vàng Tiềm Năng!</h3>
-                                        <p class="text-sm text-yellow-200">${analysis.reason}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else if (analysis.type === 'warning') {
-                        alertHtml = `
-                            <div class="p-4 rounded-lg bg-red-900/50 border-2 border-red-500">
-                                <div class="flex items-center gap-3">
-                                    <div class="text-red-400">
-                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-red-400">⚠️ Cảnh Báo Tay Gãy!</h3>
-                                        <p class="text-sm text-red-300">${analysis.reason}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    historicalAlertDiv.innerHTML = alertHtml;
+            // Individual Bar Chart Logic
+            const predictionsForRange = sessionPredictions.filter(p => p.confidence >= range.min && (p.confidence < range.max || (p.confidence >= 100 && range.max === 100)));
+            const displayedPredictions = predictionsForRange.slice(-30); // Show last 30
+            let individualBarsHTML = `<div class="flex items-end justify-center gap-px h-5 my-auto overflow-hidden" title="Hiển thị tối đa 30 ván gần nhất">`;
+            if (displayedPredictions.length > 0) {
+                for (const p of displayedPredictions) {
+                    const isWin = p.predicted === p.actual;
+                    const barClass = isWin ? 'bg-blue-500 h-5' : 'bg-red-500 h-2';
+                    const title = `Đề xuất: ${p.predicted}, Ra: ${p.actual} -> ${isWin ? 'THẮNG' : 'THUA'}\nĐộ tin cậy: ${p.confidence.toFixed(1)}%`;
+                    individualBarsHTML += `<div class="flex-shrink-0 w-1 ${barClass} rounded-t-sm" title="${title}"></div>`;
                 }
-
-                const pColor = 'text-blue-400';
-                const bColor = 'text-red-400';
-                const nextMove = predictionPath.predicted_path[0];
-                
-                const remainingPath = predictionPath.predicted_path.slice(1).map(move => {
-                    const color = move === 'P' ? 'bg-blue-600' : 'bg-red-600';
-                    return `<div class="road-item path-item ${color}">${move}</div>`;
-                }).join('');
-                
-                let extraAnalysesHtml = '';
-                
-                if (predictionPath.meta_reasoning) {
-                    extraAnalysesHtml += `
-                        <div class="mt-3 bg-gray-900/70 p-3 rounded-lg border-l-4 border-cyan-400">
-                            <p class="flex items-center gap-2 text-sm font-semibold text-cyan-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                  <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5z"/>
-                                </svg>
-                                AI Tự Phân Tích
-                            </p>
-                            <p class="text-sm text-gray-300 italic mt-1 pl-2">${predictionPath.meta_reasoning}</p>
-                        </div>
-                    `;
-                }
-
-                if (predictionPath.streak_length_analysis) {
-                    const streak = predictionPath.streak_length_analysis;
-                    const icon = streak.verdict === 'break' ? `...` : (streak.verdict === 'continue' ? `...` : `...`);
-                    const borderColor = streak.verdict === 'break' ? 'border-red-500' : (streak.verdict === 'continue' ? 'border-green-500' : 'border-gray-500');
-                    const textColor = streak.verdict === 'break' ? 'text-red-400' : (streak.verdict === 'continue' ? 'text-green-400' : 'text-gray-400');
-                    const title = streak.verdict === 'break' ? 'Dự Báo Gãy Cầu!' : (streak.verdict === 'continue' ? 'Dự Báo Cầu Bệt' : 'Phân Tích Chiều Dài Cầu');
-                    
-                     extraAnalysesHtml += `
-                        <div class="mt-3 bg-gray-900/70 p-3 rounded-lg border-l-4 ${borderColor}">
-                            <p class="flex items-center gap-2 text-sm font-semibold ${textColor}">
-                                📏 ${title}
-                            </p>
-                            <p class="text-sm text-gray-300 italic mt-1 pl-2">${streak.reason}</p>
-                        </div>
-                    `;
-                }
-                
-                if (predictionPath.asymmetry_analysis && predictionPath.asymmetry_analysis.active) {
-                    const asymmetry = predictionPath.asymmetry_analysis;
-                     extraAnalysesHtml += `
-                        <div class="mt-3 bg-gray-900/70 p-3 rounded-lg border-l-4 border-purple-400">
-                            <p class="flex items-center gap-2 text-sm font-semibold text-purple-300">
-                                📐 Phân Tích Bất Đối Xứng
-                            </p>
-                            <p class="text-sm text-gray-300 italic mt-1 pl-2">${asymmetry.reason}</p>
-                        </div>
-                    `;
-                }
-
-
-                 analysisResultDiv.innerHTML = `
-                    <div class="text-center bg-gray-900 py-4 rounded-lg border-2 ${nextMove === 'P' ? 'border-blue-500' : 'border-red-500'}">
-                        <p class="text-4xl font-bold ${nextMove === 'P' ? pColor : bColor}">${nextMove === 'P' ? '👤 PLAYER' : '🏦 BANKER'}</p>
-                        <p class="text-sm text-gray-400 italic mt-1">"${predictionPath.reasoning}"</p>
-                        <p class="font-semibold text-yellow-400 mt-2">Độ tin cậy: ${predictionPath.confidence.toFixed(1)}%</p>
-                    </div>
-                    <div class="bg-gray-700/50 p-3 rounded-lg text-sm">
-                        <p class="text-gray-300 font-semibold mb-2 text-center">Lộ trình dự kiến tiếp theo:</p>
-                        <div class="flex justify-center gap-2 flex-wrap">
-                            ${remainingPath}
-                        </div>
-                    </div>
-                    ${extraAnalysesHtml}
-                `;
-                analysisCard.classList.add(nextMove === 'P' ? 'card-glow-p' : 'card-glow-b');
             } else {
-                 analysisResultDiv.innerHTML = `<p class="text-gray-400 text-center py-8 whitespace-pre-wrap">${predictionPath ? predictionPath.error : 'Nhập kết quả để bắt đầu...'}</p>`;
+                individualBarsHTML += `<div class="w-full text-center"><span class="text-gray-600 text-xs">Chưa có</span></div>`;
             }
+            individualBarsHTML += '</div>';
+
+
+            html += `<div class="grid gap-x-2 items-center ${highlightClass} p-3 rounded-lg mt-2 text-sm" style="grid-template-columns: 2fr 4fr 2fr 2fr 3fr;">
+                <span class="font-medium text-gray-300">${range.min}%-${range.max}%</span>
+                ${individualBarsHTML}
+                <span class="text-white font-semibold text-center">${range.total}</span>
+                <span class="text-green-400 font-semibold text-center">${range.wins}</span>
+                <span class="font-bold flex items-center justify-end ${range.rate >= 70 ? 'text-green-400' : (range.rate >= 50 ? 'text-yellow-400' : 'text-red-400')}">
+                ${range.rate > -1 ? range.rate.toFixed(1) + '%' : '-'}${range.trendIndicator}${indicatorsHTML}
+                </span></div>`;
+        });
+        tableDiv.innerHTML = html;
+    }
+}
+function updateAllUI() {
+    updateBigRoadUI();
+    updateAccuracyUI();
+    updateGlobalAccuracyUI();
+    updateAnalysisUI();
+    updateConfidenceStatsUI();
+}
+
+// --- EVENT HANDLERS & ACTIONS ---
+function addResult(result) {
+    if (!state.currentSessionId) return;
+    const session = state.sessions[state.currentSessionId];
+    const historyBeforeAdd = [...session.history];
+
+    if (state.currentPrediction && state.currentPrediction.prediction) {
+        session.predictions.push({ predicted: state.currentPrediction.prediction, actual: result, confidence: state.currentPrediction.confidence });
+    }
+    
+    session.history.push(result);
+    
+    const newOptimalLength = updateLengthPerformanceAndFindOptimal(historyBeforeAdd, Object.values(state.sessions), result);
+    session.optimalLength = newOptimalLength;
+
+    state.currentPrediction = null; 
+    saveSessions();
+    updateAllUI();
+}
+function updateLengthPerformanceAndFindOptimal(history, allSessions, newResult) {
+    const session = state.sessions[state.currentSessionId];
+    if (!session.lengthPerformance) session.lengthPerformance = {};
+    const candidates = [];
+    for (let len = 10; len <= 20; len++) {
+        if (history.length < len) continue;
+        const pattern = history.slice(-len);
+        const { prediction } = state.matcher.getPredictionForPattern(pattern, allSessions);
+        if (prediction) {
+            if (!session.lengthPerformance[len]) session.lengthPerformance[len] = { wins: 0, total: 0 };
+            const stats = session.lengthPerformance[len];
+            stats.total++;
+            if (prediction === newResult) stats.wins++;
+            if (prediction === newResult) candidates.push({ length: len, rate: stats.wins / stats.total, total: stats.total });
         }
-        
-        function updateAIStatusUI(status) {
-             const statusDiv = document.getElementById('predictionStatusFooter');
-             switch(status) {
-                 case 'calculating':
-                     statusDiv.innerHTML = `<div class="flex items-center justify-center gap-2 text-sm"><div class="spinner"></div><span class="text-yellow-400">Đang vạch ra lộ trình mới...</span></div>`;
-                     break;
-                 case 'ready':
-                     statusDiv.innerHTML = `<div class="flex items-center justify-center gap-2 text-sm"><span class="text-xl">✅</span><span class="text-green-400 font-semibold">Lộ trình đã sẵn sàng</span></div>`;
-                     break;
-                 default:
-                     statusDiv.innerHTML = ``;
-             }
-        }
+    }
+    if (candidates.length === 0) return session.optimalLength;
+    candidates.sort((a, b) => b.rate !== a.rate ? b.rate - a.rate : b.total - a.total);
+    return candidates[0].length;
+}
+function undoLast() {
+    if (!state.currentSessionId || state.sessions[state.currentSessionId].history.length === 0) return;
+    state.sessions[state.currentSessionId].history.pop();
+    if (state.sessions[state.currentSessionId].predictions.length > 0) {
+        state.sessions[state.currentSessionId].predictions.pop();
+    }
+    saveSessions();
+    updateAllUI();
+}
+function clearCurrentSessionHistory() {
+    if (!state.currentSessionId) return;
+    const session = state.sessions[state.currentSessionId];
+    session.history = []; session.predictions = [];
+    session.lengthPerformance = {}; session.optimalLength = null;
+    saveSessions();
+    updateAllUI();
+}
 
-        function updateAiRhythmAnalyzer() {
-            const card = document.getElementById('aiRhythmAnalyzer');
-            const scoreEl = document.getElementById('rhythmScore');
-            const descEl = document.getElementById('rhythmDescription');
-            
-            const predictions = state.sessions[state.currentSessionId]?.predictions || [];
-            const RHYTHM_WINDOW = 20;
-            const MIN_PREDICTIONS = 5;
-
-            card.className = 'bg-gray-800 p-6 rounded-2xl shadow-lg rhythm-card'; // Reset class
-
-            if (predictions.length < MIN_PREDICTIONS) {
-                scoreEl.textContent = '-';
-                descEl.textContent = 'Cần thêm dữ liệu...';
-                descEl.className = 'font-semibold text-lg h-8 text-gray-500';
-                return;
-            }
-
-            const recentPredictions = predictions.slice(-RHYTHM_WINDOW);
-            let breaks = 0;
-            for (let i = 1; i < recentPredictions.length; i++) {
-                const currentWin = recentPredictions[i].predicted === recentPredictions[i].actual;
-                const prevWin = recentPredictions[i-1].predicted === recentPredictions[i-1].actual;
-                if (currentWin !== prevWin) {
-                    breaks++;
-                }
-            }
-
-            const stabilityScore = Math.round((1 - (breaks / (recentPredictions.length - 1))) * 100);
-            scoreEl.textContent = `${stabilityScore}`;
-
-            if (stabilityScore >= 80) {
-                descEl.textContent = 'Rất ổn định! (Cầu Thuận/Nghịch)';
-                descEl.className = 'font-semibold text-lg h-8 text-green-400';
-                card.classList.add('status-good');
-            } else if (stabilityScore >= 60) {
-                descEl.textContent = 'Tương đối ổn định';
-                descEl.className = 'font-semibold text-lg h-8 text-yellow-400';
-                card.classList.add('status-medium');
-            } else {
-                descEl.textContent = 'Cầu loạn - Nên cẩn trọng!';
-                descEl.className = 'font-semibold text-lg h-8 text-red-400';
-                card.classList.add('status-bad');
-            }
-        }
-
-        async function preCalculateNextPath() {
-            if (state.isCalculating) return;
-            state.isCalculating = true;
-            
-            const currentHistory = state.sessions[state.currentSessionId]?.history || [];
-            
-            updateAIStatusUI('calculating');
-            displayPrediction(null); // Clear old prediction
-
-            state.predictedPath = await getAIPathPrediction(currentHistory, state.sessions, state.currentSessionId);
-            state.isCalculating = false;
-
-            // Update UI with the new prediction.
-            displayPrediction(state.predictedPath);
-            if (state.predictedPath.predicted_path) {
-                updateAIStatusUI('ready');
-                updateConfidenceStatsUI(); // This call ONLY updates highlights now.
-            }
-        }
-        
-        function updateConfidenceStatsUI() {
-            const container = document.getElementById('confidenceStatsTable');
-            const recommendationDiv = document.getElementById('confidenceRecommendation');
-            const predictions = state.sessions[state.currentSessionId]?.predictions || [];
-            
-            if (predictions.length === 0 && !state.predictedPath?.confidence) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4">Chưa có dữ liệu thống kê.</p>';
-                recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm ra khoảng vàng.</p>`;
-                return;
-            }
-
-            const ranges = [
-                {min: 50, max: 60, name: '50-59%'}, {min: 60, max: 70, name: '60-69%'}, 
-                {min: 70, max: 80, name: '70-79%'}, {min: 80, max: 90, name: '80-89%'}, 
-                {min: 90, max: 101, name: '90-100%'}
-            ].map(r => ({...r, predictions: []}));
-
-            predictions.forEach(p => {
-                const range = ranges.find(r => p.confidence >= r.min && p.confidence < r.max);
-                if (range) {
-                    range.predictions.push(p);
-                }
-            });
-
-            // Determine current and previous ranges for highlighting
-            const currentConfidence = state.predictedPath?.confidence;
-            const previousPrediction = predictions.at(-1);
-            const previousConfidence = previousPrediction?.confidence;
-
-            let bestRange = null;
-            let maxRate = -1;
-            ranges.forEach(range => {
-                const total = range.predictions.length;
-                if (total > 0) {
-                    const wins = range.predictions.filter(p => p.predicted === p.actual).length;
-                    const rate = (wins / total) * 100;
-                    if (total >= 3 && rate > maxRate) {
-                        maxRate = rate;
-                        bestRange = range;
-                    }
-                }
-            });
-
-            if (bestRange) {
-                recommendationDiv.innerHTML = `<p class="text-sm text-yellow-300"><span class="font-bold">✨ Khoảng Vàng:</span> Tỷ lệ thắng cao nhất là <b class="text-green-400">${maxRate.toFixed(1)}%</b> trong khoảng <b class="text-white">${bestRange.name}</b>.</p>`;
-            } else {
-                recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm ra khoảng vàng.</p>`;
-            }
-
-            let html = '';
-            for (const range of ranges) {
-                const total = range.predictions.length;
-                const wins = range.predictions.filter(p => p.predicted === p.actual).length;
-                const rate = total > 0 ? (wins / total * 100) : 0;
-
-                let highlightClass = 'method-highlight-base';
-                let badgeHtml = '';
-                
-                const isCurrent = currentConfidence && currentConfidence >= range.min && currentConfidence < range.max;
-                const isPrevious = previousConfidence && previousConfidence >= range.min && previousConfidence < range.max && !isCurrent;
-
-                if (isCurrent) {
-                    highlightClass += ' current-method-highlight';
-                    badgeHtml = `<span class="text-xs font-bold bg-yellow-400 text-gray-900 px-2 py-0.5 rounded-full absolute -top-2 -right-2 transform transition-all" title="Đề xuất hiện tại thuộc khoảng này">Hiện tại</span>`;
-                } else if (isPrevious) {
-                    highlightClass += ' previous-method-highlight';
-                    badgeHtml = `<span class="text-xs font-bold bg-gray-400 text-gray-900 px-2 py-0.5 rounded-full absolute -top-2 -right-2 transform transition-all" title="Ván trước thuộc khoảng này">Ván trước</span>`;
-                }
-
-                let chartHtml = '<div class="bar-chart-container mt-2">';
-                if (total > 0) {
-                    chartHtml += range.predictions.map(p => {
-                        const resultClass = p.predicted === p.actual ? 'win' : 'loss';
-                        const title = `Dự đoán: ${p.predicted}, Thực tế: ${p.actual}`;
-                        return `<div class="bar ${resultClass}" title="${title}"></div>`;
-                    }).join('');
-                } else {
-                    chartHtml += '<div class="w-full text-center text-xs text-gray-600">Chưa có dữ liệu</div>';
-                }
-                chartHtml += '</div>';
-
-                html += `
-                    <div class="bg-gray-700/50 p-3 rounded-lg relative ${highlightClass}">
-                        ${badgeHtml}
-                        <div class="grid grid-cols-3 items-center gap-2">
-                            <span class="font-semibold text-sm col-span-3 sm:col-span-1">Khoảng ${range.name}</span>
-                            <div class="text-center">
-                                <span class="text-xs text-gray-400">Tỷ Lệ</span>
-                                <p class="font-bold ${rate >= 50 ? 'text-green-400' : 'text-red-400'}">${rate.toFixed(1)}%</p>
-                            </div>
-                             <div class="text-center">
-                                <span class="text-xs text-gray-400">Thắng/Tổng</span>
-                                <p class="font-semibold text-white">${wins} / ${total}</p>
-                            </div>
-                        </div>
-                        ${chartHtml}
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        }
-
-
-        // --- EVENT HANDLERS & ACTIONS ---
-        async function addResult(result) {
-            if (!state.currentSessionId || state.isSimulating || state.isCalculating) return;
-
-            // Step 1: Record the outcome of the just-finished hand.
-            if (state.predictedPath && state.predictedPath.predicted_path) {
-                state.sessions[state.currentSessionId].predictions.push({
-                    predicted: state.predictedPath.predicted_path[0],
-                    actual: result,
-                    confidence: state.predictedPath.confidence
-                });
-            }
-
-            // Step 2: Update history and clear the used prediction.
-            state.sessions[state.currentSessionId].history.push(result);
-            state.predictedPath = null;
-            saveSessions(); 
-
-            // Step 3: Update all UI elements to reflect the state of the hand that just finished.
-            updateBigRoadUI();
-            updateAccuracyUI();
-            updateConfidenceStatsUI(); 
-            updateAiRhythmAnalyzer();
-            
-            // Step 4: Asynchronously get the prediction for the *next* hand.
-            await preCalculateNextPath();
-        }
-
-        function undoLast() {
-            if (!state.currentSessionId || state.sessions[state.currentSessionId].history.length === 0 || state.isSimulating) return;
-            const session = state.sessions[state.currentSessionId];
-            session.history.pop();
-            if (session.predictions) session.predictions.pop();
+// --- SESSION MANAGEMENT ---
+function getSessions() { try { return JSON.parse(localStorage.getItem('baccaratPatternSessions_v4')) || {}; } catch (e) { return {}; }}
+function saveSessions() { localStorage.setItem('baccaratPatternSessions_v4', JSON.stringify(state.sessions)); localStorage.setItem('lastActiveSession_v4', state.currentSessionId); }
+function renameSession() {
+    if (!state.currentSessionId) return;
+    const currentName = state.sessions[state.currentSessionId].name;
+    showCustomPrompt("Nhập tên mới cho phiên:", currentName, (newName) => {
+        if (newName && newName.trim() !== "") {
+            state.sessions[state.currentSessionId].name = newName.trim();
             saveSessions();
-
-            // Rerun the whole UI update and prediction flow
-            updateBigRoadUI();
-            updateAccuracyUI();
-            updateConfidenceStatsUI();
-            updateAiRhythmAnalyzer();
-            preCalculateNextPath();
+            updateSessionSelector();
         }
+    });
+}
+function updateSessionSelector() {
+    const selector = document.getElementById('sessionSelector');
+    selector.innerHTML = '';
+    const sortedKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
+    sortedKeys.forEach(sessionId => {
+        const option = document.createElement('option');
+        option.value = sessionId;
+        option.textContent = `${state.sessions[sessionId].name} (${state.sessions[sessionId].history.length} ván)`;
+        selector.appendChild(option);
+    });
+    selector.value = state.currentSessionId;
+    selector.onchange = () => loadSession(selector.value);
+}
+function createNewSession() {
+    const newId = `session-${Date.now()}`;
+    state.currentSessionId = newId;
+    state.sessions[newId] = { name: `Phiên ${new Date().toLocaleString('vi-VN')}`, history: [], predictions: [], lengthPerformance: {}, optimalLength: null };
+    saveSessions();
+    updateSessionSelector();
+    updateAllUI();
+}
+function deleteSelectedSession() {
+    if (!state.currentSessionId || Object.keys(state.sessions).length <= 1) {
+        showToast('Không thể xóa phiên cuối cùng.', 'warning');
+        return;
+    }
+    showCustomConfirm('Bạn có chắc muốn xóa phiên này không?', () => {
+        delete state.sessions[state.currentSessionId];
+        state.currentSessionId = null;
+        localStorage.removeItem('lastActiveSession_v4');
+        saveSessions();
+        initializeApp();
+    });
+}
+function loadSession(sessionId) {
+    if (state.sessions[sessionId]) {
+        state.currentSessionId = sessionId;
+        state.currentPrediction = null;
+        localStorage.setItem('lastActiveSession_v4', state.currentSessionId);
+        updateSessionSelector();
+        updateAllUI();
+    }
+}
 
-        function clearCurrentSessionHistory() {
-            if (!state.currentSessionId || state.isSimulating) return;
-            if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử của phiên này không?')) {
-                const session = state.sessions[state.currentSessionId];
-                session.history = [];
-                session.predictions = [];
-                state.predictedPath = null;
-                saveSessions();
-                
-                // Rerun the whole UI update and prediction flow
-                updateBigRoadUI();
-                updateAccuracyUI();
-                updateConfidenceStatsUI();
-                updateAiRhythmAnalyzer();
-                preCalculateNextPath();
+// --- SETTINGS ---
+function saveSettings() {
+    const settings = {
+        minPatternLength: document.getElementById('minPatternLength').value,
+        maxPatternLength: document.getElementById('maxPatternLength').value,
+        minCertainOccurrences: document.getElementById('minCertainOccurrences').value
+    };
+    localStorage.setItem('baccaratSettings_v1', JSON.stringify(settings));
+    applySettings(settings);
+    showToast('Cài đặt đã được lưu!', 'success');
+    updateAnalysisUI();
+}
+function applySettings(settings) {
+    if (settings.minPatternLength) state.matcher.MIN_PATTERN_LENGTH = parseInt(settings.minPatternLength, 10);
+    if (settings.maxPatternLength) state.matcher.MAX_PATTERN_LENGTH = parseInt(settings.maxPatternLength, 10);
+    if (settings.minCertainOccurrences) state.matcher.MIN_CERTAIN_OCCURRENCES = parseInt(settings.minCertainOccurrences, 10);
+}
+function loadSettings() {
+    const settings = JSON.parse(localStorage.getItem('baccaratSettings_v1') || '{}');
+    applySettings(settings);
+    document.getElementById('minPatternLength').value = state.matcher.MIN_PATTERN_LENGTH;
+    document.getElementById('maxPatternLength').value = state.matcher.MAX_PATTERN_LENGTH;
+    document.getElementById('minCertainOccurrences').value = state.matcher.MIN_CERTAIN_OCCURRENCES;
+}
+
+// --- IMPORT / EXPORT ---
+function exportData() {
+    if (Object.keys(state.sessions).length === 0) { showToast("Không có dữ liệu để xuất.", 'error'); return; }
+    const dataStr = JSON.stringify(state.sessions, null, 2);
+    const dataBlob = new Blob([dataStr], {type: "application/json"});
+    const link = document.createElement('a');
+    link.download = `baccarat_backup_${new Date().toISOString().slice(0,10)}.json`;
+    link.href = URL.createObjectURL(dataBlob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedSessions = JSON.parse(e.target.result);
+            if (typeof importedSessions !== 'object' || importedSessions === null) throw new Error("Invalid format");
+            for(const key in importedSessions) {
+                const s = importedSessions[key];
+                if(!s.name || !Array.isArray(s.history)) throw new Error("Invalid session data");
+                if (!s.predictions) s.predictions = []; if (!s.lengthPerformance) s.lengthPerformance = {}; if (s.optimalLength === undefined) s.optimalLength = null;
             }
-        }
-        
-        // --- API KEY MANAGEMENT ---
-        async function testApiKey() {
-            if (state.isSimulating) return;
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            const apiKeyMessage = document.getElementById('apiKeyMessage');
-            const key = apiKeyInput.value.trim();
-
-            if (!key) {
-                apiKeyMessage.textContent = 'Vui lòng nhập API Key để kiểm tra.';
-                apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
-                return;
-            }
-
-            apiKeyMessage.textContent = 'Đang chẩn đoán kết nối...';
-            apiKeyMessage.className = 'text-sm mt-2 font-semibold text-yellow-400';
-
-            const model = document.getElementById('modelSelector').value;
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-            const payload = { contents: [{ parts: [{ text: "hello" }] }] };
-
-            try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (response.ok) {
-                    apiKeyMessage.textContent = '✅ Kết nối thành công! API Key hợp lệ.';
-                    apiKeyMessage.className = 'text-sm mt-2 font-semibold text-green-400';
-                } else {
-                    if (response.status === 400) apiKeyMessage.textContent = '❌ Lỗi: API Key không hợp lệ hoặc đã bị vô hiệu hóa.';
-                    else if (response.status === 404) apiKeyMessage.textContent = '❌ Lỗi: Mô hình AI đã chọn không tồn tại hoặc đã lỗi thời (Lỗi 404).';
-                    else apiKeyMessage.textContent = `❌ Lỗi kết nối: ${response.statusText} (Mã: ${response.status})`;
-                    apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
-                }
-            } catch (error) {
-                apiKeyMessage.textContent = '❌ Lỗi: Không thể kết nối tới máy chủ. Vui lòng kiểm tra mạng Internet.';
-                apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
-            }
-        }
-
-        function saveApiKey() {
-            if (state.isSimulating) return;
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            const apiKeyMessage = document.getElementById('apiKeyMessage');
-            const key = apiKeyInput.value.trim();
-            if (key) {
-                localStorage.setItem('geminiApiKey_v7', key);
-                apiKeyMessage.textContent = 'Lưu API Key thành công!';
-                apiKeyMessage.className = 'text-sm mt-2 font-semibold text-green-400';
-                setTimeout(() => apiKeyMessage.textContent = '', 3000);
-                if (state.currentSessionId) preCalculateNextPath();
-            } else {
-                 apiKeyMessage.textContent = 'Vui lòng nhập một API Key.';
-                 apiKeyMessage.className = 'text-sm mt-2 font-semibold text-red-400';
-            }
-        }
-
-        function loadApiKey() {
-            const savedKey = localStorage.getItem('geminiApiKey_v7');
-            if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
-        }
-
-        // --- SESSION MANAGEMENT ---
-        function getSessions() {
-            try { return JSON.parse(localStorage.getItem('baccaratAISessions_v7')) || {}; }
-            catch (e) { return {}; }
-        }
-
-        function saveSessions() {
-            localStorage.setItem('baccaratAISessions_v7', JSON.stringify(state.sessions));
-            localStorage.setItem('lastActiveAISession_v7', state.currentSessionId);
-        }
-
-        function updateSessionSelector() {
-            const selector = document.getElementById('sessionSelector');
-            selector.innerHTML = '';
-            const sortedKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
-            sortedKeys.forEach((sessionId, index) => {
-                const session = state.sessions[sessionId];
-                const option = document.createElement('option');
-                option.value = sessionId;
-                option.textContent = `${index + 1}. ${session.name} (${session.history.length} ván)`;
-                selector.appendChild(option);
-            });
-            selector.value = state.currentSessionId;
-            selector.onchange = () => loadSession(selector.value);
-        }
-
-        function createNewSession() {
-            const newId = `session-${Date.now()}`;
-            state.currentSessionId = newId;
-            state.sessions[newId] = { 
-                name: `Phiên ${new Date().toLocaleString('vi-VN')}`, 
-                history: [],
-                predictions: [] // Initialize predictions array
-            };
-            loadSession(newId);
-        }
-
-        function deleteSelectedSession() {
-            if (!state.currentSessionId || Object.keys(state.sessions).length <= 1) {
-                alert('Không thể xóa phiên cuối cùng.'); return;
-            }
-            if (confirm('Bạn có chắc muốn xóa phiên này không?')) {
-                delete state.sessions[state.currentSessionId];
+            showCustomConfirm('Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc muốn tiếp tục?', () => {
+                state.sessions = importedSessions;
                 state.currentSessionId = null;
-                localStorage.removeItem('lastActiveAISession_v7');
+                localStorage.removeItem('lastActiveSession_v4');
                 saveSessions();
                 initializeApp();
-            }
-        }
-
-        function loadSession(sessionId) {
-            if (state.sessions[sessionId]) {
-                state.currentSessionId = sessionId;
-                state.predictedPath = null;
-                // Backwards compatibility: if loading an old session without predictions, create an empty array.
-                if (!state.sessions[sessionId].predictions) {
-                    state.sessions[sessionId].predictions = [];
-                }
-                saveSessions();
-
-                updateSessionSelector();
-                updateBigRoadUI();
-                updateAccuracyUI();
-                updateConfidenceStatsUI();
-                updateAiRhythmAnalyzer();
-                
-                preCalculateNextPath();
-            }
-        }
-        
-        // --- IMPORT / EXPORT ---
-        function exportData() {
-            if (Object.keys(state.sessions).length === 0) {
-                alert("Không có dữ liệu để xuất."); return;
-            }
-            const dataStr = JSON.stringify(state.sessions, null, 2);
-            const dataBlob = new Blob([dataStr], {type: "application/json"});
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.download = `baccarat_ai_backup_${new Date().toISOString().slice(0,10)}.json`;
-            link.href = url;
-            link.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedSessions = JSON.parse(e.target.result);
-                    if (typeof importedSessions !== 'object' || importedSessions === null) throw new Error("Invalid format");
-                    for(const key in importedSessions) {
-                        if(!importedSessions[key].name || !Array.isArray(importedSessions[key].history)) {
-                             throw new Error("Invalid session data");
-                        }
-                        // Backwards compatibility for importing old data
-                        if (!importedSessions[key].predictions) {
-                            importedSessions[key].predictions = [];
-                        }
-                    }
-                    if (confirm('Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc muốn tiếp tục?')) {
-                        state.sessions = importedSessions;
-                        state.currentSessionId = null;
-                        localStorage.removeItem('lastActiveAISession_v7');
-                        saveSessions();
-                        initializeApp();
-                        alert('Nhập dữ liệu thành công!');
-                    }
-                } catch (error) {
-                    alert('Lỗi: File dữ liệu không hợp lệ.');
-                    console.error("Import error:", error);
-                } finally {
-                    event.target.value = '';
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // --- SIMULATION ---
-        function disableMainControls() {
-            document.querySelectorAll('.main-control').forEach(btn => btn.disabled = true);
-        }
-
-        function enableMainControls() {
-            document.querySelectorAll('.main-control').forEach(btn => btn.disabled = false);
-        }
-
-        function showSimulationResults(stats, totalHands) {
-            const modal = document.getElementById('simulationModal');
-            const content = document.getElementById('simulationResultContent');
-            
-            content.innerHTML = `
-                <p class="text-gray-400">AI đã phân tích và dự đoán lại <span class="font-bold text-white">${stats.total}</span> ván (từ ván 6 đến ván ${totalHands}).</p>
-                <div class="bg-gray-700 p-4 rounded-lg space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium text-gray-300">Tỷ Lệ Thắng</span>
-                        <span class="text-3xl font-bold text-green-400">${stats.rate.toFixed(1)}%</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium text-gray-300">Số Phán Đoán Đúng</span>
-                        <span class="text-xl font-semibold text-white">${stats.correct}</span>
-                    </div>
-                     <div class="flex justify-between items-center">
-                        <span class="font-medium text-gray-300">Tổng Số Phán Đoán</span>
-                        <span class="text-xl font-semibold text-white">${stats.total}</span>
-                    </div>
-                </div>
-            `;
-            modal.classList.remove('hidden');
-        }
-
-        function hideSimulationModal() {
-            document.getElementById('simulationModal').classList.add('hidden');
-        }
-
-        async function runSimulation() {
-            if (state.isCalculating || state.isSimulating) return;
-
-            const currentHistory = state.sessions[state.currentSessionId]?.history;
-            if (!currentHistory || currentHistory.length < 6) {
-                alert("Cần ít nhất 6 ván trong lịch sử để chạy mô phỏng.");
-                return;
-            }
-
-            state.isSimulating = true;
-            disableMainControls();
-            const analysisResultDiv = document.getElementById('analysisResult');
-            const simulationPredictions = [];
-
-            try {
-                for (let i = 5; i < currentHistory.length; i++) {
-                    const historyForPrediction = currentHistory.slice(0, i);
-                    const actualResult = currentHistory[i];
-
-                    analysisResultDiv.innerHTML = `<div class="flex flex-col items-center justify-center h-full"><div class="spinner spinner-lg"></div><p class="text-gray-400 mt-4">Đang mô phỏng ván ${i + 1} / ${currentHistory.length}</p></div>`;
-                    
-                    const prediction = await getAIPathPrediction(historyForPrediction, state.sessions, state.currentSessionId, simulationPredictions);
-                    
-                    if (prediction.error) throw new Error(prediction.error);
-                    
-                    if (prediction && prediction.predicted_path) {
-                         simulationPredictions.push({
-                             predicted: prediction.predicted_path[0],
-                             actual: actualResult,
-                             confidence: prediction.confidence
-                         });
-                    }
-                }
-                const total = simulationPredictions.length;
-                const correct = simulationPredictions.filter(p => p.predicted === p.actual).length;
-                const rate = total > 0 ? (correct / total) * 100 : 0;
-                showSimulationResults({ total, correct, rate }, currentHistory.length);
-
-            } catch (error) {
-                console.error("Simulation failed:", error);
-                alert(`Mô phỏng thất bại: ${error.message}`);
-            } finally {
-                state.isSimulating = false;
-                enableMainControls();
-                displayPrediction(state.predictedPath); 
-            }
-        }
-        
-        // --- MODEL SELECTION ---
-        function saveModelSelection() {
-            const model = document.getElementById('modelSelector').value;
-            localStorage.setItem('geminiApiKey_v7', model);
-            if (!state.isCalculating && state.currentSessionId) {
-                preCalculateNextPath();
-            }
-        }
-        
-        function loadModelSelection() {
-            const savedModel = localStorage.getItem('geminiApiKey_v7');
-            const modelSelector = document.getElementById('modelSelector');
-            if (savedModel) {
-                modelSelector.value = savedModel;
-            }
-            modelSelector.addEventListener('change', saveModelSelection);
-        }
-
-        function initializeApp() {
-            // Cleanup old data
-            const versionsToClean = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6'];
-            versionsToClean.forEach(v => {
-                 localStorage.removeItem(`geminiApiKey_${v}`);
-                 localStorage.removeItem(`baccaratAISessions_${v}`);
-                 localStorage.removeItem(`lastActiveAISession_${v}`);
-                 localStorage.removeItem(`geminiModel_${v}`);
+                showToast('Nhập dữ liệu thành công!', 'success');
             });
-
-            loadApiKey();
-            loadModelSelection();
-            state.sessions = getSessions();
-            const lastActiveId = localStorage.getItem('lastActiveAISession_v7');
-            if (Object.keys(state.sessions).length === 0) {
-                createNewSession();
-            } else {
-                const sortedKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
-                const idToLoad = (lastActiveId && state.sessions[lastActiveId]) ? lastActiveId : sortedKeys[0];
-                loadSession(idToLoad);
-            }
+        } catch (error) {
+            showToast('Lỗi: File dữ liệu không hợp lệ.', 'error');
+            console.error("Import error:", error);
+        } finally {
+            event.target.value = '';
         }
+    };
+    reader.readAsText(file);
+}
 
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', initializeApp);
-    </script>
+// --- CUSTOM UI COMPONENTS (MODAL, TOAST, PROMPT) ---
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    const colors = {
+        success: 'border-green-500', info: 'border-blue-500',
+        warning: 'border-yellow-500', error: 'border-red-500'
+    };
+    toast.className = `toast-notification ${colors[type]}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 3000);
+}
+function showCustomConfirm(message, onConfirm) {
+    const container = document.getElementById('modal-container');
+    const modalHTML = `
+        <div id="custom-confirm" class="modal-backdrop">
+            <div class="modal-content">
+                <p class="text-lg text-gray-200 mb-6">${message}</p>
+                <div class="flex justify-end gap-4">
+                    <button id="confirm-cancel" class="btn bg-gray-600 hover:bg-gray-500 px-6 py-2 rounded-lg">Hủy</button>
+                    <button id="confirm-ok" class="btn bg-red-600 hover:bg-red-500 px-6 py-2 rounded-lg">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.innerHTML = modalHTML;
+    document.getElementById('confirm-ok').onclick = () => { onConfirm(); container.innerHTML = ''; };
+    document.getElementById('confirm-cancel').onclick = () => { container.innerHTML = ''; };
+}
+function showCustomPrompt(message, defaultValue, onConfirm) {
+    const container = document.getElementById('modal-container');
+    const modalHTML = `
+        <div id="custom-prompt" class="modal-backdrop">
+            <div class="modal-content">
+                <p class="text-lg text-gray-200 mb-4">${message}</p>
+                <input type="text" id="prompt-input" value="${defaultValue}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none mb-6">
+                <div class="flex justify-end gap-4">
+                    <button id="prompt-cancel" class="btn bg-gray-600 hover:bg-gray-500 px-6 py-2 rounded-lg">Hủy</button>
+                    <button id="prompt-ok" class="btn bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg">Lưu</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.innerHTML = modalHTML;
+    const input = document.getElementById('prompt-input');
+    input.focus();
+    input.select();
+    document.getElementById('prompt-ok').onclick = () => { onConfirm(input.value); container.innerHTML = ''; };
+    document.getElementById('prompt-cancel').onclick = () => { container.innerHTML = ''; };
+    input.onkeydown = (e) => { if (e.key === 'Enter') document.getElementById('prompt-ok').click(); };
+}
+
+function initializeApp() {
+    loadSettings();
+    state.sessions = getSessions();
+    Object.values(state.sessions).forEach(s => {
+        if (!s.lengthPerformance) s.lengthPerformance = {};
+        if (s.optimalLength === undefined) s.optimalLength = null;
+    });
+    const lastActiveId = localStorage.getItem('lastActiveSession_v4');
+    if (Object.keys(state.sessions).length === 0) {
+        createNewSession();
+    } else {
+        const sortedKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
+        const idToLoad = (lastActiveId && state.sessions[lastActiveId]) ? lastActiveId : sortedKeys[0];
+        loadSession(idToLoad);
+    }
+}
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+</script>
 </body>
 </html>
 
