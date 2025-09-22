@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nhà Nghiên Cứu AI - Hệ Thống Tìm Kiếm Quy Luật</title>
+    <title>Hội Đồng Chuyên Gia AI - Hệ Thống Tìm Kiếm Quy Luật</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -29,7 +29,7 @@
             overflow: hidden;
         }
         .progress-bar {
-            background-color: #4f46e5;
+            background: linear-gradient(to right, #4f46e5, #a855f7);
             transition: width 0.5s ease-in-out;
         }
         .log-item {
@@ -55,31 +55,32 @@
 
     <!-- Header -->
     <div class="text-center p-6">
-        <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Nhà Nghiên Cứu AI</h1>
-        <p class="text-gray-400 mt-2">Tự động phân tích, tìm kiếm và tối ưu hóa quy luật từ dữ liệu của bạn.</p>
+        <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Hội Đồng Chuyên Gia AI</h1>
+        <p class="text-gray-400 mt-2">Nơi các AI cùng nhau nghiên cứu, tranh luận và tìm ra bộ quy luật tối ưu.</p>
     </div>
 
     <!-- Step 1: Input -->
     <div class="card p-6 rounded-2xl shadow-lg">
         <h2 class="text-2xl font-semibold mb-4 text-cyan-300 flex items-center">
             <span class="bg-cyan-500 text-gray-900 rounded-full h-8 w-8 flex items-center justify-center font-bold mr-3">1</span>
-            Cung cấp Dữ liệu & Công cụ
+            Thiết lập Hội đồng & Cung cấp Dữ liệu
         </h2>
         
-        <div class="space-y-4">
-            <div>
-                <label for="geminiApiKey" class="block text-sm font-medium text-gray-300 mb-2">Gemini API Key</label>
-                <input type="password" id="geminiApiKey" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Nhập API Key của bạn...">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Tệp Dữ Liệu Lịch Sử (.json)</label>
-                <div class="flex items-center">
-                    <label for="fileInput" class="btn w-full text-center bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-lg cursor-pointer">
-                        📤 Tải Lên "Sách Giáo Khoa"
-                    </label>
-                    <input type="file" id="fileInput" class="hidden" accept=".json">
-                    <span id="fileName" class="ml-4 text-gray-400 truncate">Chưa có tệp nào được chọn...</span>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="password" id="geminiApiKey1" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="API Key 1: Chuyên gia Cầu Bệt">
+            <input type="password" id="geminiApiKey2" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="API Key 2: Chuyên gia Mẫu Hình">
+            <input type="password" id="geminiApiKey3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="API Key 3: Nhà Thống Kê">
+            <input type="password" id="geminiApiKey4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="API Key 4: Nhà Phản Biện">
+            <input type="password" id="geminiApiKey5" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="API Key 5: Chủ Tịch Hội Đồng">
+        </div>
+        <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Tệp Dữ Liệu Lịch Sử (.json)</label>
+            <div class="flex items-center">
+                <label for="fileInput" class="btn w-full text-center bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-lg cursor-pointer">
+                    📤 Tải Lên "Sách Giáo Khoa"
+                </label>
+                <input type="file" id="fileInput" class="hidden" accept=".json">
+                <span id="fileName" class="ml-4 text-gray-400 truncate">Chưa có tệp nào được chọn...</span>
             </div>
         </div>
     </div>
@@ -88,7 +89,7 @@
     <div class="card p-6 rounded-2xl shadow-lg">
         <h2 class="text-2xl font-semibold mb-4 text-indigo-300 flex items-center">
             <span class="bg-indigo-500 text-gray-900 rounded-full h-8 w-8 flex items-center justify-center font-bold mr-3">2</span>
-            Bắt đầu quá trình Nghiên Cứu
+            Bắt đầu phiên họp Hội đồng
         </h2>
         <button id="startButton" onclick="startAnalysis()" class="btn w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg text-lg" disabled>
             Bắt đầu Phân tích
@@ -102,7 +103,7 @@
             <div class="progress-bar-container w-full h-2.5">
                 <div id="progressBar" class="progress-bar h-2.5" style="width: 0%"></div>
             </div>
-             <div id="log-container" class="mt-4 bg-gray-900 p-4 rounded-lg h-48 overflow-y-auto font-mono text-sm text-gray-300">
+             <div id="log-container" class="mt-4 bg-gray-900 p-4 rounded-lg h-64 overflow-y-auto font-mono text-sm text-gray-300">
                 <p>Khởi tạo môi trường nghiên cứu... <span class="blinking-cursor">_</span></p>
              </div>
         </div>
@@ -131,23 +132,21 @@
 
 <script>
 let state = {
-    apiKey: '',
+    apiKeys: [],
     fullHistory: [],
-    bestRuleset: {
+    finalRuleset: {
         rules: '',
         accuracy: 0,
         explanation: ''
     },
     isAnalyzing: false,
-    maxIterations: 5, // Limit iterations to prevent high costs
-    currentIteration: 0
 };
 
 // --- UI Management ---
 const fileInput = document.getElementById('fileInput');
 const fileNameEl = document.getElementById('fileName');
 const startButton = document.getElementById('startButton');
-const apiKeyInput = document.getElementById('geminiApiKey');
+const apiKeyInputs = Array.from({length: 5}, (_, i) => document.getElementById(`geminiApiKey${i+1}`));
 const analysisProgressEl = document.getElementById('analysis-progress');
 const resultsCardEl = document.getElementById('results-card');
 const logContainer = document.getElementById('log-container');
@@ -161,24 +160,23 @@ fileInput.addEventListener('change', () => {
         checkCanStart();
     }
 });
-apiKeyInput.addEventListener('input', checkCanStart);
+apiKeyInputs.forEach(input => input.addEventListener('input', checkCanStart));
 
 function checkCanStart() {
-    startButton.disabled = !(apiKeyInput.value.trim() && fileInput.files.length > 0);
+    const allKeysFilled = apiKeyInputs.every(input => input.value.trim());
+    startButton.disabled = !(allKeysFilled && fileInput.files.length > 0);
 }
 
-function logMessage(message) {
-    // Remove the blinking cursor if it exists
+function logMessage(message, isImportant = false) {
     const cursor = logContainer.querySelector('.blinking-cursor');
-    if (cursor) {
-        cursor.parentElement.remove();
-    }
+    if (cursor) cursor.parentElement.remove();
     
     const p = document.createElement('p');
     p.className = 'log-item';
+    if(isImportant) p.className += ' text-cyan-400 font-semibold';
     p.innerHTML = `${message} <span class="blinking-cursor">_</span>`;
     logContainer.appendChild(p);
-    logContainer.scrollTop = logContainer.scrollHeight; // Auto-scroll
+    logContainer.scrollTop = logContainer.scrollHeight;
 }
 
 function updateProgress(percentage, status) {
@@ -191,11 +189,11 @@ function updateProgress(percentage, status) {
 // --- Core Logic ---
 async function startAnalysis() {
     if (state.isAnalyzing) return;
-    
-    state.apiKey = apiKeyInput.value.trim();
+
+    state.apiKeys = apiKeyInputs.map(input => input.value.trim());
     const file = fileInput.files[0];
-    if (!state.apiKey || !file) {
-        alert('Vui lòng nhập API Key và chọn tệp dữ liệu.');
+    if (state.apiKeys.some(key => !key) || !file) {
+        alert('Vui lòng nhập đủ 5 API Key và chọn tệp dữ liệu.');
         return;
     }
 
@@ -204,9 +202,7 @@ async function startAnalysis() {
     resultsCardEl.classList.add('hidden');
     analysisProgressEl.classList.remove('hidden');
     logContainer.innerHTML = '<p>Khởi tạo môi trường nghiên cứu... <span class="blinking-cursor">_</span></p>';
-    state.bestRuleset = { rules: '', accuracy: 0, explanation: '' };
-    state.currentIteration = 0;
-
+    
     try {
         logMessage('Đang đọc và hợp nhất dữ liệu...');
         updateProgress(5, 'Đọc dữ liệu...');
@@ -215,108 +211,110 @@ async function startAnalysis() {
         state.fullHistory = Object.values(importedSessions).flatMap(s => s.history || []);
         
         if (state.fullHistory.length < 50) {
-            throw new Error('Dữ liệu quá ngắn. Cần ít nhất 50 ván cược trên tất cả các phiên.');
+            throw new Error('Dữ liệu quá ngắn. Cần ít nhất 50 ván cược.');
         }
-
-        logMessage(`Tổng hợp thành công ${state.fullHistory.length} ván cược. Bắt đầu vòng lặp nghiên cứu.`);
-        updateProgress(10, 'Bắt đầu nghiên cứu...');
+        logMessage(`Tổng hợp thành công ${state.fullHistory.length} ván cược. Hội đồng bắt đầu làm việc.`);
         
-        await analysisLoop();
+        // Stage 1: Specialists work in parallel
+        updateProgress(10, 'Giai đoạn 1: Các chuyên gia phân tích...');
+        logMessage('Hỏi ý kiến Chuyên gia Cầu Bệt, Chuyên gia Mẫu Hình, và Nhà Thống Kê...');
+        
+        const specialistPrompts = getSpecialistPrompts(state.fullHistory);
+        const specialistPromises = [
+            callGemini(specialistPrompts.streak.system, specialistPrompts.streak.user, state.apiKeys[0]),
+            callGemini(specialistPrompts.sequence.system, specialistPrompts.sequence.user, state.apiKeys[1]),
+            callGemini(specialistPrompts.statistical.system, specialistPrompts.statistical.user, state.apiKeys[2]),
+        ];
+        
+        const specialistResults = await Promise.all(specialistPromises);
+        const [streakResult, sequenceResult, statisticalResult] = specialistResults.map(res => JSON.parse(res.candidates[0].content.parts[0].text));
+
+        logMessage('Các chuyên gia đã đưa ra ý kiến. Chuyển cho Nhà Phản Biện.', true);
+
+        // Stage 2: Contrarian analysis
+        updateProgress(50, 'Giai đoạn 2: Nhà Phản Biện tìm kẽ hở...');
+        const contrarianPrompt = getContrarianPrompt(state.fullHistory, [streakResult, sequenceResult, statisticalResult]);
+        const contrarianResultJson = await callGemini(contrarianPrompt.system, contrarianPrompt.user, state.apiKeys[3]);
+        const contrarianResult = JSON.parse(contrarianResultJson.candidates[0].content.parts[0].text);
+
+        logMessage('Nhà Phản Biện đã hoàn thành. Chuyển tất cả cho Chủ Tịch Hội Đồng.', true);
+
+        // Stage 3: Lead Strategist synthesizes everything
+        updateProgress(75, 'Giai đoạn 3: Chủ Tịch Hội Đồng tổng hợp...');
+        const leadPrompt = getLeadStrategistPrompt(state.fullHistory, [streakResult, sequenceResult, statisticalResult], contrarianResult);
+        const leadResultJson = await callGemini(leadPrompt.system, leadPrompt.user, state.apiKeys[4]);
+        const finalRuleset = JSON.parse(leadResultJson.candidates[0].content.parts[0].text);
+
+        logMessage('Chủ Tịch đã ra quyết định. Bắt đầu kiểm chứng bộ quy luật cuối cùng.');
+
+        // Final Verification
+        updateProgress(90, 'Kiểm chứng lần cuối...');
+        const { accuracy } = await verifyRuleset(finalRuleset.rules);
+        state.finalRuleset = { ...finalRuleset, accuracy };
+        logMessage(`Kiểm chứng hoàn tất! Độ chính xác cuối cùng: ${accuracy.toFixed(2)}%`, true);
+
+        finalizeAnalysis();
 
     } catch (error) {
-        logMessage(`LỖI: ${error.message}`);
+        logMessage(`LỖI NGHIÊM TRỌNG: ${error.message}`);
         alert(`Đã xảy ra lỗi: ${error.message}`);
-    } finally {
         state.isAnalyzing = false;
         startButton.disabled = false;
+        analysisProgressEl.classList.add('hidden');
     }
-}
-
-async function analysisLoop() {
-    state.currentIteration++;
-    if (state.currentIteration > state.maxIterations) {
-        logMessage('Đã đạt số vòng lặp tối đa. Hoàn tất nghiên cứu.');
-        finalizeAnalysis();
-        return;
-    }
-    
-    const progressStart = 10 + (state.currentIteration - 1) * 18;
-    updateProgress(progressStart, `Vòng nghiên cứu ${state.currentIteration}/${state.maxIterations}...`);
-    logMessage(`--- Bắt đầu vòng nghiên cứu ${state.currentIteration} ---`);
-
-    const { systemPrompt, userQuery } = constructPrompt(state.currentIteration, state.bestRuleset, state.fullHistory);
-
-    logMessage('Gửi yêu cầu phân tích đến Gemini...');
-    const responseJson = await callGemini(systemPrompt, userQuery);
-
-    const rulesetText = responseJson?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rulesetText) {
-        throw new Error('Phản hồi từ AI không hợp lệ.');
-    }
-    
-    const parsedRules = JSON.parse(rulesetText);
-    
-    logMessage('Đã nhận bộ quy luật mới. Bắt đầu kiểm chứng...');
-    updateProgress(progressStart + 9, `Kiểm chứng bộ quy luật ${state.currentIteration}...`);
-
-    const { accuracy, correct, total } = await verifyRuleset(parsedRules.rules);
-    
-    logMessage(`Kiểm chứng hoàn tất: Độ chính xác ${accuracy.toFixed(2)}% (${correct}/${total}).`);
-
-    if (accuracy > state.bestRuleset.accuracy) {
-        logMessage(`Tìm thấy bộ quy luật tốt hơn! Độ chính xác tăng từ ${state.bestRuleset.accuracy.toFixed(2)}% lên ${accuracy.toFixed(2)}%.`);
-        state.bestRuleset = {
-            rules: parsedRules.rules,
-            explanation: parsedRules.explanation,
-            accuracy: accuracy
-        };
-    } else {
-        logMessage(`Bộ quy luật mới không hiệu quả hơn. Giữ lại bộ quy luật tốt nhất hiện tại.`);
-    }
-
-    if (state.bestRuleset.accuracy > 95) {
-         logMessage('Độ chính xác đã vượt 95%. Hoàn tất nghiên cứu.');
-         finalizeAnalysis();
-         return;
-    }
-
-    await analysisLoop();
 }
 
 function finalizeAnalysis() {
     updateProgress(100, "Hoàn tất!");
-    document.getElementById('finalAccuracy').textContent = `${state.bestRuleset.accuracy.toFixed(2)}%`;
-    document.getElementById('finalRules').textContent = state.bestRuleset.explanation;
+    document.getElementById('finalAccuracy').textContent = `${state.finalRuleset.accuracy.toFixed(2)}%`;
+    document.getElementById('finalRules').textContent = state.finalRuleset.explanation;
     resultsCardEl.classList.remove('hidden');
     analysisProgressEl.classList.add('hidden');
     startButton.disabled = false;
     state.isAnalyzing = false;
 }
 
-function constructPrompt(iteration, bestRuleset, history) {
-    const systemPrompt = `You are a world-class Baccarat analyst and logician. Your task is to find a set of rules that can predict the outcome of a sequence. You must return your findings as a JSON object with two keys: "explanation" (a human-readable summary of your rules in Vietnamese) and "rules" (a JSON array of machine-readable rule objects). The goal is to maximize the prediction accuracy.`;
+function getSpecialistPrompts(history) {
+    const historySnippet = `[${history.slice(0, 150).join(', ')}]... (tổng cộng ${history.length} ván).`;
+    const baseSystem = `You are a Baccarat analyst. Your task is to find rules to predict the outcome. Return your findings as a JSON object with "explanation" (in Vietnamese) and "rules" (a JSON array of machine-readable rule objects).`;
 
-    let userQuery = `Phân tích chuỗi kết quả Baccarat sau đây: [${history.slice(0, 200).join(', ')}]... (tổng cộng ${history.length} ván).\n`;
-
-    if (iteration === 1) {
-        userQuery += "Hãy tìm và đề xuất một bộ quy luật ban đầu để có thể dự đoán kết quả với độ chính xác cao nhất. Các quy luật có thể dựa trên: độ dài cầu bệt, cầu 1-1, các mẫu hình đặc biệt (ví dụ: PBB, PPB), hoặc bất kỳ quy luật nào khác bạn tìm thấy. Cung cấp câu trả lời dưới dạng một đối tượng JSON.";
-    } else {
-        userQuery += `Ở vòng trước, bộ quy luật sau đã đạt độ chính xác ${bestRuleset.accuracy.toFixed(2)}%:\n${bestRuleset.explanation}\n\nDựa trên dữ liệu gốc, hãy tinh chỉnh, kết hợp hoặc loại bỏ các quy luật này để tạo ra một bộ quy luật mới có độ chính xác cao hơn. Cung cấp bộ quy luật mới dưới dạng một đối tượng JSON.`
-    }
-
-    return { systemPrompt, userQuery };
+    return {
+        streak: {
+            system: baseSystem,
+            user: `Phân tích chuỗi Baccarat sau: ${historySnippet}\nHãy chỉ tập trung vào các quy luật CẦU BỆT (chuỗi dài P hoặc B) và CẦU 1-1 (P-B-P-B). Đề xuất các quy luật dựa trên độ dài của các chuỗi này và điểm gãy của chúng. Bỏ qua các mẫu hình ngắn, phức tạp.`
+        },
+        sequence: {
+            system: baseSystem,
+            user: `Phân tích chuỗi Baccarat sau: ${historySnippet}\nHãy chỉ tập trung vào các MẪU HÌNH NGẮN lặp lại (dài 3-5 tay, ví dụ: 'BBP', 'PBPB'). Đề xuất các quy luật dựa trên kết quả thường xuất hiện sau các mẫu hình này. Bỏ qua các cầu bệt dài.`
+        },
+        statistical: {
+            system: baseSystem,
+            user: `Phân tích chuỗi Baccarat sau: ${historySnippet}\nHãy tiếp cận dưới góc độ thống kê. Tìm kiếm các quy luật "hồi quy về trung bình" (ví dụ: sau một chuỗi dài P, liệu B có khả năng ra cao hơn không?). Đề xuất các quy luật dựa trên sự mất cân bằng trong phân phối P/B tổng thể.`
+        }
+    };
 }
 
-async function callGemini(systemPrompt, userQuery) {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${state.apiKey}`;
+function getContrarianPrompt(history, specialistResults) {
+    const historySnippet = `[${history.slice(0, 150).join(', ')}]... (tổng cộng ${history.length} ván).`;
+    const system = `You are a contrarian Baccarat analyst. Your job is to find weaknesses in other analysts' rules. You must return your findings as a JSON object with "explanation" (in Vietnamese) and "rules" (a JSON array of machine-readable rule objects).`;
+    const user = `Dưới đây là 3 bộ quy luật được đề xuất bởi các chuyên gia khác:\n\n1. Chuyên gia Cầu Bệt:\n${specialistResults[0].explanation}\n\n2. Chuyên gia Mẫu Hình:\n${specialistResults[1].explanation}\n\n3. Nhà Thống Kê:\n${specialistResults[2].explanation}\n\nNhiệm vụ của bạn là xem xét toàn bộ dữ liệu (${historySnippet}) và tìm ra các NGOẠI LỆ hoặc ĐIỂM YẾU của các quy luật trên. Hãy đề xuất một bộ "Quy luật Phản Biện" để xác định khi nào các quy luật chính có khả năng sai.`;
+    return { system, user };
+}
+
+function getLeadStrategistPrompt(history, specialistResults, contrarianResult) {
+     const historySnippet = `[${history.slice(0, 150).join(', ')}]... (tổng cộng ${history.length} ván).`;
+     const system = `You are the Lead Strategist of a team of Baccarat analysts. Your task is to synthesize multiple analyses into a single, cohesive, and robust set of rules. You MUST return your final findings as a JSON object with "explanation" and "rules".`;
+     const user = `Bạn là Chủ Tịch Hội Đồng. Bạn đã nhận được phân tích từ 4 chuyên gia:\n\n1. Chuyên gia Cầu Bệt:\n${specialistResults[0].explanation}\n\n2. Chuyên gia Mẫu Hình:\n${specialistResults[1].explanation}\n\n3. Nhà Thống Kê:\n${specialistResults[2].explanation}\n\n4. Nhà Phản Biện (chỉ ra điểm yếu):\n${contrarianResult.explanation}\n\nDựa trên TOÀN BỘ dữ liệu (${historySnippet}), nhiệm vụ của bạn là tổng hợp tất cả thông tin này để tạo ra một BỘ QUY LUẬT CUỐI CÙNG DUY NHẤT. Hãy ưu tiên các quy luật mạnh nhất, sử dụng các quy luật phản biện để thêm điều kiện ngoại lệ (ví dụ: "Theo cầu bệt TRỪ KHI gặp mẫu XYZ"), và giải quyết các mâu thuẫn. Mục tiêu là bộ quy luật có độ chính xác cao nhất.`;
+     return { system, user };
+}
+
+async function callGemini(systemPrompt, userQuery, apiKey) {
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
     
     const payload = {
         contents: [{ parts: [{ text: userQuery }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
-        generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.2
-        },
+        generationConfig: { responseMimeType: "application/json", temperature: 0.2 },
     };
 
     const response = await fetch(apiUrl, {
@@ -341,15 +339,13 @@ async function verifyRuleset(rules) {
         const historySlice = state.fullHistory.slice(0, i);
         const actualResult = state.fullHistory[i];
 
-        // Find the first rule that applies
         let prediction = null;
         for (const rule of rules) {
             if (rule.type === 'streak') {
                 const last = historySlice[historySlice.length - 1];
                 let streak = 0;
                 for (let j = historySlice.length - 1; j >= 0; j--) {
-                    if (historySlice[j] === last) streak++;
-                    else break;
+                    if (historySlice[j] === last) streak++; else break;
                 }
                 if (last === rule.value && streak >= rule.length) {
                     prediction = rule.prediction;
@@ -368,9 +364,7 @@ async function verifyRuleset(rules) {
 
         if (prediction) {
             total++;
-            if (prediction === actualResult) {
-                correct++;
-            }
+            if (prediction === actualResult) correct++;
         }
     }
     
@@ -379,17 +373,17 @@ async function verifyRuleset(rules) {
 }
 
 function downloadResults() {
-    if (!state.bestRuleset.rules || state.bestRuleset.rules.length === 0) {
+    if (!state.finalRuleset.rules || state.finalRuleset.rules.length === 0) {
         alert("Chưa có quy luật nào để tải về.");
         return;
     }
     
-    const content = `# CÔNG TRÌNH NGHIÊN CỨU BACCARAT\n\n## Độ chính xác cuối cùng: ${state.bestRuleset.accuracy.toFixed(2)}%\n\n---\n\n## Giải thích quy luật\n\n${state.bestRuleset.explanation}\n\n---\n\n## Dữ liệu quy luật (JSON)\n\n\`\`\`json\n${JSON.stringify(state.bestRuleset.rules, null, 2)}\n\`\`\``;
+    const content = `# CÔNG TRÌNH NGHIÊN CỨU BACCARAT\n\n## Độ chính xác cuối cùng: ${state.finalRuleset.accuracy.toFixed(2)}%\n\n---\n\n## Giải thích quy luật\n\n${state.finalRuleset.explanation}\n\n---\n\n## Dữ liệu quy luật (JSON)\n\n\`\`\`json\n${JSON.stringify(state.finalRuleset.rules, null, 2)}\n\`\`\``;
     
     const blob = new Blob([content], { type: 'text/markdown' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'quy-luat-baccarat.md';
+    link.download = 'cong-trinh-nghien-cuu-ai.md';
     link.click();
     URL.revokeObjectURL(link.href);
 }
