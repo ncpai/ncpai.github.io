@@ -85,6 +85,10 @@
             from { opacity: 0; transform: translateY(-100%); }
             to { opacity: 1; transform: translateY(0); }
         }
+        #sessionManagementContent {
+            transition: max-height 0.5s ease-in-out;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -104,20 +108,31 @@
 
         <!-- Session Management -->
         <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 text-blue-300">📁 Quản Lý Phiên</h2>
-            <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                <select id="sessionSelector" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    <button onclick="createNewSession()" class="btn w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg">➕ Mới</button>
-                    <button onclick="renameSession()" class="btn w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg">✏️ Đổi Tên</button>
-                    <button onclick="deleteSelectedSession()" class="btn w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-lg">🗑️ Xóa</button>
-                </div>
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleSessionManagement()">
+                <h2 class="text-xl font-semibold text-blue-300">📁 Quản Lý Phiên</h2>
+                <button id="toggleSessionBtn" class="text-gray-400 hover:text-white p-1">
+                    <svg id="toggleSessionIcon" class="w-6 h-6 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
             </div>
-            <!-- Import/Export -->
-            <div class="flex flex-col sm:flex-row gap-4">
-                <button onclick="exportData()" class="btn w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-lg">📤 Xuất Dữ Liệu</button>
-                <button onclick="document.getElementById('fileInput').click()" class="btn w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded-lg">📥 Nhập Dữ Liệu</button>
-                <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
+            <div id="sessionManagementContent">
+                 <div class="mt-4">
+                    <div class="flex flex-col sm:flex-row gap-4 mb-2">
+                        <select id="sessionSelector" multiple size="5" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="createNewSession()" class="btn w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg">➕ Mới</button>
+                            <button onclick="renameSession()" class="btn w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg">✏️ Đổi Tên</button>
+                            <button onclick="deleteSelectedSessions()" class="btn w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-lg col-span-2">🗑️ Xóa Mục Đã Chọn</button>
+                             <button onclick="deleteAllSessions()" class="btn w-full bg-red-800 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg col-span-2">💥 Xóa Tất Cả</button>
+                        </div>
+                    </div>
+                     <p class="text-xs text-gray-500 text-center mb-4 sm:text-left">Mẹo: Giữ phím Shift hoặc Ctrl (Cmd trên Mac) để chọn nhiều phiên.</p>
+                    <!-- Import/Export -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="exportData()" class="btn w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-lg">📤 Xuất Dữ Liệu</button>
+                        <button onclick="document.getElementById('fileInput').click()" class="btn w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded-lg">📥 Nhập Dữ Liệu</button>
+                        <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
+                    </div>
+                 </div>
             </div>
         </div>
 
@@ -344,6 +359,7 @@ let state = {
     currentPrediction: null,
     currentFinalPrediction: null, 
     goldenRange: null,
+    deathRange: null,
     sessionConfidenceRanges: [],
     confidenceSequenceData: {}
 };
@@ -357,12 +373,7 @@ function getPredictionStats(predictions) {
 }
 
 function calculateConfidenceRangeStats(predictions) {
-    // UPDATED: Changed ranges from 10% increments to 5% increments
-    const ranges = [
-        {min:50,max:55}, {min:55,max:60}, {min:60,max:65}, {min:65,max:70}, 
-        {min:70,max:75}, {min:75,max:80}, {min:80,max:85}, {min:85,max:90}, 
-        {min:90,max:95}, {min:95,max:100}
-    ].map(r => ({...r, total:0, wins:0, rate: -1}));
+    const ranges = [{min:50,max:60},{min:60,max:70},{min:70,max:80},{min:80,max:90},{min:90,max:100}].map(r => ({...r, total:0, wins:0, rate: -1}));
     
     ranges.forEach(range => {
         const predictionsForRange = predictions.filter(p => p.confidence >= range.min && (p.confidence < range.max || (range.max === 100 && p.confidence >= 100)));
@@ -375,12 +386,7 @@ function calculateConfidenceRangeStats(predictions) {
 
 function getConfidenceSequenceData() {
     const sequenceData = {};
-    // UPDATED: Changed ranges from 10% increments to 5% increments
-    const rangeDefs = [
-        {min:50,max:55}, {min:55,max:60}, {min:60,max:65}, {min:65,max:70}, 
-        {min:70,max:75}, {min:75,max:80}, {min:80,max:85}, {min:85,max:90}, 
-        {min:90,max:95}, {min:95,max:100}
-    ];
+    const rangeDefs = [{min:50,max:60},{min:60,max:70},{min:70,max:80},{min:80,max:90},{min:90,max:100}];
 
     rangeDefs.forEach(r => {
         const key = `${r.min}-${r.max}`;
@@ -453,12 +459,7 @@ function getFinalVerdict(context) {
         return { verdict: 'neutral', explanation: 'Chưa có đủ dữ liệu để đưa ra phán quyết.' };
     }
 
-    // UPDATED: Changed ranges from 10% increments to 5% increments
-    const rangeDefs = [
-        {min:50,max:55}, {min:55,max:60}, {min:60,max:65}, {min:65,max:70}, 
-        {min:70,max:75}, {min:75,max:80}, {min:80,max:85}, {min:85,max:90}, 
-        {min:90,max:95}, {min:95,max:100}
-    ];
+    const rangeDefs = [{min:50,max:60},{min:60,max:70},{min:70,max:80},{min:80,max:90},{min:90,max:100}];
     const foundRange = rangeDefs.find(r => confidence >= r.min && (confidence < r.max || (r.max === 100 && confidence >= 100)));
     
     if (!foundRange) {
@@ -670,7 +671,18 @@ function updateConfidenceStatsUI() {
     const previousConfidence = sessionPredictions.length > 0 ? sessionPredictions[sessionPredictions.length - 1].confidence : null;
 
     let bestRange = null, maxRate = -1;
+    let worstRange = null, minRate = 101;
+
     state.sessionConfidenceRanges.forEach(range => {
+        if (range.total >= 3 && range.rate > maxRate) { 
+            maxRate = range.rate; 
+            bestRange = range; 
+        }
+        if (range.total >= 3 && range.rate !== -1 && range.rate < minRate) {
+            minRate = range.rate;
+            worstRange = range;
+        }
+
         const predictionsForRange = sessionPredictions.filter(p => p.confidence >= range.min && (p.confidence < range.max || (range.max === 100 && p.confidence >= 100)));
         let trendIndicator = '', streak = 0;
         if (predictionsForRange.length >= 1) {
@@ -681,20 +693,38 @@ function updateConfidenceStatsUI() {
             if(streak >= 1) trendIndicator = `<span class="flex items-center ${lastWin ? 'text-green-400' : 'text-red-400'} ml-1.5">${lastWin ? '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>' : '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>'}<span class="font-bold text-xs">${streak}</span></span>`;
         }
         range.trendIndicator = trendIndicator;
-        if (range.total >= 3 && range.rate > maxRate) { maxRate = range.rate; bestRange = range; }
     });
     state.goldenRange = bestRange;
+    state.deathRange = worstRange;
     
     const recommendationDiv = document.getElementById('confidenceRecommendation');
-    if (bestRange) recommendationDiv.innerHTML = `<p class="text-sm text-yellow-300"><span class="font-bold">✨ Khoảng Vàng:</span> Tỷ lệ thắng cao nhất là <b class="text-green-400">${maxRate.toFixed(1)}%</b> trong khoảng <b class="text-white">${bestRange.min}%-${bestRange.max}%</b>.</p>`;
-    else recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm khoảng vàng (cần tối thiểu 3 phán đoán trong 1 khoảng).</p>`;
+    let recommendationHTML = '';
+    if (bestRange) {
+        recommendationHTML += `<p class="text-sm text-yellow-300"><span class="font-bold">✨ Khoảng Vàng:</span> Tỷ lệ thắng cao nhất là <b class="text-green-400">${maxRate.toFixed(1)}%</b> trong khoảng <b class="text-white">${bestRange.min}%-${bestRange.max}%</b>.</p>`;
+    }
+    if (worstRange) {
+        recommendationHTML += `<p class="text-sm text-yellow-300 mt-1"><span class="font-bold">💀 Khoảng Tử Thần:</span> Tỷ lệ thắng thấp nhất là <b class="text-red-400">${minRate.toFixed(1)}%</b> trong khoảng <b class="text-white">${worstRange.min}%-${worstRange.max}%</b>.</p>`;
+    }
+
+    if (!bestRange && !worstRange) {
+        recommendationDiv.innerHTML = `<p class="text-sm text-gray-400">Chưa đủ dữ liệu để tìm khoảng vàng/tử thần (cần tối thiểu 3 phán đoán trong 1 khoảng).</p>`;
+    } else {
+        recommendationDiv.innerHTML = recommendationHTML;
+    }
+    
     const tableDiv = document.getElementById('confidenceStatsTable');
     let html = `<div class="grid gap-x-2 text-xs font-semibold text-gray-400 px-3" style="grid-template-columns: 2fr 4fr 2fr 2fr 3fr;"><span>Khoảng</span><span class="text-center">Diễn Biến Gần Đây</span><span class="text-center">Tổng</span><span class="text-center">Thắng</span><span class="text-right">Tỷ Lệ</span></div>`;
     if (sessionPredictions.length === 0 && !currentConfidence) {
         tableDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Chưa có dữ liệu thống kê.</p>';
     } else {
         state.sessionConfidenceRanges.forEach(range => {
-            const highlightClass = range === bestRange ? 'bg-green-800 bg-opacity-40 border border-green-500' : 'bg-gray-700 bg-opacity-50';
+            let highlightClass = 'bg-gray-700 bg-opacity-50';
+            if (range === bestRange) {
+                highlightClass = 'bg-green-800 bg-opacity-40 border border-green-500';
+            } else if (range === worstRange) {
+                highlightClass = 'bg-red-800 bg-opacity-40 border border-red-500';
+            }
+
             let indicatorsHTML = '';
             if (currentConfidence && currentConfidence >= range.min && (currentConfidence < range.max || (range.max === 100 && currentConfidence >= 100))) {
                 indicatorsHTML += `<span class="ml-2 px-1.5 py-0.5 text-xs rounded font-semibold bg-blue-600 text-white" title="Phán đoán hiện tại">Hiện tại</span>`;
@@ -801,6 +831,20 @@ function updateAllUI() {
     updateAnalysisUI(); 
     updateConfidenceStatsUI();
     updateVerdictStatsUI();
+}
+
+// --- NEW FUNCTION: Toggle Session Management Visibility ---
+function toggleSessionManagement() {
+    const content = document.getElementById('sessionManagementContent');
+    const icon = document.getElementById('toggleSessionIcon');
+    
+    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+        content.style.maxHeight = '0px';
+        icon.style.transform = 'rotate(-180deg)';
+    } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        icon.style.transform = 'rotate(0deg)';
+    }
 }
 
 // --- EVENT HANDLERS & ACTIONS ---
@@ -948,10 +992,17 @@ function updateSessionSelector() {
         const option = document.createElement('option');
         option.value = sessionId;
         option.textContent = `${state.sessions[sessionId].name} (${state.sessions[sessionId].history.length} ván)`;
+        if (sessionId === state.currentSessionId) {
+            option.selected = true; // Highlight the currently active session
+        }
         selector.appendChild(option);
     });
-    selector.value = state.currentSessionId;
-    selector.onchange = () => loadSession(selector.value);
+    // Load session when a single session is clicked
+    selector.onclick = () => {
+        if(selector.selectedOptions.length === 1) {
+            loadSession(selector.value);
+        }
+    };
 }
 function createNewSession() {
     const newId = `session-${Date.now()}`;
@@ -961,25 +1012,57 @@ function createNewSession() {
     updateSessionSelector();
     updateAllUI();
 }
-function deleteSelectedSession() {
-    if (!state.currentSessionId || Object.keys(state.sessions).length <= 1) {
-        showToast('Không thể xóa phiên cuối cùng.', 'warning');
+function deleteSelectedSessions() {
+    const selector = document.getElementById('sessionSelector');
+    const selectedIds = Array.from(selector.selectedOptions).map(opt => opt.value);
+
+    if (selectedIds.length === 0) {
+        showToast('Vui lòng chọn ít nhất một phiên để xóa.', 'warning');
         return;
     }
-    showCustomConfirm('Bạn có chắc muốn xóa phiên này không?', () => {
-        delete state.sessions[state.currentSessionId];
-        state.currentSessionId = null;
-        localStorage.removeItem('lastActiveSession_v7');
+
+    if (selectedIds.length === Object.keys(state.sessions).length) {
+        showToast('Không thể xóa tất cả các phiên. Hãy dùng nút "Xóa Tất Cả".', 'error');
+        return;
+    }
+
+    showCustomConfirm(`Bạn có chắc muốn xóa ${selectedIds.length} phiên đã chọn không?`, () => {
+        let wasCurrentSessionDeleted = false;
+        selectedIds.forEach(id => {
+            if (id === state.currentSessionId) {
+                wasCurrentSessionDeleted = true;
+            }
+            delete state.sessions[id];
+        });
+
+        if (wasCurrentSessionDeleted) {
+            state.currentSessionId = null;
+            localStorage.removeItem('lastActiveSession_v7');
+        }
+        
         saveSessions();
         initializeApp();
+        showToast(`Đã xóa ${selectedIds.length} phiên.`, 'success');
     });
 }
+
+function deleteAllSessions() {
+     showCustomConfirm('BẠN CÓ CHẮC MUỐN XÓA TẤT CẢ CÁC PHIÊN KHÔNG? Hành động này không thể hoàn tác.', () => {
+        state.sessions = {};
+        state.currentSessionId = null;
+        localStorage.removeItem('baccaratPatternSessions_v7');
+        localStorage.removeItem('lastActiveSession_v7');
+        initializeApp();
+        showToast('Tất cả các phiên đã được xóa.', 'success');
+    });
+}
+
 function loadSession(sessionId) {
-    if (state.sessions[sessionId]) {
+    if (state.sessions[sessionId] && sessionId !== state.currentSessionId) {
         state.currentSessionId = sessionId;
         state.currentPrediction = null;
         localStorage.setItem('lastActiveSession_v7', state.currentSessionId);
-        updateSessionSelector();
+        updateSessionSelector(); // Re-render to show new selection
         updateAllUI();
     }
 }
@@ -1169,8 +1252,19 @@ function initializeApp() {
     } else {
         const sortedKeys = Object.keys(state.sessions).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
         const idToLoad = (lastActiveId && state.sessions[lastActiveId]) ? lastActiveId : sortedKeys[0];
+        state.currentSessionId = idToLoad;
         loadSession(idToLoad);
     }
+    
+    // Set initial state for collapsible section
+    const sessionContent = document.getElementById('sessionManagementContent');
+    sessionContent.style.maxHeight = sessionContent.scrollHeight + 'px';
+    
+    window.addEventListener('resize', () => {
+        if(sessionContent.style.maxHeight && sessionContent.style.maxHeight !== '0px') {
+            sessionContent.style.maxHeight = sessionContent.scrollHeight + 'px';
+        }
+    });
 }
 
 // --- INITIALIZATION ---
@@ -1179,3 +1273,4 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 </script>
 </body>
 </html>
+
