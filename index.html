@@ -210,25 +210,17 @@
             </div>
         </div>
 
-        <!-- NEW: SEPARATE ENCODED STREAK ANALYSIS -->
+        <!-- NEW: SEPARATE ENCODED STREAK ANALYSIS (YOUR IDEA) -->
         <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
             <h2 class="text-xl font-semibold mb-4 text-teal-300">✨ Phân Tích Chuỗi Cầu Tách Biệt</h2>
             <div id="separatedStreakAnalysisResult">
                  <p class="text-gray-400 text-center py-4">Chưa có đủ dữ liệu để phân tích...</p>
             </div>
         </div>
-
-        <!-- Streak Analysis -->
-        <div id="streak-analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 text-purple-300">🔎 Phân Tích Cầu Bệt</h2>
-            <div id="streakAnalysisResult" class="space-y-3">
-                <p class="text-gray-400 text-center py-4">Chưa có cầu bệt (từ 2 tay trở lên)...</p>
-            </div>
-        </div>
         
         <!-- Pattern Analysis -->
         <div id="analysis-card" class="bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow duration-500">
-            <h2 class="text-xl font-semibold mb-4 text-yellow-300">🧠 Phán Quyết & Đề Xuất</h2>
+            <h2 class="text-xl font-semibold mb-4 text-yellow-300">🧠 Phán Quyết (Phân Tích Tổng Hợp)</h2>
             <div id="analysisResult" class="space-y-4">
                 <p class="text-gray-400 text-center py-8">Cần ít nhất 10 kết quả để bắt đầu phân tích...</p>
             </div>
@@ -367,13 +359,11 @@ class PatternMatcher {
     }
 }
 
-// --- NEW: SEPARATE ENCODED STREAK ANALYZER ---
+// --- NEW: SEPARATE ENCODED STREAK ANALYZER (YOUR IDEA) ---
 const SeparatedStreakAnalyzer = {
-    // 1. Function to encode a raw history (e.g., [P,B,B,P]) into a streak array (e.g., ['1P', '2B', '1P'])
+    // Encodes a raw history (e.g., [P,B,B,P]) into a streak array (e.g., ['1P', '2B', '1P'])
     encodeHistory(history) {
-        if (!history || history.length === 0) {
-            return [];
-        }
+        if (!history || history.length === 0) return [];
         const encoded = [];
         let count = 1;
         for (let i = 1; i <= history.length; i++) {
@@ -387,63 +377,81 @@ const SeparatedStreakAnalyzer = {
         return encoded;
     },
 
-    // 2. Main analysis function
+    // Main analysis function
     getPrediction(currentHistory, allHistoricalSessions) {
-        const encodedCurrent = this.encodeHistory(currentHistory);
-        if (encodedCurrent.length < 1) { // Needs at least one streak to analyze
-            return { html: `<p class="text-gray-400 text-center py-4">Cần ít nhất 1 chuỗi cầu để phân tích...</p>` };
+        const fullEncodedCurrent = this.encodeHistory(currentHistory);
+        if (fullEncodedCurrent.length < 2) { // Needs at least 2 streaks to form a sequence pattern
+            return { html: `<p class="text-gray-400 text-center py-4">Cần ít nhất 2 chuỗi cầu để phân tích...</p>` };
         }
         
-        const currentStreakPattern = encodedCurrent[encodedCurrent.length - 1];
-        const currentStreakType = currentStreakPattern.slice(-1);
+        const currentStreakType = fullEncodedCurrent[fullEncodedCurrent.length - 1].slice(-1);
+        const currentSeparatedSequence = fullEncodedCurrent.filter(s => s.slice(-1) === currentStreakType);
 
-        // Build the combined historical database for the specific type ('P' or 'B')
-        let historicalEncodedStreaks = [];
+        if (currentSeparatedSequence.length < 2) {
+            return { html: `<p class="text-gray-400 text-center py-4">Cần ít nhất 2 chuỗi <b class="${currentStreakType === 'P' ? 'text-blue-400' : 'text-red-400'}">${currentStreakType}</b> để tạo quy luật...</p>` };
+        }
+
+        // Build historical database as an array of session-specific separated sequences
+        const historicalSeparatedSequences = [];
         for (const session of allHistoricalSessions) {
-            const encodedSession = this.encodeHistory(session.history || []);
-            const filteredStreaks = encodedSession.filter(streak => streak.slice(-1) === currentStreakType);
-            historicalEncodedStreaks.push(...filteredStreaks);
-        }
-        
-        // As the current hand is not yet finished, the last streak in the current session's history is the one we are analyzing.
-        // It should not be included in the historical search for "what comes next".
-        if(historicalEncodedStreaks.length > 0) {
-             historicalEncodedStreaks.pop();
-        }
-
-        let continues = 0; // The next streak in the separated sequence is the same type
-        let breaks = 0;    // The streak was the last one in its separated sequence for a session
-
-        // This loop finds 'continues' cases
-        for (let i = 0; i < historicalEncodedStreaks.length - 1; i++) {
-            if (historicalEncodedStreaks[i] === currentStreakPattern) {
-                // The next item in the same-type-list means it continued
-                continues++;
+            // Don't include the currently active session in the historical database
+            if (session.name === state.sessions[state.currentSessionId].name) continue;
+            const encoded = this.encodeHistory(session.history || []);
+            const separated = encoded.filter(s => s.slice(-1) === currentStreakType);
+            if (separated.length > 0) {
+                historicalSeparatedSequences.push(separated);
             }
         }
-        
-        // This loop finds 'breaks' cases by checking the end of each session's separated list
-        for (const session of allHistoricalSessions) {
-             const encodedSession = this.encodeHistory(session.history || []);
-             const filteredStreaks = encodedSession.filter(streak => streak.slice(-1) === currentStreakType);
-             if (filteredStreaks.length > 0 && filteredStreaks[filteredStreaks.length - 1] === currentStreakPattern) {
-                 // Check if it's not the currently forming streak
-                 if(session.name !== state.sessions[state.currentSessionId].name || filteredStreaks.length !== encodedCurrent.filter(s => s.slice(-1) === currentStreakType).length) {
-                    breaks++;
-                 }
-             }
+
+        let foundPattern = null;
+        let continues = 0;
+        let breaks = 0;
+        const MIN_PATTERN_LEN = 2;
+
+        // Loop from the longest possible pattern down to the minimum length
+        for (let len = currentSeparatedSequence.length; len >= MIN_PATTERN_LEN; len--) {
+            const patternToSearch = currentSeparatedSequence.slice(-len);
+            let tempContinues = 0;
+            let tempBreaks = 0;
+
+            for (const sessionSequence of historicalSeparatedSequences) {
+                for (let i = 0; i <= sessionSequence.length - len; i++) {
+                    const segment = sessionSequence.slice(i, i + len);
+                    if (JSON.stringify(segment) === JSON.stringify(patternToSearch)) {
+                        // Match found! What happened next in THIS session's separated sequence?
+                        if (i + len < sessionSequence.length) {
+                            tempContinues++;
+                        } else {
+                            tempBreaks++;
+                        }
+                    }
+                }
+            }
+
+            if (tempContinues + tempBreaks > 0) {
+                foundPattern = patternToSearch;
+                continues = tempContinues;
+                breaks = tempBreaks;
+                break; // Use the longest pattern found and stop
+            }
+        }
+
+        if (!foundPattern) {
+            return { html: `<p class="text-gray-400 text-center py-4">Không tìm thấy quy luật nào cho chuỗi cầu hiện tại.</p>` };
         }
 
         const totalOccurrences = continues + breaks;
-        if (totalOccurrences < 1) {
-             return { html: `<p class="text-gray-400 text-center py-4">Chưa có dữ liệu lịch sử cho chuỗi <b class="${currentStreakType === 'P' ? 'text-blue-400' : 'text-red-400'}">${currentStreakPattern}</b></p>` };
-        }
+        const continueRate = (continues / totalOccurrences * 100).toFixed(0);
+        const patternString = foundPattern.join(' → ');
         
-        const continueRate = totalOccurrences > 0 ? (continues / totalOccurrences * 100).toFixed(0) : 0;
         let html = `
             <div class="p-3 bg-gray-900 rounded-lg text-sm">
-                <div class="flex justify-between items-center font-bold">
-                    <span>Chuỗi hiện tại: <span class="${currentStreakType === 'P' ? 'text-blue-400' : 'text-red-400'}">${currentStreakPattern}</span></span>
+                 <div class="mb-2">
+                    <span class="font-semibold text-gray-400">Đang tìm quy luật cho chuỗi:</span>
+                    <div class="text-center font-bold text-lg ${currentStreakType === 'P' ? 'text-blue-400' : 'text-red-400'} break-words">${patternString}</div>
+                </div>
+                <div class="flex justify-between items-center font-bold mt-3">
+                    <span class="text-base">Kết quả lịch sử:</span>
                     <span class="text-gray-400">${totalOccurrences} lần</span>
                 </div>
                 <div class="flex mt-2 items-center text-xs">
@@ -453,8 +461,7 @@ const SeparatedStreakAnalyzer = {
                     </div>
                     <div class="text-red-400 w-1/2 text-right">Gãy: ${breaks}</div>
                 </div>
-            </div>
-        `;
+            </div>`;
 
         let prediction = null;
         let recommendation = 'KHÓ ĐOÁN';
@@ -477,131 +484,6 @@ const SeparatedStreakAnalyzer = {
             </div>
         `;
         
-        return { html, prediction };
-    }
-};
-
-
-// --- STREAK ANALYZER LOGIC (Standard) ---
-const StreakAnalyzer = {
-    MIN_STREAK_FOR_ANALYSIS: 2,
-
-    findOutcomesForStreakLength(streakType, streakLength, allHistoricalSessions) {
-        let continues = 0;
-        let breaks = 0;
-        const pattern = streakType.repeat(streakLength);
-
-        for (const session of allHistoricalSessions) {
-            const historyStr = (session.history || []).join('');
-            if (historyStr.length < streakLength + 1) continue;
-
-            let startIndex = -1;
-            while ((startIndex = historyStr.indexOf(pattern, startIndex + 1)) !== -1) {
-                 // Ensure it's a true streak end, not part of a longer streak
-                if (startIndex > 0 && historyStr[startIndex - 1] === streakType) {
-                    continue;
-                }
-                const nextCharIndex = startIndex + streakLength;
-                if (nextCharIndex < historyStr.length) {
-                    const nextResult = historyStr[nextCharIndex];
-                    if (nextResult === streakType) {
-                        continues++;
-                    } else {
-                        breaks++;
-                    }
-                }
-            }
-        }
-        return { continues, breaks };
-    },
-
-    getPrediction(currentHistory, allHistoricalSessions) {
-        let currentStreakLength = 0;
-        let streakType = null;
-        if (currentHistory.length > 0) {
-            streakType = currentHistory[currentHistory.length - 1];
-            for (let i = currentHistory.length - 1; i >= 0; i--) {
-                if (currentHistory[i] === streakType) {
-                    currentStreakLength++;
-                } else {
-                    break;
-                }
-            }
-        }
-
-        if (currentStreakLength < this.MIN_STREAK_FOR_ANALYSIS) {
-            return { html: `<p class="text-gray-400 text-center py-4">Chưa có cầu bệt (từ ${this.MIN_STREAK_FOR_ANALYSIS} tay trở lên)...</p>` };
-        }
-
-        const analysisResults = [];
-        for (let len = 2; len <= currentStreakLength; len++) {
-            const stats = this.findOutcomesForStreakLength(streakType, len, allHistoricalSessions);
-            if (stats.continues + stats.breaks > 0) {
-                analysisResults.push({ length: len, ...stats });
-            }
-        }
-
-        if (analysisResults.length === 0) {
-            return { html: `<p class="text-gray-400 text-center py-4">Không có dữ liệu lịch sử cho loại cầu bệt này.</p>` };
-        }
-
-        let html = '';
-        let totalScore = 0;
-        const streakTypeName = streakType === 'P' ? 'Player' : 'Banker';
-        const streakTypeColor = streakType === 'P' ? 'text-blue-400' : 'text-red-400';
-
-        html += `<p class="mb-3">Phân tích cho cầu <span class="font-bold ${streakTypeColor}">${streakTypeName} bệt ${currentStreakLength}</span>:</p>`;
-        html += `<div class="space-y-2 text-sm">`;
-
-        analysisResults.forEach(res => {
-            const total = res.continues + res.breaks;
-            const continueRate = (res.continues / total * 100).toFixed(0);
-            
-            html += `
-                <div class="p-2 bg-gray-900 rounded-md">
-                    <div class="flex justify-between items-center font-semibold">
-                        <span>Cầu bệt ${res.length}:</span>
-                        <span class="text-gray-400">${total} lần</span>
-                    </div>
-                    <div class="flex mt-1 items-center text-xs">
-                        <div class="text-green-400 w-1/2">Tiếp: ${res.continues}</div>
-                        <div class="w-full h-2 bg-gray-600 rounded-full mx-2">
-                           <div class="h-2 bg-gradient-to-r from-green-500 to-yellow-500 rounded-full" style="width: ${continueRate}%;"></div>
-                        </div>
-                        <div class="text-yellow-400 w-1/2 text-right">Gãy: ${res.breaks}</div>
-                    </div>
-                </div>
-            `;
-            
-            const score = res.continues - res.breaks;
-            const weight = res.length * res.length;
-            totalScore += score * weight;
-        });
-        html += `</div>`;
-
-        let prediction = null;
-        let recommendation = 'KHÓ ĐOÁN';
-        let recommendationColor = 'text-gray-300';
-
-        if (totalScore > 0) {
-            prediction = streakType;
-            recommendation = `THEO CẦU (${streakType})`;
-            recommendationColor = 'text-green-400';
-        } else if (totalScore < 0) {
-            prediction = (streakType === 'P' ? 'B' : 'P');
-            recommendation = `BẺ CẦU (${streakType}x${currentStreakLength})`;
-            recommendationColor = 'text-yellow-400';
-        }
-        
-        const finalPredictionHTML = `
-            <div class="mt-4 pt-3 border-t border-gray-700 text-center">
-                <p class="text-sm text-gray-400">Đề xuất dựa trên tổng điểm:</p>
-                <p class="text-xl font-bold ${recommendationColor}">${recommendation}</p>
-            </div>
-        `;
-
-        html += finalPredictionHTML;
-
         return { html, prediction };
     }
 };
@@ -869,7 +751,7 @@ function updateAnalysisUI() {
 
     let recommendationText = recommendation;
     if(finalVerdict.verdict === 'against' && !isCertain) {
-        recommendationText = 'ĐI NGƯỢỢC HỆ THỐNG';
+        recommendationText = 'ĐI NGƯỢC HỆ THỐNG';
     }
 
     const analysisResultDiv = document.getElementById('analysisResult'), analysisCard = document.getElementById('analysis-card');
@@ -915,12 +797,7 @@ function updateAnalysisUI() {
         analysisResultDiv.innerHTML = `${optimalLengthDisplay}<p class="text-gray-400 text-center py-8 whitespace-pre-wrap">${analysisText}</p>`;
     }
 }
-// UI Function for Streak Analysis
-function updateStreakAnalysisUI() {
-    const session = state.sessions[state.currentSessionId] || { history: [] };
-    const analysisResult = StreakAnalyzer.getPrediction(session.history, Object.values(state.sessions));
-    document.getElementById('streakAnalysisResult').innerHTML = analysisResult.html;
-}
+
 // NEW: UI Function for Separated Encoded Streak Analysis
 function updateSeparatedStreakAnalysisUI() {
     const session = state.sessions[state.currentSessionId] || { history: [] };
@@ -1096,14 +973,12 @@ function updateAllUI() {
     updateBigRoadUI();
     updateAccuracyUI();
     updateGlobalAccuracyUI();
-    updateSeparatedStreakAnalysisUI(); // New correct analysis
-    updateStreakAnalysisUI(); 
-    updateAnalysisUI(); 
+    updateSeparatedStreakAnalysisUI(); // Your idea's analysis
+    updateAnalysisUI(); // General analysis
     updateConfidenceStatsUI();
     updateVerdictStatsUI();
 }
 
-// --- NEW FUNCTION: Toggle Session Management Visibility ---
 function toggleSessionManagement() {
     const content = document.getElementById('sessionManagementContent');
     const icon = document.getElementById('toggleSessionIcon');
