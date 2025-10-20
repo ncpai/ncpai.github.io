@@ -375,6 +375,12 @@ class PatternMatcher {
             const result = this.getPredictionForPattern(pattern, allHistoricalSessions);
             if (result.prediction) {
                 const perf = lengthPerformance[optimalLength] || { wins: 0, total: 0 };
+                
+                // SỬA LỖI: Thêm bước kiểm tra và sửa lỗi dữ liệu không hợp lệ
+                if (perf.wins > perf.total) {
+                    perf.wins = perf.total; // Đảm bảo số lần thắng không bao giờ vượt quá tổng số
+                }
+                
                 const rate = perf.total > 0 ? (perf.wins / perf.total * 100).toFixed(1) : 'N/A';
                 return {
                     prediction: result.prediction, recommendation: 'THEO CHIỀU DÀI TỐI ƯU',
@@ -1672,15 +1678,10 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 
-
-
-
-
-
-
 </script>
 </body>
 </html>
+
 
 
 
