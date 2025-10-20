@@ -94,9 +94,11 @@
             border-radius: 4px;
             font-weight: 500;
             color: white;
+            text-align: center;
         }
-        /* BỔ SUNG: Style cho khu vực lịch sử mô phỏng */
         #simLog {
+            display: grid;
+            gap: 4px;
             max-height: 110px; /* Giới hạn chiều cao */
             overflow-y: auto;  /* Thêm thanh cuộn khi cần */
             padding-right: 5px; /* Thêm khoảng trống cho thanh cuộn */
@@ -245,6 +247,10 @@
                     <input type="number" id="stopLossLevel" value="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none">
                 </div>
                 <div>
+                    <label for="displayColumns" class="block text-sm font-medium text-gray-300 mb-1">Số cột hiển thị</label>
+                    <input type="number" id="displayColumns" value="6" min="2" max="9" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                </div>
+                <div>
                      <label class="block text-sm font-medium text-gray-300 mb-1">Chế độ cược</label>
                      <div class="flex gap-4">
                          <div class="flex-1">
@@ -269,8 +275,8 @@
                      </div>
                      <div class="text-sm">
                          <span class="font-medium text-gray-400">Chuỗi Cược:</span>
-                         <div id="simLog" class="flex flex-wrap gap-1 mt-1">
-                              <p class="text-gray-500 text-xs">Chưa có...</p>
+                         <div id="simLog" class="mt-1">
+                              <p class="text-gray-500 text-xs col-span-6 text-center">Chưa có...</p>
                          </div>
                      </div>
                  </div>
@@ -891,7 +897,7 @@ function updateVerdictStatsUI() {
     tableDiv.innerHTML = html;
 }
 
-// BỔ SUNG: Hàm cập nhật UI cho mô phỏng
+// BỔ SUNG: Cập nhật hàm này để không vô hiệu hóa input
 function updateSimulationUI() {
     if (!state.currentSessionId) return;
     const session = state.sessions[state.currentSessionId];
@@ -901,6 +907,7 @@ function updateSimulationUI() {
 
     document.getElementById('baseBet').value = sim.baseBet;
     document.getElementById('stopLossLevel').value = sim.stopLossLevel;
+    document.getElementById('displayColumns').value = sim.displayColumns;
     document.getElementById('simModeFollow').checked = sim.mode === 'follow';
     document.getElementById('simModeAgainst').checked = sim.mode === 'against';
 
@@ -923,8 +930,9 @@ function updateSimulationUI() {
 
 
     const logEl = document.getElementById('simLog');
+    logEl.style.gridTemplateColumns = `repeat(${sim.displayColumns}, 1fr)`;
     if (sim.log.length === 0) {
-        logEl.innerHTML = '<p class="text-gray-500 text-xs">Chưa có...</p>';
+        logEl.innerHTML = `<p class="text-gray-500 text-xs col-span-6 text-center" style="grid-column: span ${sim.displayColumns}">Chưa có...</p>`;
     } else {
         logEl.innerHTML = sim.log.map(entry => {
             const isWin = entry.startsWith('+');
@@ -937,25 +945,12 @@ function updateSimulationUI() {
     logEl.scrollTop = logEl.scrollHeight;
 
     const toggleBtn = document.getElementById('toggleSimBtn');
-    const baseBetInput = document.getElementById('baseBet');
-    const stopLossInput = document.getElementById('stopLossLevel');
-    const modeRadios = document.querySelectorAll('input[name="simMode"]');
-
-    if (sim.isActive) {
-        toggleBtn.textContent = 'Dừng Mô phỏng';
-        toggleBtn.classList.remove('bg-green-600', 'hover:bg-green-500');
-        toggleBtn.classList.add('bg-yellow-600', 'hover:bg-yellow-500');
-        baseBetInput.disabled = true;
-        stopLossInput.disabled = true;
-        modeRadios.forEach(radio => radio.disabled = true);
-    } else {
-        toggleBtn.textContent = 'Bắt đầu Mô phỏng';
-        toggleBtn.classList.remove('bg-yellow-600', 'hover:bg-yellow-500');
-        toggleBtn.classList.add('bg-green-600', 'hover:bg-green-500');
-        baseBetInput.disabled = false;
-        stopLossInput.disabled = false;
-        modeRadios.forEach(radio => radio.disabled = false);
-    }
+    
+    toggleBtn.textContent = sim.isActive ? 'Dừng Mô phỏng' : 'Bắt đầu Mô phỏng';
+    toggleBtn.classList.toggle('bg-green-600', !sim.isActive);
+    toggleBtn.classList.toggle('hover:bg-green-500', !sim.isActive);
+    toggleBtn.classList.toggle('bg-yellow-600', sim.isActive);
+    toggleBtn.classList.toggle('hover:bg-yellow-500', sim.isActive);
 }
 
 
@@ -993,6 +988,7 @@ function toggleSimulation() {
     } else {
         const baseBet = parseInt(document.getElementById('baseBet').value);
         const stopLossLevel = parseInt(document.getElementById('stopLossLevel').value);
+        const displayColumns = parseInt(document.getElementById('displayColumns').value);
         if (isNaN(baseBet) || baseBet <= 0) {
             showToast('Mức cược cơ bản phải là một số lớn hơn 0.', 'error');
             return;
@@ -1001,8 +997,13 @@ function toggleSimulation() {
             showToast('Ngưỡng cắt lỗ phải là một số lớn hơn 0.', 'error');
             return;
         }
+        if (isNaN(displayColumns) || displayColumns < 2 || displayColumns > 9) {
+            showToast('Số cột hiển thị phải là một số từ 2 đến 9.', 'error');
+            return;
+        }
         sim.baseBet = baseBet;
         sim.stopLossLevel = stopLossLevel;
+        sim.displayColumns = displayColumns;
         sim.mode = document.querySelector('input[name="simMode"]:checked').value;
         sim.currentBet = sim.baseBet;
         sim.consecutiveLosses = 0;
@@ -1011,6 +1012,54 @@ function toggleSimulation() {
     saveSessions();
     updateSimulationUI();
 }
+
+// THÊM MỚI: Hàm để cập nhật trực tiếp thông số mô phỏng
+function updateSimSetting(key, value) {
+    if (!state.currentSessionId) return;
+    const session = state.sessions[state.currentSessionId];
+    if (!session || !session.simulation) return;
+
+    let isValid = true;
+    let validatedValue = value;
+    let inputId = '';
+
+    switch(key) {
+        case 'baseBet': inputId = 'baseBet'; break;
+        case 'stopLossLevel': inputId = 'stopLossLevel'; break;
+        case 'displayColumns': inputId = 'displayColumns'; break;
+    }
+
+    if (key !== 'mode') {
+        const numValue = parseInt(value);
+        if (isNaN(numValue)) {
+            isValid = false;
+        } else {
+            if ((key === 'baseBet' || key === 'stopLossLevel') && numValue <= 0) {
+                showToast(`${key === 'baseBet' ? 'Mức cược cơ bản' : 'Ngưỡng cắt lỗ'} phải lớn hơn 0.`, 'warning');
+                isValid = false;
+            }
+            if (key === 'displayColumns' && (numValue < 2 || numValue > 9)) {
+                showToast('Số cột hiển thị phải là một số từ 2 đến 9.', 'warning');
+                isValid = false;
+            }
+            validatedValue = numValue;
+        }
+    }
+
+    if (isValid) {
+        session.simulation[key] = validatedValue;
+        // Logic đặc biệt: nếu thay đổi mức cược cơ bản khi đang không thua, cập nhật mức cược hiện tại
+        if (key === 'baseBet' && session.simulation.consecutiveLosses === 0 && session.simulation.isActive) {
+            session.simulation.currentBet = session.simulation.baseBet;
+        }
+        saveSessions();
+        updateSimulationUI(); // Cập nhật lại giao diện mô phỏng
+    } else {
+        // Hoàn lại giá trị cũ trên ô input nếu giá trị mới không hợp lệ
+        if(inputId) document.getElementById(inputId).value = session.simulation[key];
+    }
+}
+
 
 // --- EVENT HANDLERS & ACTIONS ---
 function addResult(result) {
@@ -1258,7 +1307,8 @@ function createNewSession() {
         profitLoss: 0,
         log: [],
         stopLossLevel: 4,
-        consecutiveLosses: 0
+        consecutiveLosses: 0,
+        displayColumns: 6
     };
     state.sessions[newId] = { 
         name: `Phiên ${new Date().toLocaleString('vi-VN')}`, 
@@ -1346,7 +1396,8 @@ function runSimulation(importedSessions) {
             isActive: false, mode: 'follow', baseBet: 10,
             currentBet: 10, profitLoss: 0, log: [],
             stopLossLevel: 4,
-            consecutiveLosses: 0
+            consecutiveLosses: 0,
+            displayColumns: 6
         };
         state.sessions[sessionId] = { 
             name: importedSession.name, 
@@ -1503,7 +1554,8 @@ function initializeApp() {
         isActive: false, mode: 'follow', baseBet: 10,
         currentBet: 10, profitLoss: 0, log: [],
         stopLossLevel: 4,
-        consecutiveLosses: 0
+        consecutiveLosses: 0,
+        displayColumns: 6
     };
 
     Object.values(state.sessions).forEach(s => {
@@ -1534,155 +1586,20 @@ function initializeApp() {
             sessionContent.style.maxHeight = sessionContent.scrollHeight + 'px';
         }
     });
+    
+    // THÊM MỚI: Gán sự kiện để cập nhật trực tiếp thông số mô phỏng
+    document.getElementById('baseBet').addEventListener('change', (e) => updateSimSetting('baseBet', e.target.value));
+    document.getElementById('stopLossLevel').addEventListener('change', (e) => updateSimSetting('stopLossLevel', e.target.value));
+    document.getElementById('displayColumns').addEventListener('change', (e) => updateSimSetting('displayColumns', e.target.value));
+    document.querySelectorAll('input[name="simMode"]').forEach(radio => {
+        radio.addEventListener('change', (e) => updateSimSetting('mode', e.target.value));
+    });
 }
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', initializeApp);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>
 </body>
 </html>
-
-
-
-
 
