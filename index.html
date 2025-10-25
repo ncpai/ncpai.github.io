@@ -442,6 +442,8 @@ let state = {
     confidenceSequenceData: {}
 };
 
+let hasShownQuotaError = false; // Thêm cờ toàn cục này
+
 // --- STATS CALCULATION ---
 function getPredictionStats(predictions) {
     const total = predictions.length;
@@ -1401,7 +1403,19 @@ function clearCurrentSessionHistory() {
 
 // --- SESSION MANAGEMENT ---
 function getSessions() { try { return JSON.parse(localStorage.getItem('baccaratPatternSessions_v11_sim')) || {}; } catch (e) { return {}; }}
-function saveSessions() { localStorage.setItem('baccaratPatternSessions_v11_sim', JSON.stringify(state.sessions)); localStorage.setItem('lastActiveSession_v11_sim', state.currentSessionId); }
+function saveSessions() { 
+    try {
+        localStorage.setItem('baccaratPatternSessions_v11_sim', JSON.stringify(state.sessions)); 
+        localStorage.setItem('lastActiveSession_v11_sim', state.currentSessionId); 
+    } catch (error) {
+        if (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED') { // Bắt các lỗi đầy bộ nhớ
+            console.warn("Lỗi lưu trữ: Đã đầy bộ nhớ localStorage. Dữ liệu mới nhất có thể không được lưu.");
+            showToastOnce("Bộ nhớ đã đầy. Dữ liệu mới có thể không được lưu.", "error");
+        } else {
+            console.error("Lỗi lưu trữ không xác định:", error);
+        }
+    }
+}
 function renameSession() {
     if (!state.currentSessionId) return;
     const currentName = state.sessions[state.currentSessionId].name;
@@ -1613,6 +1627,14 @@ function showToast(message, type = 'info') {
     container.appendChild(toast);
     setTimeout(() => { toast.remove(); }, 3000);
 }
+
+// Hàm mới để chỉ hiển thị toast lỗi một lần
+function showToastOnce(message, type = 'info') {
+    if (hasShownQuotaError) return; // Không hiển thị lại nếu đã hiển thị
+    hasShownQuotaError = true;
+    showToast(message, type);
+}
+
 function showLoadingModal(message) {
     const container = document.getElementById('modal-container');
     container.innerHTML = `
@@ -1835,49 +1857,8 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
 </script>
 </body>
 </html>
+
