@@ -510,9 +510,9 @@ function getCurrentStreak(sequence) {
         } else {
             break;
         }
-    } // <<< SỬA LỖI: Thêm dấu } bị thiếu
+    } // <<< SỬA LỖI: Đã thêm dấu } bị thiếu
     return { type: lastChar, length };
-} // <<< SỬA LỖI: Thêm dấu } bị thiếu
+} // <<< SỬA LỖI: Đã thêm dấu } bị thiếu
 
 // <<< SỬA LỖI: Thêm lại các hàm đã bị xóa do lỗi copy-paste >>>
 function calculateStreakStats(sequencesObject) {
@@ -1300,11 +1300,13 @@ function undoLast() {
     if (session.simulation.log.length > 0) {
         const sim = session.simulation;
         const lastLogEntry = sim.log.pop();
-        const lastAmount = parseInt(lastLogEntry);
+        const lastAmount = parseInt(lastLogEntry); // Đây là số tiền thắng/thua (ví dụ: +10 hoặc -10)
         
+        // Hoàn tác lại lãi/lỗ
         sim.profitLoss -= lastAmount;
 
         // Logic mới: Mức cược của ván vừa hoàn tác chính là giá trị tuyệt đối của log entry đó.
+        // Đây là số tiền CƯỢC cho ván tiếp theo (tức là ván hiện tại mà ta đang undo)
         sim.currentBet = Math.abs(lastAmount);
 
         // Tính toán lại chuỗi thua từ log đã được cập nhật
@@ -1857,10 +1859,25 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 </script>
 </body>
 </html>
-
-
-
