@@ -693,8 +693,8 @@ function getMetaPrediction(context) {
     if (foundRange) {
         const rangeKey = `${foundRange.min}-${foundRange.max}`;
         const historicalSequences = { ...confidenceSequenceData[rangeKey] };
-        const currentSequenceStr = historicalSequences[currentSessionId] || "";
-        delete historicalSequences[currentSessionId]; // Analyze history only
+        const currentSequenceStr = historicalSequences[currentSessionId] || ""; // LẤY CHUỖI HIỆN TẠI
+        delete historicalSequences[currentSessionId]; // XÓA SAU KHI LẤY
 
         const currentStreak = getCurrentStreak(currentSequenceStr);
         const streakStats = calculateStreakStats(historicalSequences);
@@ -712,8 +712,8 @@ function getMetaPrediction(context) {
 
     // 2. Analyze Verdict Streak
     const historicalVerdictSequences = { ...verdictSequenceData[verdict] };
-    const currentVerdictSequenceStr = historicalVerdictSequences[currentSessionId] || "";
-    delete historicalVerdictSequences[currentSessionId];
+    const currentVerdictSequenceStr = historicalVerdictSequences[currentSessionId] || ""; // LẤY CHUỖI HIỆN TẠI
+    delete historicalVerdictSequences[currentSessionId]; // XÓA SAU KHI LẤY
 
     const currentVerdictStreak = getCurrentStreak(currentVerdictSequenceStr);
     const verdictStreakStats = calculateStreakStats(historicalVerdictSequences);
@@ -1827,8 +1827,8 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 
-
 </script>
 </body>
 </html>
+
 
