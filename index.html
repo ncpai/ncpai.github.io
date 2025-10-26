@@ -694,39 +694,45 @@ function getMetaPrediction(context) {
     
     if (foundRange) {
         const rangeKey = `${foundRange.min}-${foundRange.max}`;
-        const historicalSequences = { ...confidenceSequenceData[rangeKey] };
-        const currentSequenceStr = historicalSequences[currentSessionId] || ""; // LẤY CHUỖI HIỆN TẠI
-        delete historicalSequences[currentSessionId]; // XÓA SAU KHI LẤY
-
+        // LẤY TOÀN BỘ CHUỖI HIỆN TẠI
+        const currentSequenceStr = confidenceSequenceData[rangeKey]?.[currentSessionId] || ""; 
+        
+        // TÁCH CHUỖI HIỆN TẠI VÀ LỊCH SỬ CỦA CHUỖI ĐÓ
         const currentStreak = getCurrentStreak(currentSequenceStr);
-        const streakStats = calculateStreakStats(historicalSequences);
+        const historicalPartOfSequence = currentSequenceStr.slice(0, -currentStreak.length);
+        
+        // TÍNH TOÁN MAX TỪ LỊCH SỬ CỦA PHIÊN NÀY
+        const streakStats = calculateStreakStats(historicalPartOfSequence); 
 
         if (currentStreak.type === 'W' && streakStats.maxW > 0 && currentStreak.length >= streakStats.maxW) {
-            confidenceSignal = { prediction: 'against', explanation: `Khoảng ${rangeKey}: Chuỗi Thắng (${currentStreak.length}) đã đạt ngưỡng tối đa (${streakStats.maxW}) -> Dự đoán THUA.` };
+            confidenceSignal = { prediction: 'against', explanation: `Khoảng ${rangeKey}: Chuỗi Thắng (${currentStreak.length}) đã đạt ngưỡng tối đa CỦA PHIÊN NÀY (${streakStats.maxW}) -> Dự đoán THUA.` };
         } else if (currentStreak.type === 'L' && streakStats.maxL > 0 && currentStreak.length >= streakStats.maxL) {
-            confidenceSignal = { prediction: 'follow', explanation: `Khoảng ${rangeKey}: Chuỗi Thua (${currentStreak.length}) đã đạt ngưỡng tối đa (${streakStats.maxL}) -> Dự đoán THẮNG.` };
+            confidenceSignal = { prediction: 'follow', explanation: `Khoảng ${rangeKey}: Chuỗi Thua (${currentStreak.length}) đã đạt ngưỡng tối đa CỦA PHIÊN NÀY (${streakStats.maxL}) -> Dự đoán THẮNG.` };
         } else {
-            confidenceSignal = { prediction: 'neutral', explanation: `Khoảng ${rangeKey}: Chuỗi ${currentStreak.type || 'N/A'} (${currentStreak.length}) chưa đạt ngưỡng (W:${streakStats.maxW}, L:${streakStats.maxL}).`};
+            confidenceSignal = { prediction: 'neutral', explanation: `Khoảng ${rangeKey}: Chuỗi ${currentStreak.type || 'N/A'} (${currentStreak.length}) chưa đạt ngưỡng phiên (W:${streakStats.maxW}, L:${streakStats.maxL}).`};
         }
     } else {
          confidenceSignal = { prediction: 'neutral', explanation: `Khoảng tin cậy không hợp lệ.`};
     }
 
     // 2. Analyze Verdict Streak
-    const historicalVerdictSequences = { ...verdictSequenceData[verdict] };
-    const currentVerdictSequenceStr = historicalVerdictSequences[currentSessionId] || ""; // LẤY CHUỖI HIỆN TẠI
-    delete historicalVerdictSequences[currentSessionId]; // XÓA SAU KHI LẤY
+    // LẤY TOÀN BỘ CHUỖI HIỆN TẠI
+    const currentVerdictSequenceStr = verdictSequenceData[verdict]?.[currentSessionId] || "";
 
+    // TÁCH CHUỖI HIỆN TẠI VÀ LỊCH SỬ CỦA CHUỖI ĐÓ
     const currentVerdictStreak = getCurrentStreak(currentVerdictSequenceStr);
-    const verdictStreakStats = calculateStreakStats(historicalVerdictSequences);
+    const historicalPartOfVerdictSequence = currentVerdictSequenceStr.slice(0, -currentVerdictStreak.length);
+
+    // TÍNH TOÁN MAX TỪ LỊCH SỬ CỦA PHIÊN NÀY
+    const verdictStreakStats = calculateStreakStats(historicalPartOfVerdictSequence);
     const verdictText = verdict === 'follow' ? 'Theo HT' : 'Ngược HT';
 
     if (currentVerdictStreak.type === 'W' && verdictStreakStats.maxW > 0 && currentVerdictStreak.length >= verdictStreakStats.maxW) {
-        verdictSignal = { prediction: 'against', explanation: `Phán quyết '${verdictText}': Chuỗi Thắng (${currentVerdictStreak.length}) đã đạt ngưỡng tối đa (${verdictStreakStats.maxW}) -> Dự đoán THUA.` };
+        verdictSignal = { prediction: 'against', explanation: `Phán quyết '${verdictText}': Chuỗi Thắng (${currentVerdictStreak.length}) đã đạt ngưỡng tối đa CỦA PHIÊN NÀY (${verdictStreakStats.maxW}) -> Dự đoán THUA.` };
     } else if (currentVerdictStreak.type === 'L' && verdictStreakStats.maxL > 0 && currentVerdictStreak.length >= verdictStreakStats.maxL) {
-        verdictSignal = { prediction: 'follow', explanation: `Phán quyết '${verdictText}': Chuỗi Thua (${currentVerdictStreak.length}) đã đạt ngưỡng tối đa (${verdictStreakStats.maxL}) -> Dự đoán THẮNG.` };
+        verdictSignal = { prediction: 'follow', explanation: `Phán quyết '${verdictText}': Chuỗi Thua (${currentVerdictStreak.length}) đã đạt ngưỡng tối đa CỦA PHIÊN NÀY (${verdictStreakStats.maxL}) -> Dự đoán THẮNG.` };
     } else {
-        verdictSignal = { prediction: 'neutral', explanation: `Phán quyết '${verdictText}': Chuỗi ${currentVerdictStreak.type || 'N/A'} (${currentVerdictStreak.length}) chưa đạt ngưỡng (W:${verdictStreakStats.maxW}, L:${verdictStreakStats.maxL}).`};
+        verdictSignal = { prediction: 'neutral', explanation: `Phán quyết '${verdictText}': Chuỗi ${currentVerdictStreak.type || 'N/A'} (${currentVerdictStreak.length}) chưa đạt ngưỡng phiên (W:${verdictStreakStats.maxW}, L:${verdictStreakStats.maxL}).`};
     }
 
     // 3. Combine Signals
@@ -1835,5 +1841,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 </script>
 </body>
 </html>
+
 
 
