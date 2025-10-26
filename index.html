@@ -668,7 +668,9 @@ function getFinalVerdict(context) {
         }
     }
     
-    return { verdict: 'neutral', explanation: 'Không tìm thấy quy luật biểu đồ rõ ràng trong lịch sử.' };
+    // SỬA LỖI: Mặc định là 'follow' (Theo) thay vì 'neutral' (Trung Lập)
+    // Điều này để khởi động hệ thống khi lịch sử maxW/maxL = 0
+    return { verdict: 'follow', explanation: 'Không tìm thấy quy luật đặc biệt, mặc định đi theo phán quyết hệ thống.' };
 }
 
 // --- NEW: META ANALYZER LOGIC ---
@@ -1830,35 +1832,8 @@ function initializeApp() {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', initializeApp);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>
 </body>
 </html>
+
 
