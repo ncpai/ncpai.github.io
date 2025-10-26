@@ -676,9 +676,10 @@ function getMetaPrediction(context) {
     const { currentPrediction, currentFinalVerdict, confidenceSequenceData, verdictSequenceData, currentSessionId } = context;
 
     if (!currentPrediction || !currentFinalVerdict || !currentFinalVerdict.prediction || currentFinalVerdict.verdict === 'neutral') {
-        return { prediction: 'neutral', explanation: 'Hệ thống chính chưa có phán quyết rõ ràng.' };
+        return { prediction: null, explanation: 'Hệ thống chính chưa có phán quyết rõ ràng.', decision: 'neutral' };
     }
 
+    const mainSystemBet = currentFinalVerdict.prediction; // 'P' or 'B'
     const { confidence } = currentPrediction;
     const { verdict } = currentFinalVerdict; // 'follow' or 'against'
 
@@ -727,22 +728,31 @@ function getMetaPrediction(context) {
     }
 
     // 3. Combine Signals
-    let finalMetaPrediction = 'neutral';
+    let finalMetaDecision = 'neutral'; // 'follow', 'against', 'neutral'
     if (confidenceSignal.prediction === verdictSignal.prediction && confidenceSignal.prediction !== 'neutral') {
-        finalMetaPrediction = confidenceSignal.prediction; // Both agree
+        finalMetaDecision = confidenceSignal.prediction; // Both agree
     } else if (confidenceSignal.prediction !== 'neutral' && verdictSignal.prediction === 'neutral') {
-        finalMetaPrediction = confidenceSignal.prediction; // Confidence signal fires
+        finalMetaDecision = confidenceSignal.prediction; // Confidence signal fires
     } else if (verdictSignal.prediction !== 'neutral' && confidenceSignal.prediction === 'neutral') {
-        finalMetaPrediction = verdictSignal.prediction; // Verdict signal fires
+        finalMetaDecision = verdictSignal.prediction; // Verdict signal fires
     } else if (confidenceSignal.prediction !== verdictSignal.prediction && confidenceSignal.prediction !== 'neutral' && verdictSignal.prediction !== 'neutral') {
-        finalMetaPrediction = 'neutral'; // Conflict
+        finalMetaDecision = 'neutral'; // Conflict
         confidenceSignal.explanation = "XUNG ĐỘT META: " + confidenceSignal.explanation;
         verdictSignal.explanation = "XUNG ĐỘT META: " + verdictSignal.explanation;
     }
     
+    // TÍNH TOÁN BÊN CƯỢC CUỐI CÙNG
+    let finalMetaSide = null; // 'P', 'B', or null
+    if (finalMetaDecision === 'follow') {
+        finalMetaSide = mainSystemBet;
+    } else if (finalMetaDecision === 'against') {
+        finalMetaSide = (mainSystemBet === 'P' ? 'B' : 'P');
+    }
+
     return {
-        prediction: finalMetaPrediction, // 'follow', 'against', 'neutral'
-        explanation: `${confidenceSignal.explanation}\n${verdictSignal.explanation}`
+        prediction: finalMetaSide, // 'P', 'B', or null
+        explanation: `${confidenceSignal.explanation}\n${verdictSignal.explanation}`,
+        decision: finalMetaDecision // 'follow', 'against', or 'neutral'
     };
 }
 
@@ -1092,8 +1102,8 @@ function updateSimulationUI() {
         }
 
         // Kiểm tra Meta Analyzer
-        if (state.currentMetaPrediction && state.currentMetaPrediction.prediction !== 'neutral') {
-            if (state.currentMetaPrediction.prediction === 'follow') {
+        if (state.currentMetaPrediction && state.currentMetaPrediction.decision !== 'neutral') { // <--- SỬ DỤNG .decision
+            if (state.currentMetaPrediction.decision === 'follow') { // <--- SỬ DỤNG .decision
                 // Meta đồng ý với hệ thống (hoặc ngược hệ thống), không cần đổi
                 betSource += " (Meta ✅)";
             } else { // 'against'
@@ -1146,23 +1156,20 @@ function updateMetaAnalyzerUI() {
     const statsDiv = document.getElementById('metaAnalysisStats');
 
     // 1. Cập nhật Phán Quyết Meta
-    if (metaPrediction && metaPrediction.prediction !== 'neutral') {
-        let predictionText = '';
-        let predictionColor = '';
-        if (metaPrediction.prediction === 'follow') {
-            predictionText = 'NÊN THEO HỆ THỐNG';
-            predictionColor = 'text-green-400';
-        } else { // 'against'
-            predictionText = 'NÊN NGƯỢC HỆ THỐNG';
-            predictionColor = 'text-red-400';
-        }
+    if (metaPrediction && metaPrediction.prediction) { // KIỂM TRA 'P' HOẶC 'B'
+        const predictionText = metaPrediction.prediction === 'P' ? '👤 PLAYER' : '🏦 BANKER';
+        const predictionColor = metaPrediction.prediction === 'P' ? 'text-blue-400' : 'text-red-400';
+        const borderColor = metaPrediction.prediction === 'P' ? 'border-blue-500' : 'border-red-500';
+        const decisionText = metaPrediction.decision === 'follow' ? 'THEO HỆ THỐNG' : 'NGƯỢC HỆ THỐNG';
+        
         resultDiv.innerHTML = `
-            <div class="text-center p-4 rounded-lg bg-gray-900">
-                <p class="text-lg font-bold ${predictionColor}">${predictionText}</p>
-                <p class="text-xs text-gray-400 whitespace-pre-wrap mt-2">${metaPrediction.explanation}</p>
+            <div class="text-center p-4 rounded-lg bg-gray-900 border-2 ${borderColor}">
+                <p class="text-sm font-semibold ${metaPrediction.decision === 'follow' ? 'text-green-400' : 'text-red-400'} mb-1">${decisionText}</p>
+                <p class="text-4xl font-extrabold ${predictionColor} animate-pulse">${predictionText}</p>
+                <p class="text-xs text-gray-400 whitespace-pre-wrap mt-3">${metaPrediction.explanation}</p>
             </div>
         `;
-    } else if (metaPrediction) {
+    } else if (metaPrediction) { // prediction is null
          resultDiv.innerHTML = `
             <div class="text-center p-4 rounded-lg bg-gray-900">
                 <p class="text-lg font-bold text-yellow-400">BỎ QUA / TRUNG LẬP</p>
@@ -1287,7 +1294,7 @@ function addResult(result) {
         if (sim.mode === 'against') {
             finalBetOn = finalBetOn === 'P' ? 'B' : 'P';
         }
-        if (state.currentMetaPrediction && state.currentMetaPrediction.prediction === 'against') {
+        if (state.currentMetaPrediction && state.currentMetaPrediction.decision === 'against') { // <--- SỬ DỤNG .decision
              finalBetOn = finalBetOn === 'P' ? 'B' : 'P'; // Đảo ngược cược
         }
         // Nếu meta là 'follow' hoặc 'neutral', cược giữ nguyên
@@ -1331,13 +1338,10 @@ function addResult(result) {
 
     // NEW: Ghi lại kết quả Phân Tích Meta
     if (!session.metaAnalyzerStats) session.metaAnalyzerStats = { predictions: [] };
-    if (state.currentMetaPrediction && state.currentMetaPrediction.prediction !== 'neutral') {
+    if (state.currentMetaPrediction && state.currentMetaPrediction.decision !== 'neutral') { // <--- SỬ DỤNG .decision
         // Tính toán xem Meta thắng hay thua
-        let metaBet = state.currentFinalPrediction.prediction; // Bắt đầu bằng cược của HT
-        if (state.currentMetaPrediction.prediction === 'against') {
-            metaBet = metaBet === 'P' ? 'B' : 'P'; // Meta bảo ngược
-        }
-        // Nếu meta là 'follow', metaBet giữ nguyên
+        // QUAN TRỌNG: Cược của Meta dựa trên phán quyết của nó (prediction), không phải của hệ thống chính
+        const metaBet = state.currentMetaPrediction.prediction; // <--- SỬ DỤNG .prediction ('P' / 'B')
         
         const isMetaWin = (metaBet === result) ? 'W' : 'L';
         session.metaAnalyzerStats.predictions.push(isMetaWin);
@@ -1824,10 +1828,7 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 
-
-
-
-
 </script>
 </body>
 </html>
+
