@@ -540,7 +540,7 @@ function getConfidenceSequenceData() {
 
         session.predictions.forEach(p => {
             const result = (p.predicted === p.actual) ? 'W' : 'L';
-            const foundRange = rangeDefs.find(r => p.confidence >= r.min && (p.confidence < r.max || (r.max === 100 && p.confidence >= 100)));
+            const foundRange = rangeDefs.find(r => p.confidence >= r.min && (p.confidence < r.max || (p.max === 100 && p.confidence >= 100)));
             if (foundRange) {
                 const key = `${foundRange.min}-${foundRange.max}`;
                 sessionSequences[key].push(result);
@@ -1281,7 +1281,7 @@ function updateSimSetting(key, value, silent = false) {
 
 
 // --- EVENT HANDLERS & ACTIONS ---
-function addResult(result) {
+function addResult(result, silent = false) { // Thêm cờ silent
     if (!state.currentSessionId) return;
     const session = state.sessions[state.currentSessionId];
     
@@ -1315,7 +1315,7 @@ function addResult(result) {
             if (sim.consecutiveLosses >= sim.stopLossLevel) {
                 sim.currentBet = sim.baseBet;
                 sim.consecutiveLosses = 0;
-                showToast(`Đã đạt ngưỡng cắt lỗ! Quay về mức cược ban đầu.`, 'warning');
+                if (!silent) showToast(`Đã đạt ngưỡng cắt lỗ! Quay về mức cược ban đầu.`, 'warning');
             } else {
                 sim.currentBet = currentBetAmount * 2;
             }
@@ -1356,8 +1356,11 @@ function addResult(result) {
     state.currentPrediction = null; 
     state.currentFinalPrediction = null;
     state.currentMetaPrediction = null; // Reset
-    saveSessions();
-    updateAllUI();
+    
+    if (!silent) {
+        saveSessions();
+        updateAllUI();
+    }
 }
 function updateLengthPerformanceAndFindOptimal(history, allSessions, newResult) {
     const session = state.sessions[state.currentSessionId];
@@ -1634,9 +1637,13 @@ function runSimulation(importedSessions) {
             state.sessions[sessionId].simulation.mode = importedSession.simulation.mode || 'follow';
         }
         
+        // Tạm thời update UI ở mỗi bước để xây dựng state chính xác
+        // Vì phán quyết của ván 11 phụ thuộc vào 10 ván trước đó
+        // Và phán quyết của ván 12 phụ thuộc vào 11 ván trước đó...
+        // Chúng ta cần tính toán lại từng bước một
         importedSession.history.forEach(result => {
-            // Tạm thời vô hiệu hóa UI update trong vòng lặp để tăng tốc
-            addResult(result, true); // Thêm cờ 'silent'
+            updateAllUI(); // Cập nhật để lấy phán quyết
+            addResult(result, true); // Thêm kết quả (silent=true để không lưu)
         });
 
     });
@@ -1667,8 +1674,8 @@ function importData(event) {
                 showLoadingModal('Đang tính toán lại toàn bộ lịch sử và mô phỏng cược...');
 
                 setTimeout(() => {
-                    runSimulation(importedSessions);
-                    saveSessions();
+                    runSimulation(importedSessions); // Hàm này giờ đã chạy tính toán đầy đủ
+                    saveSessions(); // Lưu state cuối cùng
                     hideLoadingModal();
                     showToast('Nhập và mô phỏng lại thành công!', 'success');
                 }, 100);
@@ -1827,8 +1834,31 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 </body>
 </html>
-
 
