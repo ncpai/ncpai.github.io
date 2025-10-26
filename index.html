@@ -780,10 +780,10 @@ function getAbsoluteStreakVerdict(mainPredictionResult, mainVerdictResult, allSe
         const current = currentStreaks.byConfidenceRange[key];
         const max = historicalMaxes.byConfidenceRange[key];
         
-        if (current.type === 'W' && max.maxW > 0 && current.length >= max.maxW) {
+        if (current.type === 'W' && current.length > 0 && current.length >= max.maxW) { // <-- SỬA LỖI: Bỏ `max.maxW > 0`
             rulesTriggered.push({ source: `K.Tin Cậy (${key}%)`, current: `W${current.length}`, max: `W${max.maxW}`, prediction: 'L' });
             rulePredictions.add('L');
-        } else if (current.type === 'L' && max.maxL > 0 && current.length >= max.maxL) {
+        } else if (current.type === 'L' && current.length > 0 && current.length >= max.maxL) { // <-- SỬA LỖI: Bỏ `max.maxL > 0`
             rulesTriggered.push({ source: `K.Tin Cậy (${key}%)`, current: `L${current.length}`, max: `L${max.maxL}`, prediction: 'W' });
             rulePredictions.add('W');
         }
@@ -795,10 +795,10 @@ function getAbsoluteStreakVerdict(mainPredictionResult, mainVerdictResult, allSe
         const max = historicalMaxes.byVerdict[mainVerdict];
         const sourceText = mainVerdict === 'follow' ? 'Phán Quyết (Theo)' : 'Phán Quyết (Ngược)';
 
-        if (current.type === 'W' && max.maxW > 0 && current.length >= max.maxW) {
+        if (current.type === 'W' && current.length > 0 && current.length >= max.maxW) { // <-- SỬA LỖI: Bỏ `max.maxW > 0`
             rulesTriggered.push({ source: sourceText, current: `W${current.length}`, max: `W${max.maxW}`, prediction: 'L' });
             rulePredictions.add('L');
-        } else if (current.type === 'L' && max.maxL > 0 && current.length >= max.maxL) {
+        } else if (current.type === 'L' && current.length > 0 && current.length >= max.maxL) { // <-- SỬA LỖI: Bỏ `max.maxL > 0`
             rulesTriggered.push({ source: sourceText, current: `L${current.length}`, max: `L${max.maxL}`, prediction: 'W' });
             rulePredictions.add('W');
         }
@@ -1932,6 +1932,33 @@ function initializeApp() {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', initializeApp);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 </body>
 </html>
+
