@@ -152,7 +152,7 @@
             </div>
         </div>
 
-        <!-- CHỐT ANALYSIS PANEL (SỬA LỖI: Đặt lại vào đúng vị trí) -->
+        <!-- CHỐT ANALYSIS PANEL -->
         <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
             <h2 class="text-xl font-semibold mb-4 text-purple-300">🔐 Chốt Phán Quyết (Tổng Hợp 7 Biểu Đồ)</h2>
             
@@ -167,7 +167,7 @@
             </div>
         </div>
 
-        <!-- Input Section (SỬA LỖI: Khôi phục các phần bị thiếu) -->
+        <!-- Input Section -->
         <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
             <h2 class="text-xl font-semibold mb-4 text-blue-300">🎲 Nhập Kết Quả Ván Hiện Tại</h2>
             <div class="grid grid-cols-2 gap-4 mb-4">
@@ -180,7 +180,7 @@
             </div>
         </div>
 
-        <!-- Verdict Stats Table (SỬA LỖI: Khôi phục các phần bị thiếu) -->
+        <!-- Verdict Stats Table -->
         <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
             <h2 class="text-xl font-semibold mb-2 text-indigo-300">⚖️ Thống Kê Phán Quyết (Phiên)</h2>
             <div class="mt-4 space-y-2" id="verdictStatsTable">
@@ -188,14 +188,14 @@
             </div>
         </div>
         
-        <!-- Confidence Stats Table (SỬA LỖI: Khôi phục các phần bị thiếu) -->
+        <!-- Confidence Stats Table -->
         <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
             <h2 class="text-xl font-semibold mb-2 text-green-300">📊 Thống Kê Độ Tin Cậy (Phiên)</h2>
             <div id="confidenceRecommendation" class="my-4 p-3 bg-gray-900 rounded-lg text-center"></div>
             <div class="space-y-2" id="confidenceStatsTable"></div>
         </div>
 
-        <!-- History Display (SỬA LỖI: Khôi phục các phần bị thiếu) -->
+        <!-- History Display -->
         <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold text-blue-300">📜 Bảng Cầu Big Road</h2>
@@ -261,7 +261,6 @@
                     <label for="stopLossLevel" class="block text-sm font-medium text-gray-300 mb-1">Ngưỡng cắt lỗ (số lần thua)</label>
                     <input type="number" id="stopLossLevel" value="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none">
                 </div>
-                 <!-- SỬA LỖI: Thêm lại input bị thiếu -->
                  <div>
                     <label for="displayColumns" class="block text-sm font-medium text-gray-300 mb-1">Số cột hiển thị</label>
                     <input type="number" id="displayColumns" value="6" min="2" max="9" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none">
@@ -971,7 +970,7 @@ function updateAllUI() {
     updateConfidenceStatsUI();
     updateVerdictStatsUI();
     updateSimulationUI();
-    updateChotAnalysisUI(); // <-- SỬA LỖI: Thêm lệnh gọi hàm
+    updateChotAnalysisUI();
 }
 
 function toggleSessionManagement() {
@@ -1548,45 +1547,94 @@ function loadSession(sessionId) {
 
 // --- IMPORT / EXPORT & RECALCULATION ---
 function runSimulation(importedSessions) {
+    // 1. Clear current state completely
     state.sessions = {};
     state.currentSessionId = null;
+    localStorage.removeItem('baccaratPatternSessions_v11_sim');
+    localStorage.removeItem('lastActiveSession_v11_sim');
 
-    const sortedSessionIds = Object.keys(importedSessions).sort((a, b) => parseInt(a.split('-')[1]) - parseInt(b.split('-')[1]));
+    // 2. Sort imported sessions chronologically based on ID (timestamp)
+    const sortedSessionIds = Object.keys(importedSessions).sort((a, b) => {
+        const timeA = parseInt(a.split('-')[1] || 0);
+        const timeB = parseInt(b.split('-')[1] || 0);
+        return timeA - timeB;
+    });
 
-    sortedSessionIds.forEach(sessionId => {
+    // 3. Iterate through sorted sessions and simulate step-by-step
+    sortedSessionIds.forEach((sessionId, index) => {
         const importedSession = importedSessions[sessionId];
-        
-        state.currentSessionId = sessionId;
+        if (!importedSession || !importedSession.history) {
+            console.warn(`Skipping invalid imported session: ${sessionId}`);
+            return; // Skip if session data or history is missing
+        }
+
+        // 3a. Create a new empty session with imported settings
+        const newId = sessionId; // Use the original ID
+        state.currentSessionId = newId;
         const defaultSimulation = {
             isActive: true, mode: 'follow', baseBet: 10,
             currentBet: 10, profitLoss: 0, log: [],
             stopLossLevel: 4, consecutiveLosses: 0, displayColumns: 6
         };
-        
-        state.sessions[sessionId] = { 
-            name: importedSession.name, 
-            history: [], predictions: [], verdictPredictions: [], 
+        state.sessions[newId] = {
+            name: importedSession.name || `Phiên nhập ${index + 1}`,
+            history: [], predictions: [], verdictPredictions: [],
             lengthPerformance: {}, optimalLength: null,
-            simulation: JSON.parse(JSON.stringify(defaultSimulation))
+            simulation: JSON.parse(JSON.stringify(defaultSimulation)) // Start with default simulation
         };
-        
+
+        // Apply imported simulation settings (if they exist) before starting simulation
         if (importedSession.simulation) {
-            state.sessions[sessionId].simulation.baseBet = importedSession.simulation.baseBet || 10;
-            state.sessions[sessionId].simulation.stopLossLevel = importedSession.simulation.stopLossLevel || 4;
-            // Bỏ qua displayColumns khi import để dùng giá trị mặc định/hiện tại
-            state.sessions[sessionId].simulation.mode = importedSession.simulation.mode || 'follow';
+            // Only apply baseBet, stopLossLevel, and mode. Reset others.
+            state.sessions[newId].simulation.baseBet = parseInt(importedSession.simulation.baseBet) || 10;
+            state.sessions[newId].simulation.stopLossLevel = parseInt(importedSession.simulation.stopLossLevel) || 4;
+            state.sessions[newId].simulation.mode = importedSession.simulation.mode === 'against' ? 'against' : 'follow'; // Default to 'follow'
+             // Ensure currentBet starts at baseBet
+            state.sessions[newId].simulation.currentBet = state.sessions[newId].simulation.baseBet;
         }
-        
-        importedSession.history.forEach(result => {
-            addResult(result); 
+
+
+        // 3b. Simulate each result (P/B) by calling addResult
+        importedSession.history.forEach((result, resultIndex) => {
+            // IMPORTANT: Temporarily set the current session ID for addResult context
+             // Make sure state reflects the session being processed *before* calling addResult
+            state.currentSessionId = newId;
+            // Validate result before adding
+            if (result === 'P' || result === 'B') {
+                 // Call addResult to process this single game result
+                 // addResult handles predictions, simulation updates, etc.
+                 // It relies on state.currentSessionId being set correctly
+                addResult(result); // addResult will save state internally
+            } else {
+                console.warn(`Skipping invalid result '${result}' at index ${resultIndex} in session ${sessionId}`);
+            }
         });
+
+        // Save session state after fully processing one session
+        saveSessions();
 
     });
 
+    // 4. Load the very last session processed into the UI
     if (sortedSessionIds.length > 0) {
         const lastSessionId = sortedSessionIds[sortedSessionIds.length - 1];
-        loadSession(lastSessionId);
+        if (state.sessions[lastSessionId]) {
+             loadSession(lastSessionId); // Load the final state of the last session
+        } else if (Object.keys(state.sessions).length > 0) {
+            // Fallback: load the last available session if the intended last one failed
+            const availableKeys = Object.keys(state.sessions).sort((a, b) => parseInt(a.split('-')[1] || 0) - parseInt(b.split('-')[1] || 0));
+            loadSession(availableKeys[availableKeys.length - 1]);
+        } else {
+            // If absolutely no sessions were successfully processed, create a new one
+            createNewSession();
+        }
+    } else {
+        // If the imported file was empty or invalid, create a new session
+        createNewSession();
     }
+
+     // 5. Final UI Update after all processing is done
+     updateAllUI(); // Refresh UI once after the entire simulation loop
 }
 
 
@@ -1607,7 +1655,7 @@ function importData(event) {
 
                 setTimeout(() => {
                     runSimulation(importedSessions);
-                    saveSessions();
+                    // saveSessions(); // runSimulation now saves after each session
                     hideLoadingModal();
                     showToast('Nhập và mô phỏng lại thành công!', 'success');
                 }, 100);
@@ -1762,62 +1810,6 @@ function initializeApp() {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', initializeApp)  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>
 </body>
 </html>
