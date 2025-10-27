@@ -247,6 +247,13 @@
             <div id="metaAnalysisResult" class="space-y-3">
                 <p class="text-gray-400 text-center py-4">Hệ thống con đang chờ dữ liệu để phân tích...</p>
             </div>
+            <!-- NEW: META-ANALYSIS STATS BAR -->
+            <div id="metaStatsBar" class="mt-4 p-3 bg-gray-700 rounded-lg hidden">
+                <h3 class="text-sm font-semibold text-gray-300 mb-2">Hiệu suất Meta-Analysis (Phiên):</h3>
+                <div id="metaStatsDisplay" class="flex items-end justify-start gap-px h-5 overflow-hidden">
+                    <!-- Bars inserted here -->
+                </div>
+            </div>
         </div>
         
         <!-- SIMULATION PANEL -->
@@ -451,7 +458,8 @@ let state = {
     deathRange: null,
     sessionConfidenceRanges: [],
     confidenceSequenceData: {}, // W/L sequences grouped by confidence range
-    verdictSequenceData: {} // W/L sequences for Follow/Against decisions
+    verdictSequenceData: {}, // W/L sequences for Follow/Against decisions
+    metaVerdictHistory: [] // NEW: Stores W/L results of Meta-Analysis predictions for the current session
 };
 
 // --- STATS CALCULATION ---
@@ -716,17 +724,14 @@ function analyzeWLPattern(currentSequence, historicalSequences) {
  */
 function getVerdictPrediction() {
     if (!state.currentSessionId || !state.currentPrediction?.prediction) {
-        return { prediction: null, analysisText: 'Hệ thống chính chưa có phán đoán.', side: 'none' };
+        return { prediction: null, analysisText: 'Hệ thống chính chưa có phán đoán.', side: 'none', metaVerdictHistory: [] };
     }
     
     const { currentSessionId, currentPrediction, confidenceSequenceData, verdictSequenceData, goldenRange } = state;
 
     if (!goldenRange || goldenRange.total < state.matcher.MIN_HISTORY_FOR_ANALYSIS) {
-        return { prediction: null, analysisText: 'Cần thêm dữ liệu cho Khoảng Vàng để đánh giá Meta-Analysis.', side: 'none' };
+        return { prediction: null, analysisText: 'Cần thêm dữ liệu cho Khoảng Vàng để đánh giá Meta-Analysis.', side: 'none', metaVerdictHistory: [] };
     }
-    
-    const predictions = state.sessions[currentSessionId].predictions || [];
-    const verdictPredictions = state.sessions[currentSessionId].verdictPredictions || [];
     
     // 1. Lấy chuỗi W/L hiện tại
     const currentConfidence = currentPrediction.confidence;
@@ -745,20 +750,27 @@ function getVerdictPrediction() {
     const systemVerdict = getFinalVerdict({ prediction: currentPrediction.prediction, confidence: currentConfidence, sequenceData: confidenceSequenceData, currentSessionId: currentSessionId }).verdict;
     
     let verdictMetaResult;
+    let currentMetaSequence;
+    let isFollowMode = false;
+
     if (systemVerdict === 'follow') {
         const verdictHistoricalSequences = { ...verdictSequenceData.follow };
         delete verdictHistoricalSequences[currentSessionId];
         verdictMetaResult = analyzeWLPattern(currentVerdictFollowSequence, verdictHistoricalSequences);
+        currentMetaSequence = currentVerdictFollowSequence;
+        isFollowMode = true;
     } else if (systemVerdict === 'against') {
         const verdictHistoricalSequences = { ...verdictSequenceData.against };
         delete verdictHistoricalSequences[currentSessionId];
         verdictMetaResult = analyzeWLPattern(currentVerdictAgainstSequence, verdictHistoricalSequences);
+        currentMetaSequence = currentVerdictAgainstSequence;
+        isFollowMode = false;
     } else {
         verdictMetaResult = { verdict: 'neutral', explanation: 'Hệ thống chính không có phán quyết Follow/Against rõ ràng.', totalOccurrences: 0, winRate: 0 };
+        currentMetaSequence = state.sessions[currentSessionId].metaAnalysisResults.join(''); // Fallback to recorded history
     }
     
     
-    const consensus = { W: 0, L: 0 };
     let finalVerdictSide = 'neutral';
     let detailedAnalysis = '';
 
@@ -778,8 +790,7 @@ function getVerdictPrediction() {
     let finalTip = null;
     
     if (rangeMetaResult.verdict === verdictMetaResult.verdict && rangeMetaResult.verdict !== 'neutral') {
-        // TRƯỜNG HỢP ĐỒNG THUẬN (TH1: L MAX = W -> về B (Win của ngược hệ thống))
-        consensus[rangeMetaResult.verdict] = 1; 
+        // TRƯỜNG HỢP ĐỒNG THUẬN
         finalTip = convertToPBTip(rangeMetaResult.verdict);
         finalVerdictSide = rangeMetaResult.verdict === 'W' ? 'follow' : 'against';
         detailedAnalysis = `CẢ HAI HỆ THỐNG CON ĐỒNG THUẬN: ${rangeMetaResult.verdict === 'W' ? 'NÊN THEO' : 'NÊN ĐI NGƯỢC'}.`;
@@ -787,15 +798,30 @@ function getVerdictPrediction() {
         // TRƯỜNG HỢP MÂU THUẪN HOẶC CHỈ CÓ 1 KẾT QUẢ (TH2)
         detailedAnalysis = `CÓ MÂU THUẪN HOẶC KHÔNG ĐỒNG THUẬN GIỮA CÁC HỆ THỐNG CON.`;
 
-        // Ưu tiên kết quả có độ tin cậy cao hơn (nếu cả 2 đều có đủ dữ liệu)
-        if (rangeMetaResult.totalOccurrences > verdictMetaResult.totalOccurrences && rangeMetaResult.totalOccurrences >= state.matcher.META_MIN_OCCURRENCES) {
+        // Ưu tiên kết quả có độ tin cậy cao hơn (dựa trên totalOccurrences)
+        if (rangeMetaResult.totalOccurrences > verdictMetaResult.totalOccurrences && rangeMetaResult.totalOccurrences >= state.matcher.META_MIN_OCCURRENCES && rangeMetaResult.verdict !== 'neutral') {
              finalTip = convertToPBTip(rangeMetaResult.verdict);
              finalVerdictSide = rangeMetaResult.verdict === 'W' ? 'follow' : 'against';
              detailedAnalysis += ` Ưu tiên Meta Khoảng Vàng (${rangeMetaResult.totalOccurrences} lần lặp).`;
-        } else if (verdictMetaResult.totalOccurrences > rangeMetaResult.totalOccurrences && verdictMetaResult.totalOccurrences >= state.matcher.META_MIN_OCCURRENCES) {
+             currentMetaSequence = currentRangeSequence;
+        } else if (verdictMetaResult.totalOccurrences > rangeMetaResult.totalOccurrences && verdictMetaResult.totalOccurrences >= state.matcher.META_MIN_OCCURRENCES && verdictMetaResult.verdict !== 'neutral') {
              finalTip = convertToPBTip(verdictMetaResult.verdict);
              finalVerdictSide = verdictMetaResult.verdict === 'W' ? 'follow' : 'against';
              detailedAnalysis += ` Ưu tiên Meta Phán Quyết (${verdictMetaResult.totalOccurrences} lần lặp).`;
+             currentMetaSequence = isFollowMode ? currentVerdictFollowSequence : currentVerdictAgainstSequence;
+        } else if (rangeMetaResult.verdict !== 'neutral') {
+             finalTip = convertToPBTip(rangeMetaResult.verdict);
+             finalVerdictSide = rangeMetaResult.verdict === 'W' ? 'follow' : 'against';
+             detailedAnalysis += ` Chỉ có Meta Khoảng Vàng hợp lệ.`;
+             currentMetaSequence = currentRangeSequence;
+        } else if (verdictMetaResult.verdict !== 'neutral') {
+             finalTip = convertToPBTip(verdictMetaResult.verdict);
+             finalVerdictSide = verdictMetaResult.verdict === 'W' ? 'follow' : 'against';
+             detailedAnalysis += ` Chỉ có Meta Phán Quyết hợp lệ.`;
+             currentMetaSequence = isFollowMode ? currentVerdictFollowSequence : currentVerdictAgainstSequence;
+        } else {
+             detailedAnalysis = 'Không tìm thấy mẫu W/L có độ tin cậy trong bất kỳ hệ thống con nào.';
+             // Vẫn sử dụng MetaAnalysisResults đã lưu để vẽ biểu đồ
         }
     }
 
@@ -806,13 +832,32 @@ function getVerdictPrediction() {
         sideColor = finalTip === 'P' ? 'text-blue-400' : 'text-red-400';
     }
 
+    // Nếu không có Meta Tip, sử dụng logic của Hệ thống Chính cho Phán quyết cuối
+    if (!finalTip) {
+        finalVerdictSide = mainVerdict.verdict;
+        detailedAnalysis = mainVerdict.explanation;
+    }
+    
+    // Nếu Meta Tip được tạo ra, chúng ta dùng nó để dự đoán ván tiếp theo
+    if (finalTip) {
+        return {
+            prediction: finalTip,
+            analysisText: `**META-ANALYSIS** (Tỷ lệ thắng Meta: ${(finalVerdictSide === 'follow' ? rangeMetaResult.winRate : verdictMetaResult.winRate)?.toFixed(1) || 'N/A'}%)\n\n${rangeMetaResult.explanation}\n\n${verdictMetaResult.explanation}\n\n--- ĐỀ XUẤT CUỐI CÙNG ---`,
+            side: sideText,
+            finalVerdictSide: finalVerdictSide,
+            sideColor: finalTip ? sideColor : 'text-gray-400',
+            metaVerdictHistory: state.sessions[currentSessionId]?.metaAnalysisResults || [] // Hiển thị lịch sử Meta đã lưu
+        };
+    }
 
+    // Trả về kết quả của Hệ thống Chính nếu Meta không có Tip chắc chắn
     return {
-        prediction: finalTip,
-        analysisText: `--- PHÂN TÍCH META KHOẢNG VÀNG --- \n${rangeMetaResult.explanation}\n\n--- PHÂN TÍCH META PHÁN QUYẾT --- \n${verdictMetaResult.explanation}\n\n--- ĐỀ XUẤT CUỐI CÙNG ---`,
-        side: finalTip ? sideText : 'neutral',
-        finalVerdictSide: finalVerdictSide,
-        sideColor: finalTip ? sideColor : 'text-gray-400'
+        prediction: prediction,
+        analysisText: `**HỆ THỐNG CHÍNH**\n\n${analysisText}`,
+        side: prediction === 'P' ? 'PLAYER' : (prediction === 'B' ? 'BANKER' : 'neutral'),
+        finalVerdictSide: mainVerdict.verdict,
+        sideColor: prediction === 'P' ? 'text-blue-400' : (prediction === 'B' ? 'text-red-400' : 'text-gray-400'),
+        metaVerdictHistory: state.sessions[currentSessionId]?.metaAnalysisResults || []
     };
 }
 
@@ -867,27 +912,57 @@ function updateGlobalAccuracyUI() {
 }
 
 function updateMetaAnalysisUI() {
+    const session = state.sessions[state.currentSessionId] || {};
     const metaAnalysis = getVerdictPrediction();
     const resultDiv = document.getElementById('metaAnalysisResult');
+    const metaStatsBar = document.getElementById('metaStatsBar');
+    const metaStatsDisplay = document.getElementById('metaStatsDisplay');
     
+    // Tính toán Tỷ lệ thắng của Meta-Analysis trong phiên hiện tại
+    const metaResults = session.metaAnalysisResults || [];
+    const metaWins = metaResults.filter(r => r === 'W').length;
+    const metaTotal = metaResults.length;
+    const metaRate = metaTotal > 0 ? (metaWins / metaTotal * 100).toFixed(1) : 'N/A';
+    
+    // Logic hiển thị chính
+    let predictionDisplay = `<p class="text-3xl font-extrabold ${metaAnalysis.sideColor}">${metaAnalysis.finalVerdictSide === 'follow' ? 'THEO PHÁN ĐOÁN CHÍNH' : (metaAnalysis.finalVerdictSide === 'against' ? 'NGƯỢC PHÁN ĐOÁN CHÍNH' : 'KHÔNG CHẮC CHẮN')}</p>`;
     if (metaAnalysis.prediction) {
-        resultDiv.innerHTML = `
-            <div class="text-center bg-gray-900 p-4 rounded-lg border-2 ${metaAnalysis.prediction === 'P' ? 'border-blue-500' : 'border-red-500'}">
-                <p class="text-lg text-gray-400 mb-2">Đề xuất theo Meta-Analysis:</p>
-                <p class="text-3xl font-extrabold ${metaAnalysis.sideColor}">
-                    ${metaAnalysis.finalVerdictSide === 'follow' ? 'THEO PHÁN ĐOÁN CHÍNH' : (metaAnalysis.finalVerdictSide === 'against' ? 'NGƯỢC PHÁN ĐOÁN CHÍNH' : 'ĐỒNG THUẬN')}
-                </p>
-                <p class="text-4xl font-bold mt-2 ${metaAnalysis.sideColor}">${metaAnalysis.side}</p>
-            </div>
-            <div class="bg-gray-700 p-4 rounded-lg mt-4">
-                <p class="font-semibold text-gray-300">Phân tích chi tiết Meta:</p>
-                <p class="text-gray-400 whitespace-pre-wrap text-sm">${metaAnalysis.analysisText}</p>
-            </div>
-        `;
-    } else {
-        resultDiv.innerHTML = `<p class="text-gray-400 text-center py-4 whitespace-pre-wrap">${metaAnalysis.analysisText}</p>`;
+        predictionDisplay = `<p class="text-3xl font-extrabold ${metaAnalysis.sideColor}">${metaAnalysis.finalVerdictSide === 'follow' ? 'THEO PHÁN ĐOÁN CHÍNH' : (metaAnalysis.finalVerdictSide === 'against' ? 'NGƯỢC PHÁN ĐOÁN CHÍNH' : 'ĐỒNG THUẬN')}</p>`;
     }
+    
+    resultDiv.innerHTML = `
+        <div class="text-center bg-gray-900 p-4 rounded-lg border-2 ${metaAnalysis.prediction ? (metaAnalysis.prediction === 'P' ? 'border-blue-500' : 'border-red-500') : 'border-gray-600'}">
+            <p class="text-lg text-gray-400 mb-2">Đề xuất cuối cùng:</p>
+            ${predictionDisplay}
+            <p class="text-4xl font-bold mt-2 ${metaAnalysis.sideColor}">${metaAnalysis.side}</p>
+        </div>
+        <div class="bg-gray-700 p-4 rounded-lg mt-4">
+            <p class="font-semibold text-gray-300">Phân tích chi tiết Meta:</p>
+            <p class="text-gray-400 whitespace-pre-wrap text-sm">${metaAnalysis.analysisText}</p>
+        </div>
+        <div class="mt-4 bg-gray-700 p-3 rounded-lg">
+            <p class="text-sm font-bold text-yellow-300">Tỷ lệ Meta (Phiên): <span class="text-white">${metaRate}%</span> (${metaWins}/${metaTotal})</p>
+        </div>
+    `;
     state.metaAnalysisPrediction = metaAnalysis; // Lưu kết quả Meta
+
+    // Logic vẽ Biểu đồ Meta W/L
+    metaStatsDisplay.innerHTML = '';
+    if (metaResults.length > 0) {
+        metaStatsBar.classList.remove('hidden');
+        const displayedHistory = metaResults.slice(-30);
+        
+        for (const result of displayedHistory) {
+            const isWin = result === 'W';
+            // Biểu diễn W/L: W là thanh cao (h-5), L là thanh thấp (h-2)
+            const barClass = isWin ? 'bg-green-500 h-5' : 'bg-red-500 h-2';
+            const title = isWin ? 'Meta Thắng' : 'Meta Thua';
+            
+            metaStatsDisplay.innerHTML += `<div class="flex-shrink-0 w-1 ${barClass} rounded-t-sm" title="${title}"></div>`;
+        }
+    } else {
+        metaStatsBar.classList.add('hidden');
+    }
 }
 
 
@@ -920,14 +995,15 @@ function updateAnalysisUI() {
     if (metaAnalysis.prediction) {
         finalPrediction = metaAnalysis.prediction;
         finalRecommendationText = metaAnalysis.prediction === currentPrediction.prediction ? 'ĐỒNG THUẬN (THEO CHÍNH)' : 'ĐỒNG THUẬN (NGƯỢC CHÍNH)';
+        
         if (metaAnalysis.finalVerdictSide === 'follow') {
-            finalRecommendationText = `THEO KHOẢNG META (${confidence.toFixed(1)}%)`;
+            finalPrediction = prediction;
+            finalRecommendationText = `META ĐỀ XUẤT: THEO (${confidence.toFixed(1)}%)`;
         } else if (metaAnalysis.finalVerdictSide === 'against') {
             finalPrediction = prediction === 'P' ? 'B' : 'P';
-            finalRecommendationText = `NGƯỢC KHOẢNG META (${confidence.toFixed(1)}%)`;
-        } else {
-            // Khi có mâu thuẫn hoặc trung lập, sử dụng phán đoán Meta (nếu có)
-            finalPrediction = metaAnalysis.prediction;
+            finalRecommendationText = `META ĐỀ XUẤT: NGƯỢC (${confidence.toFixed(1)}%)`;
+        } else if (metaAnalysis.finalVerdictSide === 'neutral' && finalPrediction) {
+            // Nếu Meta là neutral nhưng có Tip, dùng Tip đó (từ logic Đồng Thuận/Ưu tiên)
             finalRecommendationText = `META QUYẾT: ${finalPrediction === currentPrediction.prediction ? 'THEO PHÂN TÍCH CHÍNH' : 'NGƯỢC PHÂN TÍCH CHÍNH'}`;
         }
         
@@ -994,7 +1070,7 @@ function updateAnalysisUI() {
 function updateConfidenceStatsUI() {
     if (!state.currentSessionId || !state.sessions[state.currentSessionId]) return;
     
-    const sessionPredictions = state.sessions[state.currentSessionId].predictions || [];
+    const sessionPredictions = state.sessions[state.currentSessionId]?.predictions || [];
     state.sessionConfidenceRanges = calculateConfidenceRangeStats(sessionPredictions);
     state.confidenceSequenceData = getConfidenceSequenceData();
     state.verdictSequenceData = getVerdictSequenceData(); // Cập nhật dữ liệu cho hệ thống Meta
@@ -1097,7 +1173,7 @@ function updateConfidenceStatsUI() {
 function updateVerdictStatsUI() {
     if (!state.currentSessionId || !state.sessions[state.currentSessionId]) return;
 
-    const verdictPredictions = state.sessions[state.currentSessionId].verdictPredictions || [];
+    const verdictPredictions = state.sessions[state.currentSessionId]?.verdictPredictions || [];
     const tableDiv = document.getElementById('verdictStatsTable');
 
     const stats = {
@@ -1284,6 +1360,10 @@ function addResult(result) {
     if (!state.currentSessionId) return;
     const session = state.sessions[state.currentSessionId];
     
+    // Tạm thời lưu trữ kết quả Meta-Analysis trước khi thêm kết quả mới
+    const metaAnalysis = getVerdictPrediction();
+    
+    // Logic Mô phỏng cược (chỉ chạy nếu có Phán đoán Cuối cùng)
     if(state.currentFinalPrediction?.prediction) {
         const sim = session.simulation;
         let betOn = state.currentFinalPrediction.prediction;
@@ -1314,6 +1394,7 @@ function addResult(result) {
         }
     }
 
+    // Cập nhật predictions và verdictPredictions
     if (state.currentPrediction && state.currentPrediction.prediction) {
         session.predictions.push({ predicted: state.currentPrediction.prediction, actual: result, confidence: state.currentPrediction.confidence });
     }
@@ -1326,6 +1407,15 @@ function addResult(result) {
             actual: result
         });
     }
+
+    // LƯU KẾT QUẢ META-ANALYSIS (NEW)
+    if (!session.metaAnalysisResults) session.metaAnalysisResults = [];
+    // Chỉ lưu kết quả Meta nếu Meta-Analysis có đưa ra dự đoán (dù là từ logic chính hay meta)
+    if (metaAnalysis.prediction) {
+        const metaIsWin = metaAnalysis.prediction === result;
+        session.metaAnalysisResults.push(metaIsWin ? 'W' : 'L');
+    }
+
 
     session.history.push(result);
     
@@ -1440,6 +1530,10 @@ function undoLast() {
     if (session.verdictPredictions && session.verdictPredictions.length > 0) {
         session.verdictPredictions.pop();
     }
+    // HOÀN TÁC KẾT QUẢ META-ANALYSIS (NEW)
+    if (session.metaAnalysisResults && session.metaAnalysisResults.length > 0) {
+        session.metaAnalysisResults.pop();
+    }
 
     saveSessions();
     updateAllUI();
@@ -1452,6 +1546,7 @@ function clearCurrentSessionHistory() {
     session.verdictPredictions = [];
     session.lengthPerformance = {}; 
     session.optimalLength = null;
+    session.metaAnalysisResults = []; // XÓA LỊCH SỬ META (NEW)
 
     const sim = session.simulation;
     sim.profitLoss = 0;
@@ -1507,7 +1602,7 @@ function createNewSession() {
     state.sessions[newId] = { 
         name: `Phiên ${new Date().toLocaleString('vi-VN')}`, 
         history: [], predictions: [], verdictPredictions: [], 
-        lengthPerformance: {}, optimalLength: null,
+        lengthPerformance: {}, optimalLength: null, metaAnalysisResults: [], // NEW
         simulation: defaultSimulation
     };
     saveSessions();
@@ -1571,9 +1666,14 @@ function loadSession(sessionId) {
 
 // --- IMPORT / EXPORT & RECALCULATION ---
 function runSimulation(importedSessions) {
+    // Tạm thời tắt UI update để tăng tốc độ import
+    const originalUpdate = updateAllUI;
+    updateAllUI = () => {};
+
     state.sessions = {};
     state.currentSessionId = null;
 
+    // Sắp xếp theo thứ tự thời gian để đảm bảo lịch sử Meta-Analysis được tính đúng
     const sortedSessionIds = Object.keys(importedSessions).sort((a, b) => parseInt(a.split('-')[1]) - parseInt(b.split('-')[1]));
 
     sortedSessionIds.forEach(sessionId => {
@@ -1586,26 +1686,35 @@ function runSimulation(importedSessions) {
             stopLossLevel: 4, consecutiveLosses: 0, displayColumns: 6
         };
         
+        // Tạo lại cấu trúc session tối thiểu, xóa hết dữ liệu predictions/results cũ để tính toán lại
         state.sessions[sessionId] = { 
             name: importedSession.name, 
-            history: [], predictions: [], verdictPredictions: [], 
-            lengthPerformance: {}, optimalLength: null,
+            history: [], 
+            predictions: [], 
+            verdictPredictions: [], 
+            metaAnalysisResults: [], // NEW: Reset Meta Results
+            lengthPerformance: {}, 
+            optimalLength: null,
             simulation: JSON.parse(JSON.stringify(defaultSimulation))
         };
         
+        // Giữ lại cài đặt simulation
         if (importedSession.simulation) {
             state.sessions[sessionId].simulation.baseBet = importedSession.simulation.baseBet || 10;
             state.sessions[sessionId].simulation.stopLossLevel = importedSession.simulation.stopLossLevel || 4;
-            // Bỏ qua displayColumns khi import để dùng giá trị mặc định/hiện tại
             state.sessions[sessionId].simulation.mode = importedSession.simulation.mode || 'follow';
         }
         
+        // Lặp lại lịch sử để kích hoạt logic prediction và lưu trữ kết quả
         importedSession.history.forEach(result => {
+            // Chạy qua quá trình addResult đầy đủ để tính toán lại toàn bộ prediction, verdict và meta-analysis
             addResult(result); 
         });
-
+        
     });
 
+    // Khôi phục và cập nhật UI lần cuối
+    updateAllUI = originalUpdate;
     if (sortedSessionIds.length > 0) {
         const lastSessionId = sortedSessionIds[sortedSessionIds.length - 1];
         loadSession(lastSessionId);
@@ -1623,20 +1732,21 @@ function importData(event) {
             if (typeof importedSessions !== 'object' || importedSessions === null) throw new Error("Invalid format");
             for(const key in importedSessions) {
                 const s = importedSessions[key];
+                // Kiểm tra tối thiểu: tên và lịch sử là mảng
                 if(!s.name || !Array.isArray(s.history)) throw new Error("Invalid session data");
             }
-            showCustomConfirm('Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc muốn tiếp tục?', () => {
+            showCustomConfirm(`Tìm thấy ${Object.keys(importedSessions).length} phiên. Dữ liệu hiện tại sẽ bị ghi đè và tính toán lại toàn bộ. Bạn có chắc muốn tiếp tục?`, () => {
                 showLoadingModal('Đang tính toán lại toàn bộ lịch sử và mô phỏng cược...');
 
                 setTimeout(() => {
                     runSimulation(importedSessions);
                     saveSessions();
                     hideLoadingModal();
-                    showToast('Nhập và mô phỏng lại thành công!', 'success');
+                    showToast(`Nhập thành công ${Object.keys(state.sessions).length} phiên và mô phỏng lại!`, 'success');
                 }, 100);
             });
         } catch (error) {
-            showToast('Lỗi: File dữ liệu không hợp lệ.', 'error');
+            showToast('Lỗi: File dữ liệu không hợp lệ. Vui lòng kiểm tra định dạng.', 'error');
             console.error("Import error:", error);
         } finally {
             event.target.value = '';
@@ -1750,6 +1860,7 @@ function initializeApp() {
         if (!s.lengthPerformance) s.lengthPerformance = {};
         if (s.optimalLength === undefined) s.optimalLength = null;
         if (!s.verdictPredictions) s.verdictPredictions = []; 
+        if (!s.metaAnalysisResults) s.metaAnalysisResults = []; // Initialize Meta results
         
         s.simulation = { ...JSON.parse(JSON.stringify(defaultSimulation)), ...s.simulation };
         s.simulation.isActive = true; // Force simulation on for all sessions
