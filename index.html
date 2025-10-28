@@ -124,11 +124,12 @@ height: 100%; /* Cột dài */
 background-color: #ef4444; /* Red-500 */
 height: 40%; /* Cột ngắn */
 }
-
 /* Bỏ style Chiến lược */
-/*
-.strategy-highlight { ... }
-*/
+.strategy-highlight {
+    background-color: rgba(250, 204, 21, 0.1); /* bg-yellow-400/10 */
+    /* ring-1 ring-yellow-500 */
+    box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.7), 0 0 15px rgba(250, 204, 21, 0.4);
+}
 
 </style>
 </head>
@@ -173,12 +174,26 @@ height: 40%; /* Cột ngắn */
 </div>
 </div>
 
-<!-- *** BỎ: STRATEGY PANEL *** -->
-<!--
+<!-- STRATEGY PANEL (MỚI) -->
 <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-...
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-yellow-300">💡 Chiến Lược (Phân tích W/L)</h2>
+        <span id="strategy-recommendation-badge" class="px-3 py-1 text-sm font-bold rounded-full text-gray-900 bg-gray-400">...</span>
+    </div>
+
+    <!-- Vùng hiển thị đề xuất chiến lược -->
+    <div id="strategyRecommendationResult" class="text-center bg-gray-900 py-4 rounded-lg border-2 border-yellow-500 mb-4 transition-all duration-300 hidden">
+        <p class="text-sm text-gray-400 mb-1">Đề xuất "CHIẾN LƯỢC" (Ưu tiên cao):</p>
+        <p id="strategyResultText" class="text-2xl font-extrabold text-yellow-300">... Chờ tín hiệu ...</p>
+        <p id="strategyReasonText" class="text-xs text-gray-400 mt-1 px-2">...</p>
+    </div>
+
+    <!-- Vùng hiển thị các quy luật được tìm thấy -->
+    <div id="strategyAnalysisDetails" class="space-y-1">
+        <p class="text-gray-500 text-center py-4">Đang tìm các quy luật chiến lược...</p>
+    </div>
 </div>
--->
+
 
 <!-- CHỐT ANALYSIS PANEL -->
 <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
@@ -299,9 +314,9 @@ height: 40%; /* Cột ngắn */
     { key: '70-80', min: 70, max: 80 }, { key: '80-90', min: 80, max: 90 },
     { key: '90-100', min: 90, max: 100.1 } // Use 100.1 to include 100
  ];
- // *** BỎ: Constants Chiến lược ***
- // const STRATEGY_THRESHOLD = 80;
- // const MAX_TRANSITION_CHECK = 5;
+ // (MỚI) Constants cho Chiến lược
+ const STRATEGY_THRESHOLD = 80; // Ngưỡng % để coi là quy luật mạnh
+ const MAX_TRANSITION_CHECK = 5; // Kiểm tra tối đa 5L hoặc 5W liên tiếp
 
 // --- CORE LOGIC: PATTERN MATCHER (Standard) ---
 class PatternMatcher {
@@ -443,9 +458,8 @@ currentPrediction: null,
 originalSystemPrediction: null,
 currentFinalPrediction: null,
 currentChotPredictionForLog: null,
-// *** BỎ: State Chiến lược ***
-// currentStrategyAnalysis: null,
-// currentStrategyRecommendation: null,
+currentStrategyAnalysis: null, // (MỚI) Lưu trữ kết quả phân tích chiến lược chi tiết
+currentStrategyRecommendation: null, // (MỚI) Lưu trữ đề xuất P/B cuối cùng của Chiến lược
 goldenRange: null,
 deathRange: null,
 sessionConfidenceRanges: [],
@@ -866,9 +880,8 @@ updateGlobalAccuracyUI();
 updateAnalysisUI(); // Tính toán Phán quyết HT và lưu P/B gốc
 updateConfidenceStatsUI();
 updateVerdictStatsUI();
-updateChotAnalysisUI(); // Tính toán Chốt dựa trên kết quả Phán quyết HT
-// *** BỎ: Cập nhật UI Chiến lược ***
-// updateStrategyUI();
+const chotAnalysis = updateChotAnalysisUI(); // Tính toán Chốt
+updateStrategyUI(chotAnalysis); // (MỚI) Tính toán Chiến Lược dựa trên phân tích Chốt
 }
 function toggleSessionManagement() {
 const content = document.getElementById('sessionManagementContent');
@@ -919,21 +932,21 @@ function findNextOutcomeInHistory(pattern, historicalSequences) {
         let i = -1;
         while ((i = history.indexOf(pattern, i + 1)) !== -1) {
             const nextCharIndex = i + pattern.length;
-            if (i === history.length - pattern.length || nextCharIndex < history.length) {
-                if (i > 0 && history[i - 1] === pattern[0] && pattern.length === 1) { // Chỉ kiểm tra cho pattern dài 1
-                   continue;
-                }
-               if (nextCharIndex < history.length) {
-                   if (history[nextCharIndex] === 'W') W++;
-                   else L++;
-               }
+            // Chỉ đếm nếu là sự xuất hiện riêng lẻ (không phải là phần của chuỗi dài hơn)
+             // Kiểm tra ký tự TRƯỚC pattern (nếu có)
+            const prevCharDifferent = (i === 0 || history[i - 1] !== pattern[pattern.length - 1]);
+             // Chỉ đếm nếu ký tự trước khác VÀ có ký tự tiếp theo
+            if (prevCharDifferent && nextCharIndex < history.length) {
+                 if (history[nextCharIndex] === 'W') W++;
+                 else L++;
             }
         }
     }
     return { W, L, total: W + L };
 }
 
-// Hàm tìm pattern chính xác, không phải là phần của chuỗi dài hơn
+// (MỚI) Hàm tìm pattern chính xác, không phải là phần của chuỗi dài hơn
+// Dùng cho Chiến Lược
 function findExactEndPatternOccurrences(pattern, historicalSequences) {
     if (!pattern || pattern.length < 1) return { W: 0, L: 0, total: 0 };
     let W = 0, L = 0;
@@ -968,7 +981,7 @@ const possibleResults = [];
 for (let len = Math.min(maxLen, currentSequence.length); len >= minLen; len--) {
 const pattern = currentSequence.slice(-len);
 if (!pattern) continue;
-const stats = findExactEndPatternOccurrences(pattern, historicalSequences); // Use exact
+const stats = findNextOutcomeInHistory(pattern, historicalSequences); // Use original inexact
 if (stats.total >= minOccurrences) {
     const rateW = stats.total > 0 ? stats.W / stats.total : 0;
     possibleResults.push({ length: len, stats: stats, rate: rateW });
@@ -1086,7 +1099,7 @@ const optimalLength = session.chotOptimalLengths ? session.chotOptimalLengths[so
 // --- BƯỚC 1: ƯU TIÊN ĐỘ DÀI TỐI ƯU ---
 if (optimalLength && currentSequence.length >= optimalLength) {
 const pattern = currentSequence.slice(-optimalLength);
-const stats = findExactEndPatternOccurrences(pattern, historicalSequences); // Use exact
+const stats = findNextOutcomeInHistory(pattern, historicalSequences); // Use inexact for optimal
 if (stats.total > 0) {
 if (stats.W > stats.L) return { predictionType: 'OPTIMAL', predictedWL: 'W', stats: stats, optimalLength: optimalLength };
 if (stats.L > stats.W) return { predictionType: 'OPTIMAL', predictedWL: 'L', stats: stats, optimalLength: optimalLength };
@@ -1110,7 +1123,7 @@ return { predictionType: 'BALANCED', stats: stats, optimalLength: length };
 function updateChotAnalysisUI() {
 const MAX_BARS_TO_SHOW = 50;
 const finalChotResultDiv = document.getElementById('finalChotResult');
-const finalChotResultText = document.getElementById('finalChotResultText');
+const finalChotResultText = document.getElementById('finalChotResultText'); // Lấy element text
 const chotAnalysisDetailsDiv = document.getElementById('chotAnalysisDetails');
 const chotHistoryChartDiv = document.getElementById('chotHistoryChart');
 const chotAccuracyStatsSpan = document.getElementById('chotAccuracyStats');
@@ -1122,7 +1135,7 @@ const finalVerdictInfo = state.currentFinalPrediction;
 state.currentChotPredictionForLog = null;
 let analysisRowsHTML = '';
 const finalVotesPB = { P: 0, B: 0 };
-let chotAnalysisResults = {}; // Lưu kết quả
+let chotAnalysisResults = {}; // (MỚI) Lưu kết quả phân tích Chốt chi tiết
 
 if (originalSystemPB && finalVerdictInfo !== null) {
 if (finalVerdictInfo.verdict === 'follow') activeSourcesKeys.add('follow');
@@ -1143,12 +1156,24 @@ const currentSequence = allSequences[source.key]?.[currentSessionId] || "";
 const historicalData = { ...allSequences[source.key] };
 if(historicalData) delete historicalData[currentSessionId];
 const analysisResult = getChotPrediction(currentSequence, historicalData, source.key);
-chotAnalysisResults[source.key] = analysisResult; // Lưu
+chotAnalysisResults[source.key] = analysisResult; // (MỚI) Lưu kết quả
 const predictedWL = analysisResult.predictedWL || null;
 let finalPBprediction = null;
+let voteFor = null; // (MỚI) Biến trung gian để giữ phiếu bầu
 if (isActive && predictedWL) {
-finalPBprediction = (predictedWL === 'W') ? originalSystemPB : (originalSystemPB === 'P' ? 'B' : 'P');
-if (finalPBprediction) finalVotesPB[finalPBprediction]++;
+    if (source.key === 'against') {
+        // Logic ĐÃ SỬA LỖI cho "Ngược HT"
+        voteFor = (predictedWL === 'W')
+            ? (originalSystemPB === 'P' ? 'B' : 'P') // W (Ngược đúng) -> Vote ngược P/B Gốc
+            : originalSystemPB;                      // L (Ngược sai) -> Vote cho P/B Gốc
+    } else {
+        // Logic cho "Theo HT" và các khoảng tin cậy (ĐÃ ĐÚNG)
+        voteFor = (predictedWL === 'W')
+            ? originalSystemPB                      // W (Theo đúng) -> Vote cho P/B Gốc
+            : (originalSystemPB === 'P' ? 'B' : 'P'); // L (Theo sai) -> Vote ngược P/B Gốc
+    }
+    finalVotesPB[voteFor]++;
+    finalPBprediction = voteFor; // Gán P/B cuối cùng để hiển thị [P] hoặc [B]
 }
 analysisRowsHTML += getChotRowHTML(source.name, currentSequence, analysisResult, isActive, finalPBprediction);
 }
@@ -1158,7 +1183,7 @@ chotAnalysisDetailsDiv.innerHTML = analysisRowsHTML || '<p class="text-gray-500 
 state.currentChotPredictionForLog = null;
 chotAnalysisDetailsDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Chờ tín hiệu từ Phán Quyết Hệ Thống...</p>';
 }
-let finalChotPredictionTextContent = '... Chờ tín hiệu ...';
+let finalChotPredictionTextContent = '... Chờ tín hiệu ...'; // Đổi tên biến
 let finalChotPredictionColor = 'text-gray-400';
 let finalChotBorderColor = 'border-purple-500';
 let finalChotPB = null;
@@ -1182,10 +1207,14 @@ finalChotBorderColor = 'border-yellow-500';
 } else if (originalSystemPB && finalVerdictInfo !== null) {
 finalChotPredictionTextContent = 'Không đủ tín hiệu bỏ phiếu';
 }
-state.currentChotPredictionForLog = finalChotPB;
+// (MỚI) Lưu đề xuất Chốt (Optimal/Max/Fallback)
+state.currentChotPredictionForLog = {
+    prediction: finalChotPB,
+    source: 'CHOT_VOTE' // Nguồn là CHOT_VOTE
+};
 finalChotResultDiv.className = `text-center bg-gray-900 py-4 rounded-lg border-2 ${finalChotBorderColor} mb-4 transition-all duration-300`;
-finalChotResultText.textContent = finalChotPredictionTextContent;
-finalChotResultText.className = `text-2xl font-extrabold ${finalChotPredictionColor}`;
+finalChotResultText.textContent = finalChotPredictionTextContent; // Cập nhật textContent
+finalChotResultText.className = `text-2xl font-extrabold ${finalChotPredictionColor}`; // Cập nhật class
 
 const session = state.currentSessionId ? state.sessions[state.currentSessionId] : null;
 const chotHistory = session?.chotPredictions || [];
@@ -1207,19 +1236,244 @@ chotHistoryChartDiv.innerHTML = '<p class="text-gray-600 text-xs text-center w-f
 }
 const accuracyRate = totalChot > 0 ? (correctChot / totalChot * 100).toFixed(1) : '0.0';
 chotAccuracyStatsSpan.textContent = `Đúng: ${correctChot}/${totalChot} (${accuracyRate}%)`;
-
-// Bỏ trả về return vì Chiến lược đã bị xóa
-// return { activeSourcesKeys, chotAnalysisResults };
+// (MỚI) Trả về kết quả phân tích chi tiết để Chiến Lược sử dụng
+return { activeSourcesKeys, chotAnalysisResults };
 }
 // --- END: LOGIC CHO PHÂN TÍCH "CHỐT" ---
 
-// --- START: BỎ LOGIC CHIẾN LƯỢC ---
-/*
-function analyzeStrategyRules(...) { ... }
-function getStrategyRecommendation(...) { ... }
-function updateStrategyUI(...) { ... }
-*/
-// --- END: BỎ LOGIC CHIẾN LƯỢC ---
+// --- START: (MỚI) LOGIC CHO CHIẾN LƯỢC ---
+/**
+ * Phân tích các quy luật mạnh (Transition, Max Streak) cho một nguồn Chốt.
+ */
+function analyzeStrategyRules(currentSequence, historicalSequences) {
+    const rules = [];
+    if (!currentSequence || currentSequence.length < 1) {
+        return rules;
+    }
+    const { maxW, maxL } = calculateStreakStats(historicalSequences);
+    const { type: currentType, length: currentLength } = getCurrentStreak(currentSequence);
+
+    // 1. Quy luật Max Streak
+    if (currentType === 'W' && maxW > 0 && currentLength >= maxW) {
+        rules.push({ type: 'MAX_STREAK', predictedWL: 'L', strength: 101, reason: `Max W (${maxW})` });
+    }
+    if (currentType === 'L' && maxL > 0 && currentLength >= maxL) {
+        rules.push({ type: 'MAX_STREAK', predictedWL: 'W', strength: 101, reason: `Max L (${maxL})` });
+    }
+
+    // 2. Quy luật Chuyển đổi (Transition)
+    const oppositeChar = (currentType === 'W') ? 'L' : 'W';
+    for (let len = 1; len <= Math.min(currentLength, MAX_TRANSITION_CHECK); len++) {
+        const pattern = currentType.repeat(len);
+        // Tìm chính xác các lần chuỗi 'len' này kết thúc (tức là ký tự trước nó phải khác)
+        const stats = findExactEndPatternOccurrences(pattern, historicalSequences);
+        
+        if (stats.total > 0) {
+            const rateW = (stats.W / stats.total) * 100;
+            const rateL = (stats.L / stats.total) * 100;
+
+            if (rateW >= STRATEGY_THRESHOLD) {
+                rules.push({ type: 'TRANSITION', predictedWL: 'W', strength: rateW, reason: `${len}${currentType} -> W (${rateW.toFixed(0)}%)` });
+            }
+            if (rateL >= STRATEGY_THRESHOLD) {
+                rules.push({ type: 'TRANSITION', predictedWL: 'L', strength: rateL, reason: `${len}${currentType} -> L (${rateL.toFixed(0)}%)` });
+            }
+        }
+    }
+    return rules;
+}
+
+/**
+ * Quyết định đề xuất Chiến Lược cuối cùng dựa trên các quy luật và dự đoán Chốt.
+ */
+function getStrategyRecommendation(activeSourcesKeys, chotAnalysisResults, allStrategyRules) {
+    let strongRules = [];
+    // 1. Thu thập quy luật mạnh từ các nguồn active
+    for (const sourceKey of activeSourcesKeys) {
+        if (allStrategyRules[sourceKey] && allStrategyRules[sourceKey].length > 0) {
+            strongRules.push(...allStrategyRules[sourceKey].map(rule => ({ ...rule, source: sourceKey })));
+        }
+    }
+
+    if (strongRules.length > 0) {
+        strongRules.sort((a, b) => b.strength - a.strength); // Sắp xếp theo độ mạnh
+        const bestRule = strongRules[0];
+        // Kiểm tra mâu thuẫn (các quy luật khác có cùng độ mạnh nhưng ngược WL)
+        const conflictingRule = strongRules.find(rule => rule.strength === bestRule.strength && rule.predictedWL !== bestRule.predictedWL);
+        if (conflictingRule) {
+            return {
+                finalWL: null,
+                reason: `Quy luật mạnh mâu thuẫn (${bestRule.reason} vs ${conflictingRule.reason})`,
+                source: 'Strategy',
+                type: 'Conflicting Strong Rules'
+            };
+        }
+        // Trả về quy luật mạnh nhất
+        return {
+            finalWL: bestRule.predictedWL,
+            reason: `Quy luật mạnh: ${bestRule.reason}`,
+            source: sourceKeyToName(bestRule.source),
+            type: bestRule.type
+        };
+    }
+
+    // 2. Fallback về dự đoán Chốt (Optimal/Max/Fallback) nếu không có quy luật mạnh
+    let chotPredictions = [];
+    const predictionTypeWeight = { 'MAX_STREAK': 3, 'OPTIMAL': 2, 'FALLBACK': 1 };
+
+    for (const sourceKey of activeSourcesKeys) {
+        const result = chotAnalysisResults[sourceKey];
+        if (result && result.predictedWL && predictionTypeWeight[result.predictionType]) {
+            chotPredictions.push({
+                wl: result.predictedWL,
+                weight: predictionTypeWeight[result.predictionType],
+                source: sourceKeyToName(sourceKey),
+                type: result.predictionType
+            });
+        }
+    }
+
+    if (chotPredictions.length > 0) {
+        chotPredictions.sort((a, b) => b.weight - a.weight); // Sắp xếp theo độ ưu tiên
+        const bestChotPrediction = chotPredictions[0];
+        // Kiểm tra mâu thuẫn (các dự đoán khác có cùng độ ưu tiên nhưng ngược WL)
+        const conflictingChot = chotPredictions.find(p => p.weight === bestChotPrediction.weight && p.wl !== bestChotPrediction.wl);
+        if (conflictingChot) {
+            return {
+                finalWL: null,
+                reason: `Dự đoán Chốt mâu thuẫn (${bestChotPrediction.type} từ ${bestChotPrediction.source} vs ${conflictingChot.type} từ ${conflictingChot.source})`,
+                source: 'Chot',
+                type: 'Conflicting Chot Predictions'
+            };
+        }
+        // Trả về dự đoán Chốt mạnh nhất
+        return {
+            finalWL: bestChotPrediction.wl,
+            reason: `Theo Chốt (${bestChotPrediction.type})`,
+            source: bestChotPrediction.source,
+            type: bestChotPrediction.type
+        };
+    }
+
+    // 3. Không có quy luật mạnh, không có dự đoán Chốt
+    return {
+        finalWL: null,
+        reason: 'Không có quy luật mạnh hoặc dự đoán Chốt hợp lệ.',
+        source: 'None',
+        type: 'No Valid Prediction'
+    };
+}
+
+function sourceKeyToName(key) {
+    return key === 'follow' ? 'Theo HT' : key === 'against' ? 'Ngược HT' : `${key.replace('-', ' - ')}%`;
+}
+
+/**
+ * Cập nhật giao diện cho phần Chiến Lược.
+ */
+function updateStrategyUI(chotAnalysis) {
+    const { activeSourcesKeys, chotAnalysisResults } = chotAnalysis;
+    const detailsDiv = document.getElementById('strategyAnalysisDetails');
+    const badge = document.getElementById('strategy-recommendation-badge');
+    const resultDiv = document.getElementById('strategyRecommendationResult');
+    const resultText = document.getElementById('strategyResultText');
+    const reasonText = document.getElementById('strategyReasonText');
+
+    if (!activeSourcesKeys || !chotAnalysisResults || !state.originalSystemPrediction) {
+        detailsDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Chờ tín hiệu từ Phán Quyết HT...</p>';
+        badge.textContent = 'Chờ...';
+        badge.className = 'px-3 py-1 text-sm font-bold rounded-full text-gray-900 bg-gray-400';
+        resultDiv.classList.add('hidden');
+        state.currentStrategyAnalysis = null;
+        state.currentStrategyRecommendation = null;
+        return;
+    }
+
+    const allSequences = getChotAnalysisData();
+    const currentSessionId = state.currentSessionId;
+    let allStrategyRules = {};
+    let detailsHTML = '';
+
+    // 1. Phân tích và hiển thị quy luật cho TẤT CẢ các nguồn (để tham khảo)
+    for (const sourceKey of CHOT_SOURCES) {
+        const currentSequence = allSequences[sourceKey]?.[currentSessionId] || "";
+        const historicalData = { ...allSequences[sourceKey] };
+        if (historicalData) delete historicalData[currentSessionId];
+        
+        const rules = analyzeStrategyRules(currentSequence, historicalData);
+        allStrategyRules[sourceKey] = rules; // Lưu lại
+        
+        const isActive = activeSourcesKeys.has(sourceKey);
+        const activeClass = isActive ? 'bg-gray-700 bg-opacity-60 ring-1 ring-yellow-500' : 'bg-gray-900';
+        const name = sourceKeyToName(sourceKey);
+
+        detailsHTML += `<div class="grid grid-cols-12 gap-2 items-center text-xs mb-1 p-1.5 ${activeClass} rounded-lg transition-colors duration-300">
+            <div class="col-span-3 font-semibold ${isActive ? 'text-yellow-300' : 'text-gray-300'} truncate" title="${name}">${name}</div>
+            <div class="col-span-9 text-right font-medium">`;
+        
+        if (rules.length > 0) {
+            rules.sort((a, b) => b.strength - a.strength); // Sắp xếp theo độ mạnh
+            detailsHTML += rules.map(rule => {
+                const color = rule.predictedWL === 'W' ? 'text-green-400' : 'text-red-400';
+                return `<span class="${color}" title="Độ mạnh: ${rule.strength.toFixed(0)}%">${rule.reason}</span>`;
+            }).join(' / ');
+        } else {
+            detailsHTML += '<span class="text-gray-600">Không có quy luật mạnh</span>';
+        }
+        detailsHTML += '</div></div>';
+    }
+    detailsDiv.innerHTML = detailsHTML;
+    state.currentStrategyAnalysis = allStrategyRules; // Lưu phân tích chi tiết
+
+    // 2. Lấy đề xuất cuối cùng
+    const recommendation = getStrategyRecommendation(activeSourcesKeys, chotAnalysisResults, allStrategyRules);
+    let finalPBPrediction = null;
+    
+    if (recommendation.finalWL) {
+        const originalSystemPB = state.originalSystemPrediction;
+        // Chuyển đổi W/L sang P/B
+        // Logic này giống hệt logic tính vote của Chốt (đã fix)
+        let voteFor = null;
+        if (recommendation.source === 'Ngược HT') {
+            voteFor = (recommendation.finalWL === 'W')
+                ? (originalSystemPB === 'P' ? 'B' : 'P') // W (Ngược đúng) -> Vote ngược P/B Gốc
+                : originalSystemPB;                      // L (Ngược sai) -> Vote cho P/B Gốc
+        } else {
+            // "Theo HT" và các khoảng tin cậy
+            voteFor = (recommendation.finalWL === 'W')
+                ? originalSystemPB                      // W (Theo đúng) -> Vote cho P/B Gốc
+                : (originalSystemPB === 'P' ? 'B' : 'P'); // L (Theo sai) -> Vote ngược P/B Gốc
+        }
+        finalPBPrediction = voteFor;
+
+        // Hiển thị kết quả
+        resultDiv.classList.remove('hidden');
+        const color = finalPBPrediction === 'P' ? 'text-blue-400' : 'text-red-400';
+        resultText.textContent = finalPBPrediction === 'P' ? 'PLAYER' : 'BANKER';
+        resultText.className = `text-2xl font-extrabold ${color}`;
+        reasonText.textContent = `Nguồn: ${recommendation.source} (${recommendation.reason})`;
+        
+        badge.textContent = 'ƯU TIÊN';
+        badge.className = 'px-3 py-1 text-sm font-bold rounded-full text-gray-900 bg-yellow-400 animate-pulse';
+    } else {
+        // Không có đề xuất Chiến Lược
+        resultDiv.classList.add('hidden');
+        resultText.textContent = '...';
+        reasonText.textContent = recommendation.reason; // Hiển thị lý do (mâu thuẫn, không có...)
+        
+        badge.textContent = 'BỎ QUA';
+        badge.className = 'px-3 py-1 text-sm font-bold rounded-full text-gray-900 bg-gray-600';
+    }
+
+    state.currentStrategyRecommendation = {
+        prediction: finalPBPrediction, // P, B, hoặc null
+        source: recommendation.source,
+        type: recommendation.type,
+        reason: recommendation.reason
+    };
+}
+// --- END: LOGIC CHO CHIẾN LƯỢC ---
+
 
 /**
 * Cập nhật tỷ lệ thắng (performance) cho các độ dài W/L của Chốt.
@@ -1243,7 +1497,7 @@ const candidates = [];
 for (let len = 3; len <= 20; len++) {
 if (prevSequence.length < len) continue;
 const pattern = prevSequence.slice(-len);
-const stats = findExactEndPatternOccurrences(pattern, historicalSequences);
+const stats = findNextOutcomeInHistory(pattern, historicalSequences); // use inexact
 if (stats.total > 0 && stats.W !== stats.L) {
     const predictedWL = (stats.W > stats.L) ? 'W' : 'L';
     if (!perfData[len]) perfData[len] = { wins: 0, total: 0 };
@@ -1274,7 +1528,16 @@ function addResult(result) {
     if (!state.currentSessionId) return;
     const session = state.sessions[state.currentSessionId];
 
-    const chotPredictionForThisRound = state.currentChotPredictionForLog; // Chốt P/B (lấy trước)
+    // (MỚI) Lấy đề xuất cuối cùng (Chiến Lược hoặc Chốt)
+    const strategyRec = state.currentStrategyRecommendation;
+    const chotRec = state.currentChotPredictionForLog;
+    let finalPredictionForLog = null;
+    if (strategyRec && strategyRec.prediction) {
+        finalPredictionForLog = strategyRec; // Ưu tiên Chiến Lược
+    } else if (chotRec && chotRec.prediction) {
+        finalPredictionForLog = chotRec; // Fallback về Chốt
+    }
+
     const tier1Prediction = state.originalSystemPrediction; // HT1 P/B (lấy trước)
 
     // --- Ghi log Prediction HT1 ---
@@ -1290,17 +1553,17 @@ function addResult(result) {
             actual: result
         });
     }
-    // --- Ghi log Chốt & Tính actualChotWL ---
+    // --- Ghi log Chốt (Sửa đổi: Ghi cả Chốt và Chiến Lược) ---
     if (!session.chotPredictions) session.chotPredictions = [];
-    let actualChotWL = null;
-    if (chotPredictionForThisRound) {
+    if (finalPredictionForLog && finalPredictionForLog.prediction) {
         session.chotPredictions.push({
-            predicted: chotPredictionForThisRound,
-            actual: result
+            predicted: finalPredictionForLog.prediction,
+            actual: result,
+            source: finalPredictionForLog.source, // 'CHOT_VOTE' hoặc 'Theo HT', 'Ngược HT', v.v.
+            type: finalPredictionForLog.type,     // 'OPTIMAL', 'MAX_STREAK', 'TRANSITION', v.v.
+            reason: finalPredictionForLog.reason
         });
-        actualChotWL = (chotPredictionForThisRound === result) ? 'W' : 'L';
     }
-
 
     // --- Cập nhật Performance ---
     updateChotLengthPerformance(session, tier1Prediction, result);
@@ -1315,9 +1578,8 @@ function addResult(result) {
     state.originalSystemPrediction = null;
     state.currentFinalPrediction = null;
     state.currentChotPredictionForLog = null;
-    // *** BỎ: Reset strategy ***
-    // state.currentStrategyAnalysis = null;
-    // state.currentStrategyRecommendation = null;
+    state.currentStrategyAnalysis = null;
+    state.currentStrategyRecommendation = null;
 
     saveSessions();
     updateAllUI();
@@ -1353,15 +1615,10 @@ function undoLast() {
     const lastResult = session.history.pop();
     const historyForUndo = session.history;
 
-     let actualChotWLToUndo = null;
+     // --- Hoàn tác Chốt / Chiến Lược ---
      if (session.chotPredictions && session.chotPredictions.length > 0) {
-        const lastChotPrediction = session.chotPredictions[session.chotPredictions.length - 1];
-        if (lastChotPrediction.predicted) {
-             actualChotWLToUndo = (lastChotPrediction.predicted === lastResult) ? 'W' : 'L';
-        }
-         session.chotPredictions.pop();
+         session.chotPredictions.pop(); // Chỉ cần xóa cái cuối cùng
      }
-
 
     // --- Hoàn tác Chốt Performance ---
     const tier1PredictionToUndo = session.predictions.length > 0 ? session.predictions[session.predictions.length - 1].predicted : null;
@@ -1378,7 +1635,7 @@ function undoLast() {
             for (let len = 3; len <= 20; len++) {
                 if (prevSequenceChot.length < len) continue;
                 const pattern = prevSequenceChot.slice(-len);
-                const stats = findExactEndPatternOccurrences(pattern, historicalSequencesChot);
+                const stats = findNextOutcomeInHistory(pattern, historicalSequencesChot); // use inexact
                 if (stats.total > 0 && stats.W !== stats.L) {
                     const predictedWL = (stats.W > stats.L) ? 'W' : 'L';
                     if (perfDataChot[len] && perfDataChot[len].total > 0) {
@@ -1558,9 +1815,8 @@ state.currentPrediction = null;
 state.originalSystemPrediction = null;
 state.currentFinalPrediction = null;
 state.currentChotPredictionForLog = null;
-// *** BỎ: Reset strategy ***
-// state.currentStrategyAnalysis = null;
-// state.currentStrategyRecommendation = null;
+state.currentStrategyAnalysis = null;
+state.currentStrategyRecommendation = null;
 localStorage.setItem('lastActiveSession_v11_sim', state.currentSessionId);
 updateSessionSelector();
 updateAllUI();
@@ -1700,8 +1956,8 @@ function runSimulation(importedSessions) {
             state.currentSessionId = newId;
             if (result === 'P' || result === 'B') {
                 updateAnalysisUI(); // Tính toán trước khi add
-                updateChotAnalysisUI(); // Tính toán trước khi add
-                // *** BỎ: updateStrategyUI() ***
+                const chotAnalysis = updateChotAnalysisUI(); // Tính toán trước khi add
+                updateStrategyUI(chotAnalysis); // (MỚI) Tính toán Chiến Lược
                 addResult(result);
             } else {
                 console.warn(`Skipping invalid result '${result}' at index ${resultIndex} in session ${sessionId}`);
@@ -1890,11 +2146,6 @@ function initializeApp() {
         if (!s.chotPredictions) s.chotPredictions = [];
         if (!s.chotLengthPerformance) s.chotLengthPerformance = CHOT_SOURCES.reduce((acc, key) => { acc[key] = {}; return acc; }, {});
         if (!s.chotOptimalLengths) s.chotOptimalLengths = CHOT_SOURCES.reduce((acc, key) => { acc[key] = null; return acc; }, {});
-
-        // *** BỎ: Xóa các thuộc tính Chiến lược cũ nếu có ***
-        delete s.strategyAnalysis;
-        delete s.strategyRecommendation;
-
         delete s.simulation; // Remove old property
     });
     const lastActiveId = localStorage.getItem('lastActiveSession_v11_sim');
