@@ -305,8 +305,8 @@ height: 40%; /* Cột ngắn */
 class PatternMatcher {
 constructor() {
 this.MIN_HISTORY_FOR_ANALYSIS = 10;
-this.MIN_PATTERN_LENGTH = 3;
-this.MAX_PATTERN_LENGTH = 20;
+this.MIN_PATTERN_LENGTH = 10; // <<<< ĐÃ THAY ĐỔI: Quay lại 10
+this.MAX_PATTERN_LENGTH = 20; // <<<< ĐÃ THAY ĐỔI: Giữ 20 theo yêu cầu
 this.MIN_CERTAIN_OCCURRENCES = 5;
 }
 calculateSimilarity(arr1, arr2) {
@@ -414,7 +414,7 @@ const pattern = currentHistory.slice(-len);
 const occurrences = this.findPatternOccurrences(pattern, allHistoricalSessions);
 if (occurrences.length > 0) {
 allMatches.push(...occurrences);
-break;
+break; // Chỉ lấy pattern dài nhất tìm thấy
 }
 }
 if (allMatches.length === 0) return { prediction: null, analysisText: 'Không tìm thấy hình cầu tương tự.', confidence: 0, isCertain: false };
@@ -1336,7 +1336,8 @@ const session = state.sessions[state.currentSessionId];
 if (!session) return null;
 if (!session.lengthPerformance) session.lengthPerformance = {};
 const candidates = [];
-for (let len = 3; len <= 20; len++) {
+// <<<< ĐÃ THAY ĐỔI: Loop từ 10
+for (let len = 10; len <= 20; len++) {
 if (history.length < len) continue;
 const pattern = history.slice(-len);
 const { prediction } = state.matcher.getPredictionForPattern(pattern, allSessions);
@@ -1408,7 +1409,8 @@ function undoLast() {
 
     // --- Hoàn tác HT1 Performance ---
     if (session.lengthPerformance) {
-        for (let len = 3; len <= 20; len++) {
+        // <<<< ĐÃ THAY ĐỔI: Loop từ 10
+        for (let len = 10; len <= 20; len++) {
             if (historyForUndo.length < len) continue;
             const pattern = historyForUndo.slice(-len);
              const tempAllSessions = Object.values(state.sessions).map(s =>
@@ -1912,52 +1914,6 @@ function initializeApp() {
 }
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', initializeApp)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>
 </body>
 </html>
