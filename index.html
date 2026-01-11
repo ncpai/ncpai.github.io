@@ -46,6 +46,19 @@
             z-index: 100; animation: slideDown 0.5s ease;
             border-left: 4px solid;
         }
+        .warning-alert {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%);
+            background-color: #f59e0b; color: white;
+            padding: 1rem 2rem; border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            z-index: 100; animation: slideDown 0.5s ease;
+            border-left: 4px solid #d97706;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -152,6 +165,7 @@
 <body class="p-4 md:p-8">
     <div id="modal-container"></div>
     <div id="toast-container"></div>
+    <div id="warning-container"></div>
 
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
@@ -706,7 +720,9 @@
                 ht4: { verdict: null, chot: null, range: null, rangeAccuracy: null, intervalHistory: [] }
             },
             // LỊCH SỬ QUYẾT ĐỊNH CUỐI CÙNG
-            finalDecisionHistory: [] // { gameNumber: số, decision: 'P'/'B', actual: 'P'/'B', correct: boolean, reason: string, timestamp: số }
+            finalDecisionHistory: [], // { gameNumber: số, decision: 'P'/'B', actual: 'P'/'B', correct: boolean, reason: string, timestamp: số }
+            // Lưu trữ các cảnh báo đã hiển thị để tránh trùng lặp
+            displayedWarnings: {}
         };
 
         // Chart instances
@@ -741,67 +757,6 @@
             
             // Mặc định trả về null
             return null;
-        }
-
-        // Hàm tìm chuỗi mạnh nhất (chuỗi liên tiếp cùng màu) trong biểu đồ
-        function findStrongestStreak(history) {
-            if (!history || history.length === 0) {
-                return { length: 0, color: null, endIndex: -1 };
-            }
-            
-            let longestStreak = { length: 0, color: null, endIndex: -1 };
-            let currentStreak = { length: 0, color: null, startIndex: -1 };
-            
-            // Duyệt qua lịch sử từ đầu đến cuối
-            for (let i = 0; i < history.length; i++) {
-                const item = history[i];
-                if (!item) continue;
-                
-                // Xác định màu (xanh/đỏ)
-                let isCorrect = false;
-                if (item.correct !== undefined) {
-                    isCorrect = item.correct === true;
-                } else if (item.predicted !== undefined && item.actual !== undefined) {
-                    isCorrect = item.predicted === item.actual;
-                } else if (item.isCorrect !== undefined) {
-                    isCorrect = item.isCorrect === true;
-                }
-                
-                const color = isCorrect ? 'green' : 'red';
-                
-                // Nếu màu thay đổi hoặc chuỗi bắt đầu
-                if (currentStreak.color !== color || currentStreak.length === 0) {
-                    // Cập nhật chuỗi dài nhất nếu cần
-                    if (currentStreak.length > longestStreak.length) {
-                        longestStreak = {
-                            length: currentStreak.length,
-                            color: currentStreak.color,
-                            endIndex: i - 1
-                        };
-                    }
-                    
-                    // Bắt đầu chuỗi mới
-                    currentStreak = {
-                        length: 1,
-                        color: color,
-                        startIndex: i
-                    };
-                } else {
-                    // Tiếp tục chuỗi hiện tại
-                    currentStreak.length++;
-                }
-            }
-            
-            // Kiểm tra chuỗi cuối cùng
-            if (currentStreak.length > longestStreak.length) {
-                longestStreak = {
-                    length: currentStreak.length,
-                    color: currentStreak.color,
-                    endIndex: history.length - 1
-                };
-            }
-            
-            return longestStreak;
         }
 
         // Hàm tìm chuỗi mạnh nhất từ CUỐI biểu đồ (chuỗi hiện tại đang diễn ra)
@@ -856,6 +811,55 @@
             };
         }
 
+        // =================== HÀM CẢNH BÁO CHUỖI DÀI ===================
+        function showStreakWarning(system, streakLength, color, chartType) {
+            // Tạo key duy nhất cho cảnh báo để tránh hiển thị trùng lặp
+            const warningKey = `${system}-${color}-${chartType}-${streakLength}`;
+            
+            // Kiểm tra xem cảnh báo đã được hiển thị chưa
+            if (masterState.displayedWarnings[warningKey]) {
+                return; // Đã hiển thị rồi, không hiển thị lại
+            }
+            
+            // Đánh dấu đã hiển thị
+            masterState.displayedWarnings[warningKey] = true;
+            
+            const systemName = system.toUpperCase();
+            const colorText = color === 'green' ? 'XANH (đúng)' : 'ĐỎ (sai)';
+            const chartText = chartType === 'interval' ? 'Biểu đồ khoảng tỷ lệ' : 'Biểu đồ kết hợp';
+            
+            const message = `⚠️ CẢNH BÁO: ${systemName} có chuỗi ${colorText} dài ${streakLength} ở ${chartText}!`;
+            
+            // Hiển thị cảnh báo nổi bật ở giữa màn hình
+            const warningContainer = document.getElementById('warning-container');
+            const warning = document.createElement('div');
+            warning.className = 'warning-alert';
+            warning.innerHTML = `
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            `;
+            
+            warningContainer.appendChild(warning);
+            
+            // Tự động xóa cảnh báo sau 10 giây
+            setTimeout(() => {
+                if (warning.parentNode) {
+                    warning.style.animation = 'fadeOut 0.5s ease';
+                    setTimeout(() => warning.remove(), 500);
+                }
+            }, 10000);
+            
+            // Cũng hiển thị toast thông báo
+            showToast(message, 'warning');
+        }
+
         // =================== THUẬT TOÁN TÍNH QUYẾT ĐỊNH CUỐI CÙNG MỚI ===================
         function calculateFinalDecision() {
             console.log("Tính toán quyết định cuối cùng với thuật toán mới...");
@@ -888,7 +892,18 @@
                 
                 console.log(`${system}: Interval streak = ${intervalStreak.length} (${intervalStreak.color}), Combined streak = ${combinedStreak.length} (${combinedStreak.color})`);
                 
-                // Chỉ xem xét nếu chuỗi >= 2
+                // =================== KIỂM TRA CẢNH BÁO CHUỖI DÀI >= 4 ===================
+                // Kiểm tra và cảnh báo cho Biểu đồ khoảng tỷ lệ
+                if (intervalStreak.length >= 4) {
+                    showStreakWarning(system, intervalStreak.length, intervalStreak.color, 'interval');
+                }
+                
+                // Kiểm tra và cảnh báo cho Biểu đồ kết hợp
+                if (combinedStreak.length >= 4) {
+                    showStreakWarning(system, combinedStreak.length, combinedStreak.color, 'combined');
+                }
+                
+                // Chỉ xem xét nếu chuỗi >= 2 (cho quyết định)
                 if (intervalStreak.length >= 2 || combinedStreak.length >= 2) {
                     // So sánh và chọn chuỗi dài hơn
                     let currentStreak = null;
@@ -1638,6 +1653,9 @@
                 updateFinalDecisionStats();
                 saveFinalDecisionHistory();
                 
+                // Xóa tất cả cảnh báo đã lưu
+                masterState.displayedWarnings = {};
+                
                 showToast('Đã xóa toàn bộ lịch sử từ 4 hệ thống', 'info');
             }
         }
@@ -1696,6 +1714,9 @@
                 // Xóa lịch sử quyết định cuối cùng
                 masterState.finalDecisionHistory = [];
                 
+                // Xóa tất cả cảnh báo đã lưu
+                masterState.displayedWarnings = {};
+                
                 localStorage.removeItem('vanSuNhuY_sessions_v2');
                 localStorage.removeItem('vanSuNhuY_finalDecisionHistory');
                 updateMasterSessionSelector();
@@ -1709,6 +1730,9 @@
                 
                 // Reset final decision stats
                 updateFinalDecisionStats();
+                
+                // Xóa tất cả cảnh báo đang hiển thị
+                document.getElementById('warning-container').innerHTML = '';
                 
                 showToast('Đã reset tất cả 4 hệ thống', 'info');
             }
