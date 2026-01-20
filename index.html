@@ -160,6 +160,26 @@
             background-color: #ef4444;
             height: 40%;
         }
+        /* Pattern Analysis Styles */
+        .pattern-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-left: 3px solid #8b5cf6;
+            margin-top: 4px;
+            font-size: 0.8rem;
+        }
+        .pattern-strong {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .pattern-weak {
+            color: #f59e0b;
+        }
+        .pattern-alert {
+            background-color: #8b5cf6;
+            border-left: 4px solid #7c3aed;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -225,10 +245,10 @@
                     <h2 class="text-xl font-semibold mb-4 text-blue-300">🎲 Nhập Kết Quả Ván Hiện Tại</h2>
                     <p class="text-gray-400 text-sm mb-4">Kết quả sẽ được đồng bộ đến tất cả hệ thống</p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
-                        <button onclick="addResultToAll('P')" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 rounded-lg text-2xl">
+                        <button onclick="addResultToAllWithPatternAnalysis('P')" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 rounded-lg text-2xl">
                             <span>👤</span> PLAYER
                         </button>
-                        <button onclick="addResultToAll('B')" class="btn bg-red-600 hover:bg-red-500 text-white font-bold py-6 rounded-lg text-2xl">
+                        <button onclick="addResultToAllWithPatternAnalysis('B')" class="btn bg-red-600 hover:bg-red-500 text-white font-bold py-6 rounded-lg text-2xl">
                             <span>🏦</span> BANKER
                         </button>
                     </div>
@@ -249,6 +269,13 @@
                         <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
                             <span class="font-medium text-gray-300">Phiên đang chọn</span>
                             <span id="currentSessionName" class="text-lg font-semibold text-cyan-400">Chưa chọn</span>
+                        </div>
+                        <!-- Pattern Analysis Info -->
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <h3 class="font-medium text-gray-300 mb-2">🔍 Phân Tích Pattern</h3>
+                            <div id="currentPatternInfo" class="text-sm text-gray-400">
+                                Chưa có dữ liệu đủ để phân tích pattern
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -369,7 +396,7 @@
                             <div id="ht1-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
                         
-                        <!-- BIỂU ĐỒ KẾT HỢP (ĐÃ THÊM VÀO ĐÂY) -->
+                        <!-- BIỂU ĐỒ KẾT HỢP -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht1-combined-chart" class="history-chart" style="height: 60px;">
@@ -407,7 +434,7 @@
                             <div id="ht2-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
                         
-                        <!-- BIỂU ĐỒ KẾT HỢP (ĐÃ THÊM VÀO ĐÂY) -->
+                        <!-- BIỂU ĐỒ KẾT HỢP -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht2-combined-chart" class="history-chart" style="height: 60px;">
@@ -445,7 +472,7 @@
                             <div id="ht3-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
                         
-                        <!-- BIỂU ĐỒ KẾT HỢP (ĐÃ THÊM VÀO ĐÂY) -->
+                        <!-- BIỂU ĐỒ KẾT HỢP -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht3-combined-chart" class="history-chart" style="height: 60px;">
@@ -483,7 +510,7 @@
                             <div id="ht4-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
                         
-                        <!-- BIỂU ĐỒ KẾT HỢP (ĐÃ THÊM VÀO ĐÂY) -->
+                        <!-- BIỂU ĐỒ KẾT HỢP -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht4-combined-chart" class="history-chart" style="height: 60px;">
@@ -530,14 +557,15 @@
 
                     <!-- Final Decision -->
                     <div class="bg-gray-900 bg-opacity-50 p-4 rounded-xl md:col-span-2">
-                        <h3 class="text-lg font-semibold mb-3 text-center text-green-300">QUYẾT ĐỊNH CUỐI CÙNG</h3>
+                        <h3 class="text-lg font-semibold mb-3 text-center text-green-300">QUYẾT ĐỊNH CUỐI CÙNG (4 Hệ Thống + Pattern Matching)</h3>
                         <div class="text-center">
                             <div id="finalDecisionContainer" class="py-6 rounded-lg border-2 border-purple-500 mb-4">
-                                <p class="text-sm text-gray-400 mb-2">Đề xuất từ hệ thống tổng hợp (4 hệ thống):</p>
+                                <p class="text-sm text-gray-400 mb-2">Đề xuất từ hệ thống tổng hợp (4 hệ thống + Pattern Matching):</p>
                                 <p id="finalDecisionText" class="text-3xl md:text-4xl font-extrabold text-gray-300">ĐANG TÍNH TOÁN...</p>
                                 <div id="decisionReason" class="mt-4 text-sm text-gray-400 px-4">
-                                    Hệ thống đang phân tích dữ liệu từ 4 hệ thống con...
+                                    Hệ thống đang phân tích dữ liệu từ 4 hệ thống con và pattern matching...
                                 </div>
+                                <!-- Pattern Analysis Info will be inserted here -->
                             </div>
                             <div class="flex justify-center gap-4">
                                 <button onclick="forcePlayerDecision()" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg text-lg">
@@ -680,7 +708,7 @@
 
         <!-- Footer -->
         <div class="mt-8 text-center text-gray-500 text-sm">
-            <p>Hệ thống "VẠN SỰ NHƯ Ý" - Tổng hợp từ 4 hệ thống (HT1, HT2, HT3, HT4) | Phiên bản 2.0</p>
+            <p>Hệ thống "VẠN SỰ NHƯ Ý" - Tổng hợp từ 4 hệ thống (HT1, HT2, HT3, HT4) + Pattern Matching | Phiên bản 3.0</p>
             <p class="mt-2">Lưu ý: Các hệ thống chạy độc lập nhưng đồng bộ về dữ liệu và phiên làm việc</p>
         </div>
     </div>
@@ -720,7 +748,7 @@
                 ht4: { verdict: null, chot: null, range: null, rangeAccuracy: null, intervalHistory: [] }
             },
             // LỊCH SỬ QUYẾT ĐỊNH CUỐI CÙNG
-            finalDecisionHistory: [], // { gameNumber: số, decision: 'P'/'B', actual: 'P'/'B', correct: boolean, reason: string, timestamp: số }
+            finalDecisionHistory: [],
             // Lưu trữ các cảnh báo đã hiển thị để tránh trùng lặp
             displayedWarnings: {}
         };
@@ -729,47 +757,367 @@
         let gameAccuracyChart = null;
         let currentChartSystem = 'ht1';
 
+        // =================== THUẬT TOÁN PATTERN MATCHING N-GRAM ===================
+        function analyzePatternsWithNgram(history) {
+            if (!history || history.length < 3) {
+                return { prediction: null, confidence: 0, pattern: null };
+            }
+            
+            // Chuyển history thành chuỗi (P = Player, B = Banker)
+            const sequence = history.join('');
+            const patterns = {};
+            const patternLength = 2; // Phân tích pattern 2 ván trước
+            
+            // Thu thập dữ liệu pattern
+            for (let i = 0; i < sequence.length - patternLength; i++) {
+                const pattern = sequence.substring(i, i + patternLength);
+                const nextResult = sequence.charAt(i + patternLength);
+                
+                if (!patterns[pattern]) {
+                    patterns[pattern] = { P: 0, B: 0, total: 0 };
+                }
+                
+                patterns[pattern][nextResult]++;
+                patterns[pattern].total++;
+            }
+            
+            // Lấy pattern gần nhất
+            const lastPattern = sequence.substring(sequence.length - patternLength);
+            const patternData = patterns[lastPattern];
+            
+            if (!patternData || patternData.total < 2) {
+                return { prediction: null, confidence: 0, pattern: lastPattern };
+            }
+            
+            const pRate = (patternData.P / patternData.total) * 100;
+            const bRate = (patternData.B / patternData.total) * 100;
+            
+            // Chọn prediction với tỷ lệ cao nhất và > 55%
+            if (pRate >= 55 || bRate >= 55) {
+                if (pRate > bRate) {
+                    return { 
+                        prediction: 'P', 
+                        confidence: pRate, 
+                        pattern: lastPattern,
+                        patternData: patternData,
+                        totalOccurrences: patternData.total
+                    };
+                } else {
+                    return { 
+                        prediction: 'B', 
+                        confidence: bRate, 
+                        pattern: lastPattern,
+                        patternData: patternData,
+                        totalOccurrences: patternData.total
+                    };
+                }
+            }
+            
+            return { prediction: null, confidence: 0, pattern: lastPattern };
+        }
+
+        // =================== HIỂN THỊ THÔNG TIN PATTERN ===================
+        function showPatternInfo(patternAnalysis) {
+            const container = document.getElementById('finalDecisionContainer');
+            if (!container || !patternAnalysis.patternData) return;
+            
+            // Xóa pattern info cũ nếu có
+            const oldPatternInfo = container.querySelector('.pattern-info');
+            if (oldPatternInfo) oldPatternInfo.remove();
+            
+            // Thêm pattern info mới
+            const patternInfo = document.createElement('div');
+            patternInfo.className = 'pattern-info mt-2';
+            patternInfo.innerHTML = `
+                <div>Pattern: <strong>${patternAnalysis.pattern}</strong> → 
+                P:${patternAnalysis.patternData.P} (${((patternAnalysis.patternData.P/patternAnalysis.totalOccurrences)*100).toFixed(1)}%) | 
+                B:${patternAnalysis.patternData.B} (${((patternAnalysis.patternData.B/patternAnalysis.totalOccurrences)*100).toFixed(1)}%)</div>
+            `;
+            
+            // Chèn vào sau decision reason
+            const reasonEl = document.getElementById('decisionReason');
+            if (reasonEl) {
+                reasonEl.parentNode.insertBefore(patternInfo, reasonEl.nextSibling);
+            }
+        }
+
+        // =================== HIỂN THỊ PATTERN TRÊN GIAO DIỆN ===================
+        function updateCurrentPatternInfo() {
+            const currentSession = masterState.sessions[masterState.currentSessionId];
+            const history = currentSession?.history || [];
+            const patternInfoEl = document.getElementById('currentPatternInfo');
+            
+            if (!patternInfoEl) return;
+            
+            if (history.length >= 3) {
+                const analysis = analyzePatternsWithNgram(history);
+                if (analysis.pattern) {
+                    let infoHTML = '';
+                    
+                    if (analysis.prediction && analysis.confidence >= 55) {
+                        infoHTML = `
+                            <div class="text-green-400 font-semibold">
+                                Pattern "${analysis.pattern}" → ${analysis.prediction === 'P' ? 'PLAYER' : 'BANKER'} 
+                                (${analysis.confidence.toFixed(1)}%)
+                            </div>
+                            <div class="text-xs mt-1">
+                                P:${analysis.patternData?.P || 0} | B:${analysis.patternData?.B || 0} 
+                                (Tổng: ${analysis.totalOccurrences || 0})
+                            </div>
+                        `;
+                    } else {
+                        infoHTML = `
+                            <div class="text-yellow-400">
+                                Pattern "${analysis.pattern}" không rõ ràng
+                            </div>
+                            <div class="text-xs mt-1">
+                                P:${analysis.patternData?.P || 0} | B:${analysis.patternData?.B || 0} 
+                                (Tổng: ${analysis.totalOccurrences || 0})
+                            </div>
+                        `;
+                    }
+                    
+                    patternInfoEl.innerHTML = infoHTML;
+                } else {
+                    patternInfoEl.innerHTML = 'Chưa đủ dữ liệu để phân tích pattern';
+                }
+            } else {
+                patternInfoEl.innerHTML = 'Cần ít nhất 3 ván để phân tích pattern';
+            }
+        }
+
+        // =================== PHÂN TÍCH PATTERN REAL-TIME ===================
+        function analyzeCurrentPattern() {
+            const currentSession = masterState.sessions[masterState.currentSessionId];
+            const history = currentSession?.history || [];
+            
+            if (history.length >= 3) {
+                const analysis = analyzePatternsWithNgram(history);
+                if (analysis.prediction && analysis.confidence >= 60) {
+                    // Hiển thị cảnh báo pattern mạnh
+                    showPatternAlert(analysis);
+                }
+            }
+            
+            // Cập nhật thông tin pattern trên giao diện
+            updateCurrentPatternInfo();
+        }
+
+        function showPatternAlert(patternAnalysis) {
+            const message = `🔍 PHÁT HIỆN PATTERN MẠNH: "${patternAnalysis.pattern}" → ${patternAnalysis.prediction === 'P' ? 'PLAYER' : 'BANKER'} với ${patternAnalysis.confidence.toFixed(1)}%`;
+            
+            // Hiển thị cảnh báo đặc biệt
+            const warningContainer = document.getElementById('warning-container');
+            const warning = document.createElement('div');
+            warning.className = 'warning-alert pattern-alert';
+            warning.innerHTML = `
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                </svg>
+                <span class="font-bold">${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            `;
+            
+            warningContainer.appendChild(warning);
+            
+            // Tự động xóa sau 8 giây
+            setTimeout(() => {
+                if (warning.parentNode) {
+                    warning.style.animation = 'fadeOut 0.5s ease';
+                    setTimeout(() => warning.remove(), 500);
+                }
+            }, 8000);
+        }
+
+        // =================== TÍNH TOÁN QUYẾT ĐỊNH TỔNG HỢP MỚI ===================
+        function calculateFinalDecisionAdvanced() {
+            console.log("Tính toán quyết định tổng hợp (4 hệ thống + Pattern Matching)...");
+            
+            // 1. Lấy dữ liệu lịch sử thực tế
+            const currentSession = masterState.sessions[masterState.currentSessionId];
+            const history = currentSession?.history || [];
+            
+            // 2. Phân tích pattern bằng N-gram
+            const patternAnalysis = analyzePatternsWithNgram(history);
+            
+            // 3. Thu thập predictions từ 4 hệ thống
+            const systemPredictions = [];
+            const systems = ['ht1', 'ht2', 'ht3', 'ht4'];
+            
+            systems.forEach(system => {
+                const details = masterState.systemDetails[system];
+                if (details && details.chot) {
+                    // Trích xuất prediction từ chốt phán quyết
+                    const chotText = details.chot.toString().toUpperCase();
+                    let prediction = null;
+                    let confidence = details.rangeAccuracy ? parseFloat(details.rangeAccuracy) : 50;
+                    
+                    if (chotText.includes('P') || chotText === 'P') {
+                        prediction = 'P';
+                    } else if (chotText.includes('B') || chotText === 'B') {
+                        prediction = 'B';
+                    }
+                    
+                    if (prediction) {
+                        // Tính độ ưu tiên dựa trên độ chính xác của hệ thống
+                        const systemAccuracy = masterState[`${system}Accuracy`] || 50;
+                        const weight = systemAccuracy / 100;
+                        
+                        systemPredictions.push({
+                            system: system.toUpperCase(),
+                            prediction: prediction,
+                            confidence: confidence,
+                            weight: weight,
+                            details: details
+                        });
+                    }
+                }
+            });
+            
+            // 4. Thêm prediction từ pattern analysis nếu có
+            if (patternAnalysis.prediction && patternAnalysis.confidence >= 55) {
+                systemPredictions.push({
+                    system: 'PATTERN',
+                    prediction: patternAnalysis.prediction,
+                    confidence: patternAnalysis.confidence,
+                    weight: patternAnalysis.confidence / 100,
+                    isPattern: true,
+                    patternInfo: patternAnalysis
+                });
+            }
+            
+            // 5. Nếu không có predictions
+            if (systemPredictions.length === 0) {
+                updateFinalDecisionDisplay(null, "Không có đủ dữ liệu từ 4 hệ thống và pattern matching", "CHỜ");
+                return;
+            }
+            
+            // 6. Phân tích voting với trọng số
+            const voteCount = { P: 0, B: 0 };
+            let totalWeight = 0;
+            
+            systemPredictions.forEach(p => {
+                voteCount[p.prediction] += p.weight;
+                totalWeight += p.weight;
+            });
+            
+            // 7. Tính tỷ lệ phần trăm
+            const pPercentage = totalWeight > 0 ? (voteCount.P / totalWeight) * 100 : 0;
+            const bPercentage = totalWeight > 0 ? (voteCount.B / totalWeight) * 100 : 0;
+            
+            // 8. Xác định quyết định cuối cùng
+            let finalDecision = null;
+            let finalReason = '';
+            let prioritySystem = 'TỔNG HỢP';
+            
+            // Ngưỡng quyết định: phải có ít nhất 60% confidence
+            if (pPercentage >= 60 && pPercentage > bPercentage) {
+                finalDecision = 'P';
+                finalReason = `4 hệ thống + Pattern Matching: PLAYER chiếm ${pPercentage.toFixed(1)}% (${voteCount.P.toFixed(2)}/${totalWeight.toFixed(2)})`;
+                
+                // Thêm thông tin pattern nếu có
+                if (patternAnalysis.prediction === 'P' && patternAnalysis.confidence >= 55) {
+                    finalReason += ` | Pattern "${patternAnalysis.pattern}" → PLAYER ${patternAnalysis.confidence.toFixed(1)}% (${patternAnalysis.patternData?.P || 0}/${patternAnalysis.totalOccurrences})`;
+                    prioritySystem = 'PATTERN+' + systems.filter(s => {
+                        const p = systemPredictions.find(sp => sp.system === s.toUpperCase());
+                        return p && p.prediction === 'P';
+                    }).join(',');
+                }
+                
+            } else if (bPercentage >= 60 && bPercentage > pPercentage) {
+                finalDecision = 'B';
+                finalReason = `4 hệ thống + Pattern Matching: BANKER chiếm ${bPercentage.toFixed(1)}% (${voteCount.B.toFixed(2)}/${totalWeight.toFixed(2)})`;
+                
+                // Thêm thông tin pattern nếu có
+                if (patternAnalysis.prediction === 'B' && patternAnalysis.confidence >= 55) {
+                    finalReason += ` | Pattern "${patternAnalysis.pattern}" → BANKER ${patternAnalysis.confidence.toFixed(1)}% (${patternAnalysis.patternData?.B || 0}/${patternAnalysis.totalOccurrences})`;
+                    prioritySystem = 'PATTERN+' + systems.filter(s => {
+                        const p = systemPredictions.find(sp => sp.system === s.toUpperCase());
+                        return p && p.prediction === 'B';
+                    }).join(',');
+                }
+                
+            } else {
+                // Nếu không đạt ngưỡng, ưu tiên pattern nếu có confidence cao
+                if (patternAnalysis.prediction && patternAnalysis.confidence >= 60) {
+                    finalDecision = patternAnalysis.prediction;
+                    finalReason = `Pattern Matching ưu tiên: "${patternAnalysis.pattern}" → ${patternAnalysis.prediction === 'P' ? 'PLAYER' : 'BANKER'} ${patternAnalysis.confidence.toFixed(1)}%`;
+                    prioritySystem = 'PATTERN';
+                } else {
+                    // Hoặc ưu tiên hệ thống có độ chính xác cao nhất
+                    const bestSystem = systemPredictions.sort((a, b) => b.weight - a.weight)[0];
+                    if (bestSystem && bestSystem.weight >= 0.6) {
+                        finalDecision = bestSystem.prediction;
+                        finalReason = `${bestSystem.system} ưu tiên (độ tin cậy: ${bestSystem.confidence.toFixed(1)}%)`;
+                        prioritySystem = bestSystem.system;
+                    }
+                }
+            }
+            
+            // 9. Log chi tiết để debug
+            console.log('=== PHÂN TÍCH QUYẾT ĐỊNH TỔNG HỢP ===');
+            console.log('Lịch sử thực tế:', history.join(''));
+            console.log('Pattern analysis:', patternAnalysis);
+            console.log('System predictions:', systemPredictions);
+            console.log('Vote count:', voteCount);
+            console.log('P Percentage:', pPercentage.toFixed(1) + '%');
+            console.log('B Percentage:', bPercentage.toFixed(1) + '%');
+            console.log('Final decision:', finalDecision);
+            
+            // 10. Hiển thị thông tin pattern nếu có
+            if (patternAnalysis.pattern && patternAnalysis.totalOccurrences > 0) {
+                showPatternInfo(patternAnalysis);
+            }
+            
+            // 11. Cập nhật hiển thị
+            if (finalDecision) {
+                updateFinalDecisionDisplay(finalDecision, finalReason, prioritySystem);
+            } else {
+                updateFinalDecisionDisplay(null, `Tỷ lệ không rõ ràng: PLAYER ${pPercentage.toFixed(1)}% - BANKER ${bPercentage.toFixed(1)}%. Chờ tín hiệu mạnh hơn.`, "CHỜ");
+            }
+        }
+
+        // =================== CẬP NHẬT HÀM TÍNH QUYẾT ĐỊNH CHÍNH ===================
+        function calculateFinalDecision() {
+            // Sử dụng thuật toán nâng cao
+            calculateFinalDecisionAdvanced();
+        }
+
         // =================== HÀM HỖ TRỢ ===================
         function getOriginalVerdict(verdictString) {
             if (!verdictString) return null;
             
-            // Chuyển sang chữ hoa và loại bỏ khoảng trắng thừa
             verdictString = verdictString.trim().toUpperCase();
             
-            // Nếu chỉ có P hoặc B
             if (verdictString === 'P' || verdictString === 'B') {
                 return verdictString;
             }
             
-            // Nếu có chữ "NGƯỢC"
             if (verdictString.includes('NGƯỢC')) {
-                // Tìm chữ P hoặc B đầu tiên
-                if (verdictString.includes('P')) return 'B'; // P NGƯỢC -> gốc là B
-                if (verdictString.includes('B')) return 'P'; // B NGƯỢC -> gốc là P
+                if (verdictString.includes('P')) return 'B';
+                if (verdictString.includes('B')) return 'P';
             }
             
-            // Nếu có chữ "THEO"
             if (verdictString.includes('THEO')) {
-                // Tìm chữ P hoặc B trong chuỗi
                 if (verdictString.includes('P')) return 'P';
                 if (verdictString.includes('B')) return 'B';
             }
             
-            // Mặc định trả về null
             return null;
         }
 
-        // Hàm tìm chuỗi mạnh nhất từ CUỐI biểu đồ (chuỗi hiện tại đang diễn ra)
         function findCurrentStreakFromEnd(history) {
             if (!history || history.length === 0) {
                 return { length: 0, color: null };
             }
             
-            // Lấy phần tử cuối cùng
             const lastItem = history[history.length - 1];
             if (!lastItem) return { length: 0, color: null };
             
-            // Xác định màu của phần tử cuối
             let lastIsCorrect = false;
             if (lastItem.correct !== undefined) {
                 lastIsCorrect = lastItem.correct === true;
@@ -782,7 +1130,6 @@
             const lastColor = lastIsCorrect ? 'green' : 'red';
             let streakLength = 1;
             
-            // Duyệt ngược từ phần tử áp chót
             for (let i = history.length - 2; i >= 0; i--) {
                 const item = history[i];
                 if (!item) break;
@@ -813,15 +1160,12 @@
 
         // =================== HÀM CẢNH BÁO CHUỖI DÀI ===================
         function showStreakWarning(system, streakLength, color, chartType) {
-            // Tạo key duy nhất cho cảnh báo để tránh hiển thị trùng lặp
             const warningKey = `${system}-${color}-${chartType}-${streakLength}`;
             
-            // Kiểm tra xem cảnh báo đã được hiển thị chưa
             if (masterState.displayedWarnings[warningKey]) {
-                return; // Đã hiển thị rồi, không hiển thị lại
+                return;
             }
             
-            // Đánh dấu đã hiển thị
             masterState.displayedWarnings[warningKey] = true;
             
             const systemName = system.toUpperCase();
@@ -830,7 +1174,6 @@
             
             const message = `⚠️ CẢNH BÁO: ${systemName} có chuỗi ${colorText} dài ${streakLength} ở ${chartText}!`;
             
-            // Hiển thị cảnh báo nổi bật ở giữa màn hình
             const warningContainer = document.getElementById('warning-container');
             const warning = document.createElement('div');
             warning.className = 'warning-alert';
@@ -848,7 +1191,6 @@
             
             warningContainer.appendChild(warning);
             
-            // Tự động xóa cảnh báo sau 10 giây
             setTimeout(() => {
                 if (warning.parentNode) {
                     warning.style.animation = 'fadeOut 0.5s ease';
@@ -856,146 +1198,7 @@
                 }
             }, 10000);
             
-            // Cũng hiển thị toast thông báo
             showToast(message, 'warning');
-        }
-
-        // =================== THUẬT TOÁN TÍNH QUYẾT ĐỊNH CUỐI CÙNG MỚI ===================
-        function calculateFinalDecision() {
-            console.log("Tính toán quyết định cuối cùng với thuật toán mới...");
-            
-            const systems = ['ht1', 'ht2', 'ht3', 'ht4'];
-            
-            // Biến để lưu thông tin tốt nhất
-            let bestDecision = null;
-            let bestReason = '';
-            let bestPrioritySystem = '';
-            let bestStreakLength = 0;
-            let bestChartType = ''; // 'interval' hoặc 'combined'
-            let bestSystem = '';
-            
-            // Duyệt qua từng hệ thống
-            for (const system of systems) {
-                const details = masterState.systemDetails[system];
-                if (!details) {
-                    console.log(`${system}: Không có chi tiết hệ thống`);
-                    continue;
-                }
-                
-                // Lấy dữ liệu từ hai biểu đồ
-                const intervalHistory = details.intervalHistory || [];
-                const combinedHistory = masterState[`${system}ChotHistory`] || [];
-                
-                // Tìm chuỗi mạnh nhất từ CUỐI của mỗi biểu đồ
-                const intervalStreak = findCurrentStreakFromEnd(intervalHistory);
-                const combinedStreak = findCurrentStreakFromEnd(combinedHistory);
-                
-                console.log(`${system}: Interval streak = ${intervalStreak.length} (${intervalStreak.color}), Combined streak = ${combinedStreak.length} (${combinedStreak.color})`);
-                
-                // =================== KIỂM TRA CẢNH BÁO CHUỖI DÀI >= 4 ===================
-                // Kiểm tra và cảnh báo cho Biểu đồ khoảng tỷ lệ
-                if (intervalStreak.length >= 4) {
-                    showStreakWarning(system, intervalStreak.length, intervalStreak.color, 'interval');
-                }
-                
-                // Kiểm tra và cảnh báo cho Biểu đồ kết hợp
-                if (combinedStreak.length >= 4) {
-                    showStreakWarning(system, combinedStreak.length, combinedStreak.color, 'combined');
-                }
-                
-                // Chỉ xem xét nếu chuỗi >= 2 (cho quyết định)
-                if (intervalStreak.length >= 2 || combinedStreak.length >= 2) {
-                    // So sánh và chọn chuỗi dài hơn
-                    let currentStreak = null;
-                    let currentChartType = '';
-                    
-                    if (intervalStreak.length >= 2 && combinedStreak.length >= 2) {
-                        // Cả hai đều có chuỗi >= 2, chọn chuỗi dài hơn
-                        if (intervalStreak.length >= combinedStreak.length) {
-                            currentStreak = intervalStreak;
-                            currentChartType = 'interval';
-                        } else {
-                            currentStreak = combinedStreak;
-                            currentChartType = 'combined';
-                        }
-                    } else if (intervalStreak.length >= 2) {
-                        currentStreak = intervalStreak;
-                        currentChartType = 'interval';
-                    } else if (combinedStreak.length >= 2) {
-                        currentStreak = combinedStreak;
-                        currentChartType = 'combined';
-                    }
-                    
-                    // So sánh với kết quả tốt nhất hiện tại (ưu tiên chuỗi dài hơn)
-                    if (currentStreak && currentStreak.length > bestStreakLength) {
-                        bestStreakLength = currentStreak.length;
-                        bestSystem = system;
-                        bestChartType = currentChartType;
-                        
-                        // Xác định quyết định dựa trên TRƯỜNG HỢP 1 hoặc 2
-                        const systemName = system.toUpperCase();
-                        
-                        if (currentStreak.color === 'red') {
-                            // TRƯỜNG HỢP 1: Chuỗi đỏ (sai)
-                            if (currentChartType === 'interval') {
-                                // Ngược với kết quả gốc của 🧠 Phán Quyết
-                                const originalVerdict = getOriginalVerdict(details.verdict);
-                                if (originalVerdict) {
-                                    bestDecision = originalVerdict === 'P' ? 'B' : 'P';
-                                    bestReason = `TH1: ${systemName} có chuỗi ĐỎ (sai) dài ${currentStreak.length} ở Biểu đồ khoảng tỷ lệ, NGƯỢC với kết quả gốc 🧠 Phán Quyết (${originalVerdict})`;
-                                    bestPrioritySystem = systemName;
-                                }
-                            } else if (currentChartType === 'combined') {
-                                // Ngược với kết quả của 🔐 Chốt Phán Quyết
-                                if (details.chot) {
-                                    const chotDecision = details.chot.trim().toUpperCase();
-                                    const chotLetter = chotDecision.includes('P') ? 'P' : 
-                                                     chotDecision.includes('B') ? 'B' : null;
-                                    if (chotLetter) {
-                                        bestDecision = chotLetter === 'P' ? 'B' : 'P';
-                                        bestReason = `TH1: ${systemName} có chuỗi ĐỎ (sai) dài ${currentStreak.length} ở Biểu đồ kết hợp, NGƯỢC với 🔐 Chốt Phán Quyết (${chotLetter})`;
-                                        bestPrioritySystem = systemName;
-                                    }
-                                }
-                            }
-                        } else if (currentStreak.color === 'green') {
-                            // TRƯỜNG HỢP 2: Chuỗi xanh (đúng)
-                            if (currentChartType === 'interval') {
-                                // Theo với kết quả gốc của 🧠 Phán Quyết
-                                const originalVerdict = getOriginalVerdict(details.verdict);
-                                if (originalVerdict) {
-                                    bestDecision = originalVerdict;
-                                    bestReason = `TH2: ${systemName} có chuỗi XANH (đúng) dài ${currentStreak.length} ở Biểu đồ khoảng tỷ lệ, THEO kết quả gốc 🧠 Phán Quyết (${originalVerdict})`;
-                                    bestPrioritySystem = systemName;
-                                }
-                            } else if (currentChartType === 'combined') {
-                                // Theo với kết quả của 🔐 Chốt Phán Quyết
-                                if (details.chot) {
-                                    const chotDecision = details.chot.trim().toUpperCase();
-                                    const chotLetter = chotDecision.includes('P') ? 'P' : 
-                                                     chotDecision.includes('B') ? 'B' : null;
-                                    if (chotLetter) {
-                                        bestDecision = chotLetter;
-                                        bestReason = `TH2: ${systemName} có chuỗi XANH (đúng) dài ${currentStreak.length} ở Biểu đồ kết hợp, THEO 🔐 Chốt Phán Quyết (${chotLetter})`;
-                                        bestPrioritySystem = systemName;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Nếu tìm được quyết định từ thuật toán mới
-            if (bestDecision) {
-                console.log(`Quyết định: ${bestDecision}, Lý do: ${bestReason}`);
-                updateFinalDecisionDisplay(bestDecision, bestReason, bestPrioritySystem);
-                return;
-            }
-            
-            // Nếu không có chuỗi mạnh nào (không có hệ thống nào có chuỗi >= 2)
-            console.log("Không có hệ thống nào có chuỗi mạnh (>=2). Không đề xuất quyết định.");
-            updateFinalDecisionDisplay(null, "Không có hệ thống nào có chuỗi mạnh (>=2 cột cùng màu). Chờ tín hiệu.", "CHỜ");
         }
 
         // =================== CẬP NHẬT HIỂN THỊ QUYẾT ĐỊNH ===================
@@ -1026,6 +1229,45 @@
             masterState.lastDecisionReason = reason;
         }
 
+        // =================== THÊM KẾT QUẢ VỚI PHÂN TÍCH PATTERN ===================
+        function addResultToAllWithPatternAnalysis(result) {
+            if (!masterState.currentSessionId) {
+                showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning');
+                return;
+            }
+            
+            // Update master history
+            const session = masterState.sessions[masterState.currentSessionId];
+            if (!session.history) session.history = [];
+            session.history.push(result);
+            
+            saveMasterSessions();
+            updateCurrentSessionInfo();
+            
+            // Send to all systems
+            broadcastToAll('add_result', result);
+            
+            // Thêm vào lịch sử quyết định cuối cùng
+            addFinalDecisionToHistory(result);
+            
+            // Phân tích pattern real-time
+            analyzeCurrentPattern();
+            
+            // Request updated data và tính toán quyết định với pattern analysis
+            setTimeout(() => {
+                broadcastToAll('get_accuracy');
+                broadcastToAll('get_chot_history');
+                broadcastToAll('get_system_details');
+                
+                setTimeout(() => {
+                    calculateFinalDecision();
+                }, 500);
+                
+            }, 800);
+            
+            showToast(`Đã thêm kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'} và phân tích pattern`, 'success');
+        }
+
         // =================== THỐNG KÊ VÀ BIỂU ĐỒ CHO QUYẾT ĐỊNH CUỐI CÙNG ===================
         function updateFinalDecisionStats() {
             const history = masterState.finalDecisionHistory;
@@ -1033,15 +1275,11 @@
             const correctGames = history.filter(item => item.correct).length;
             const accuracyRate = totalGames > 0 ? ((correctGames / totalGames) * 100).toFixed(1) : 0;
             
-            // Cập nhật thống kê
             document.getElementById('final-total-games').textContent = totalGames;
             document.getElementById('final-correct-games').textContent = correctGames;
             document.getElementById('final-accuracy-rate').textContent = `${accuracyRate}%`;
             
-            // Cập nhật biểu đồ
             updateFinalDecisionChart();
-            
-            // Cập nhật lịch sử
             updateFinalDecisionHistoryTable();
         }
 
@@ -1057,7 +1295,6 @@
             }
             
             let chartHTML = '';
-            // Lấy tối đa 30 ván gần nhất
             const recentHistory = history.slice(-30);
             
             recentHistory.forEach((item, index) => {
@@ -1086,7 +1323,6 @@
                 return;
             }
             
-            // Lấy 10 bản ghi gần nhất (từ mới nhất đến cũ nhất)
             const recentHistory = history.slice(-10).reverse();
             
             let tableHTML = '';
@@ -1125,10 +1361,7 @@
             
             masterState.finalDecisionHistory.push(newRecord);
             
-            // Cập nhật thống kê và biểu đồ
             updateFinalDecisionStats();
-            
-            // Lưu vào localStorage
             saveFinalDecisionHistory();
         }
 
@@ -1175,7 +1408,6 @@
 
         // =================== MESSAGE LISTENER ===================
         window.addEventListener('message', function(event) {
-            // Only accept messages from our iframes
             if (event.data.source === 'ht1' || event.data.source === 'ht2' || 
                 event.data.source === 'ht3' || event.data.source === 'ht4') {
                 handleSystemMessage(event.data);
@@ -1207,17 +1439,13 @@
                     break;
                     
                 case 'prediction_update':
-                    // Store prediction for final decision
                     if (data.prediction) {
                         masterState.predictions[system] = data.prediction;
-                        // KHÔNG gọi calculateFinalDecision() ở đây, sẽ gọi sau khi nhận system_details
                     }
                     break;
 
                 case 'system_details_update':
-                    // Update system details for display
                     updateSystemDetails(system, data.details);
-                    // Tính toán quyết định cuối cùng sau khi nhận chi tiết từ hệ thống
                     calculateFinalDecision();
                     break;
 
@@ -1226,7 +1454,6 @@
                     break;
 
                 case 'export_data':
-                    // Handle export data from system
                     if (data.sessions) {
                         masterState[`${system}Sessions`] = data.sessions;
                     }
@@ -1298,13 +1525,9 @@
 
         // =================== SESSION MANAGEMENT ===================
         function initializeSystems() {
-            // Load existing sessions from localStorage
             loadMasterSessions();
-            
-            // Load final decision history
             loadFinalDecisionHistory();
             
-            // Request initial data from systems
             setTimeout(() => {
                 broadcastToAll('get_accuracy');
                 broadcastToAll('get_session_info');
@@ -1361,7 +1584,6 @@
                 updateMasterSessionSelector();
                 updateCurrentSessionInfo();
                 
-                // Send to all systems
                 broadcastToAll('create_session', {
                     name: sessionName,
                     id: sessionId
@@ -1386,7 +1608,6 @@
                 updateMasterSessionSelector();
                 updateCurrentSessionInfo();
                 
-                // Send to all systems
                 broadcastToAll('rename_session', {
                     id: masterState.currentSessionId,
                     name: newName
@@ -1403,6 +1624,9 @@
             if (session && session.history) {
                 document.getElementById('totalGamesMaster').textContent = session.history.length;
             }
+            
+            // Cập nhật thông tin pattern
+            updateCurrentPatternInfo();
         }
 
         // =================== DATA IMPORT/EXPORT ===================
@@ -1410,7 +1634,7 @@
             return new Promise((resolve) => {
                 const exportData = {
                     type: 'vanSuNhuY_export',
-                    version: '2.0',
+                    version: '3.0',
                     timestamp: new Date().toISOString(),
                     sessions: masterState.sessions,
                     finalDecisionHistory: masterState.finalDecisionHistory,
@@ -1425,19 +1649,15 @@
                 let systemsCollected = 0;
                 const totalSystems = 4;
 
-                // Hàm xử lý phản hồi từ các hệ thống
                 function handleSystemResponse(event) {
-                    // Chỉ xử lý các message từ các iframe (ht1, ht2, ht3, ht4) và type là 'export_data'
                     if (event.data.source && event.data.type === 'export_data') {
-                        const system = event.data.source; // ht1, ht2, ht3, ht4
+                        const system = event.data.source;
                         exportData.system_sessions[system] = event.data.sessions;
                         systemsCollected++;
 
-                        // Khi đã thu thập đủ 4 hệ thống
                         if (systemsCollected === totalSystems) {
                             window.removeEventListener('message', handleSystemResponse);
                             
-                            // Xuất file
                             const dataStr = JSON.stringify(exportData, null, 2);
                             const dataBlob = new Blob([dataStr], {type: 'application/json'});
                             const url = URL.createObjectURL(dataBlob);
@@ -1453,18 +1673,13 @@
                     }
                 }
 
-                // Lắng nghe phản hồi từ hệ thống
                 window.addEventListener('message', handleSystemResponse);
-
-                // Gửi yêu cầu đến tất cả hệ thống
                 broadcastToAll('export_data');
 
-                // Timeout nếu có hệ thống không phản hồi
                 setTimeout(() => {
                     if (systemsCollected < totalSystems) {
                         showToast(`Chỉ thu thập được ${systemsCollected}/4 hệ thống. Xuất dữ liệu không đầy đủ.`, 'warning');
                         
-                        // Vẫn xuất với dữ liệu đã có
                         const dataStr = JSON.stringify(exportData, null, 2);
                         const dataBlob = new Blob([dataStr], {type: 'application/json'});
                         const url = URL.createObjectURL(dataBlob);
@@ -1477,7 +1692,7 @@
                         window.removeEventListener('message', handleSystemResponse);
                         resolve(true);
                     }
-                }, 5000); // Đợi 5 giây
+                }, 5000);
             });
         }
 
@@ -1491,21 +1706,18 @@
                     const data = JSON.parse(e.target.result);
                     
                     if (data.type === 'vanSuNhuY_export') {
-                        // Import master data
                         if (data.sessions) {
                             masterState.sessions = data.sessions;
                             saveMasterSessions();
                             updateMasterSessionSelector();
                         }
                         
-                        // Import final decision history
                         if (data.finalDecisionHistory) {
                             masterState.finalDecisionHistory = data.finalDecisionHistory;
                             saveFinalDecisionHistory();
                             updateFinalDecisionStats();
                         }
                         
-                        // Kiểm tra xem có dữ liệu hệ thống riêng không
                         const hasSystemData = data.system_sessions && 
                             (data.system_sessions.ht1 || data.system_sessions.ht2 || 
                              data.system_sessions.ht3 || data.system_sessions.ht4);
@@ -1516,15 +1728,13 @@
                         
                         showLoadingModal('Đang nhập dữ liệu vào 4 hệ thống...');
                         
-                        // Gửi dữ liệu riêng cho từng hệ thống
-                        // Nếu không có dữ liệu riêng, gửi dữ liệu tổng hợp với ghi chú
                         setTimeout(() => {
                             ['ht1', 'ht2', 'ht3', 'ht4'].forEach(system => {
                                 const systemData = data.system_sessions?.[system] || data.sessions;
                                 sendToIframe(`${system}-iframe`, 'import_data', {
                                     sessions: systemData,
                                     simulate: true,
-                                    isMasterData: !data.system_sessions?.[system] // Đánh dấu là dữ liệu master
+                                    isMasterData: !data.system_sessions?.[system]
                                 });
                             });
                             
@@ -1532,13 +1742,13 @@
                                 hideLoadingModal();
                                 showToast('Đã nhập dữ liệu thành công vào 4 hệ thống!', 'success');
                                 
-                                // Refresh data
                                 setTimeout(() => {
                                     broadcastToAll('get_accuracy');
                                     broadcastToAll('get_session_info');
                                     broadcastToAll('get_chot_history');
                                     broadcastToAll('get_system_details');
                                     updateFinalDecisionStats();
+                                    updateCurrentPatternInfo();
                                 }, 1000);
                                 
                             }, 2000);
@@ -1546,7 +1756,6 @@
                         }, 500);
                         
                     } else {
-                        // Legacy import - gửi cùng dữ liệu cho tất cả
                         showToast('File cũ - Gửi cùng dữ liệu cho tất cả hệ thống', 'info');
                         broadcastToAll('import_data', {
                             sessions: data,
@@ -1566,35 +1775,8 @@
 
         // =================== INPUT HANDLING ===================
         function addResultToAll(result) {
-            if (!masterState.currentSessionId) {
-                showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning');
-                return;
-            }
-            
-            // Update master history
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session.history) session.history = [];
-            session.history.push(result);
-            
-            saveMasterSessions();
-            updateCurrentSessionInfo();
-            
-            // Send to all systems
-            broadcastToAll('add_result', result);
-            
-            // Thêm vào lịch sử quyết định cuối cùng
-            addFinalDecisionToHistory(result);
-            
-            // Request updated data
-            setTimeout(() => {
-                broadcastToAll('get_accuracy');
-                broadcastToAll('get_chot_history');
-                broadcastToAll('get_prediction');
-                broadcastToAll('get_system_details');
-                // KHÔNG gọi calculateFinalDecision() ở đây vì đã gọi trong handleSystemMessage
-            }, 800);
-            
-            showToast(`Đã thêm kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'} đến 4 hệ thống`, 'success');
+            // Legacy function, use new one instead
+            addResultToAllWithPatternAnalysis(result);
         }
 
         function undoLastAll() {
@@ -1613,22 +1795,22 @@
             saveMasterSessions();
             updateCurrentSessionInfo();
             
-            // Send to all systems
             broadcastToAll('undo_last');
             
-            // Xóa bản ghi cuối cùng trong lịch sử quyết định cuối cùng
             if (masterState.finalDecisionHistory.length > 0) {
                 masterState.finalDecisionHistory.pop();
                 updateFinalDecisionStats();
                 saveFinalDecisionHistory();
             }
             
-            // Request updated data
+            // Cập nhật thông tin pattern sau khi hoàn tác
+            analyzeCurrentPattern();
+            
             setTimeout(() => {
                 broadcastToAll('get_accuracy');
                 broadcastToAll('get_chot_history');
                 broadcastToAll('get_system_details');
-                // KHÔNG gọi calculateFinalDecision() ở đây vì đã gọi trong handleSystemMessage
+                calculateFinalDecision();
             }, 800);
             
             showToast('Đã hoàn tác kết quả cuối cùng từ 4 hệ thống', 'info');
@@ -1645,16 +1827,16 @@
                 saveMasterSessions();
                 updateCurrentSessionInfo();
                 
-                // Send to all systems
                 broadcastToAll('clear_history');
                 
-                // Xóa lịch sử quyết định cuối cùng
                 masterState.finalDecisionHistory = [];
                 updateFinalDecisionStats();
                 saveFinalDecisionHistory();
                 
-                // Xóa tất cả cảnh báo đã lưu
                 masterState.displayedWarnings = {};
+                
+                // Cập nhật thông tin pattern
+                updateCurrentPatternInfo();
                 
                 showToast('Đã xóa toàn bộ lịch sử từ 4 hệ thống', 'info');
             }
@@ -1668,7 +1850,6 @@
             
             const session = masterState.sessions[masterState.currentSessionId];
             
-            // Send session data to all systems
             broadcastToAll('load_session', {
                 id: masterState.currentSessionId,
                 name: session.name,
@@ -1683,20 +1864,19 @@
                 document.getElementById('sync-status').className = 'text-green-400 font-semibold';
                 showToast('Đã đồng bộ 4 hệ thống', 'success');
                 
-                // Request updated data
                 setTimeout(() => {
                     broadcastToAll('get_accuracy');
                     broadcastToAll('get_chot_history');
                     broadcastToAll('get_prediction');
                     broadcastToAll('get_system_details');
-                    // KHÔNG gọi calculateFinalDecision() ở đây vì đã gọi trong handleSystemMessage
+                    calculateFinalDecision();
+                    updateCurrentPatternInfo();
                 }, 1000);
             }, 1500);
         }
 
         function resetAllSystems() {
             if (confirm('Bạn có chắc muốn reset tất cả 4 hệ thống về trạng thái ban đầu?')) {
-                // Clear master state
                 masterState.sessions = {};
                 masterState.currentSessionId = null;
                 masterState.currentSessionName = 'Chưa chọn';
@@ -1711,10 +1891,7 @@
                     ht4: { verdict: null, chot: null, range: null, rangeAccuracy: null, intervalHistory: [] }
                 };
                 
-                // Xóa lịch sử quyết định cuối cùng
                 masterState.finalDecisionHistory = [];
-                
-                // Xóa tất cả cảnh báo đã lưu
                 masterState.displayedWarnings = {};
                 
                 localStorage.removeItem('vanSuNhuY_sessions_v2');
@@ -1722,16 +1899,10 @@
                 updateMasterSessionSelector();
                 updateCurrentSessionInfo();
                 
-                // Send reset command to all systems
                 broadcastToAll('reset_system');
-                
-                // Reset charts
                 resetCharts();
-                
-                // Reset final decision stats
                 updateFinalDecisionStats();
                 
-                // Xóa tất cả cảnh báo đang hiển thị
                 document.getElementById('warning-container').innerHTML = '';
                 
                 showToast('Đã reset tất cả 4 hệ thống', 'info');
@@ -1742,14 +1913,12 @@
         function updateSystemAccuracy(system, accuracy) {
             masterState[`${system}Accuracy`] = accuracy;
             
-            // Update display
             const element = document.getElementById(`${system}-accuracy`);
             const display = document.getElementById(`accuracy-${system}-display`);
             
             if (element) element.textContent = `${accuracy.toFixed(1)}%`;
             if (display) display.textContent = `${accuracy.toFixed(1)}%`;
             
-            // Update badge color
             if (element) {
                 element.className = 'accuracy-badge ';
                 if (accuracy >= 70) {
@@ -1766,7 +1935,6 @@
             masterState[`${system}ChotHistory`] = history;
             renderCombinedChart(system);
             
-            // Update game chart if it's the current system
             if (system === currentChartSystem) {
                 updateGameChart(system);
                 updateGameResultsTable(system);
@@ -1774,7 +1942,6 @@
         }
 
         function updateSessionInfo(system, sessionInfo) {
-            // Update master state with session info from system
             if (sessionInfo && sessionInfo.id) {
                 if (!masterState.sessions[sessionInfo.id]) {
                     masterState.sessions[sessionInfo.id] = {
@@ -1802,7 +1969,6 @@
         function updateSystemDetails(system, details) {
             if (!details) return;
             
-            // Update master state
             masterState.systemDetails[system] = {
                 verdict: details.verdict || null,
                 chot: details.chot || null,
@@ -1811,7 +1977,6 @@
                 intervalHistory: details.intervalHistory || []
             };
             
-            // Update UI
             updateSystemDetailsUI(system);
         }
 
@@ -1819,7 +1984,6 @@
             const details = masterState.systemDetails[system];
             if (!details) return;
             
-            // Update prediction displays
             const verdictElement = document.getElementById(`${system}-verdict-prediction`);
             const chotElement = document.getElementById(`${system}-chot-prediction`);
             const rangeElement = document.getElementById(`${system}-confidence-range`);
@@ -1843,10 +2007,7 @@
                 rangeAccuracyElement.textContent = details.rangeAccuracy ? `${details.rangeAccuracy}%` : '-';
             }
             
-            // Update interval chart
             updateIntervalChart(system, details.intervalHistory);
-            
-            // Update combined chart
             renderCombinedChart(system);
         }
 
@@ -1906,7 +2067,6 @@
                 return;
             }
             
-            // Take last 30 results
             const recentHistory = history.slice(-30);
             let chartHTML = '';
             
@@ -1917,7 +2077,6 @@
                     const title = `Đề xuất: ${prediction.predicted}, Thực tế: ${prediction.actual}`;
                     chartHTML += `<div class="history-bar ${barClass}" title="${title}"></div>`;
                 } else if (prediction && prediction.prediction) {
-                    // Handle different data format
                     const isCorrect = prediction.correct;
                     const barClass = isCorrect ? 'history-bar-correct' : 'history-bar-incorrect';
                     chartHTML += `<div class="history-bar ${barClass}" title="Prediction"></div>`;
@@ -1931,7 +2090,6 @@
         function showGameChart(system) {
             currentChartSystem = system;
             
-            // Update active button
             document.querySelectorAll('.system-chart-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.getAttribute('data-system') === system) {
@@ -1939,21 +2097,17 @@
                 }
             });
             
-            // Update system label
             document.getElementById('current-system-label').textContent = system.toUpperCase();
             
-            // Update chart
             updateGameChart(system);
             updateGameResultsTable(system);
         }
 
         function showAllGameCharts() {
-            // Create combined chart for all systems
             updateCombinedGameChart();
             updateCombinedGameResultsTable();
             document.getElementById('current-system-label').textContent = 'TẤT CẢ HỆ THỐNG';
             
-            // Update active buttons
             document.querySelectorAll('.system-chart-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
@@ -1968,7 +2122,6 @@
             
             const ctx = document.getElementById('gameAccuracyChart').getContext('2d');
             
-            // Prepare data
             const labels = [];
             const correctData = [];
             const incorrectData = [];
@@ -1989,12 +2142,10 @@
                 }
             });
             
-            // Destroy previous chart if exists
             if (gameAccuracyChart) {
                 gameAccuracyChart.destroy();
             }
             
-            // Create new chart
             gameAccuracyChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -2083,7 +2234,6 @@
                 return;
             }
             
-            // Sort by game number if available, otherwise by index
             allHistories.sort((a, b) => {
                 if (a.gameNumber && b.gameNumber) {
                     return a.gameNumber - b.gameNumber;
@@ -2098,12 +2248,10 @@
             const ht3Data = { correct: [], incorrect: [] };
             const ht4Data = { correct: [], incorrect: [] };
             
-            // Group by system and calculate
             allHistories.forEach((prediction, index) => {
                 labels.push(`Ván ${index + 1}`);
                 const isCorrect = prediction.predicted === prediction.actual;
                 
-                // Initialize all systems with 0
                 ht1Data.correct.push(0);
                 ht1Data.incorrect.push(0);
                 ht2Data.correct.push(0);
@@ -2113,7 +2261,6 @@
                 ht4Data.correct.push(0);
                 ht4Data.incorrect.push(0);
                 
-                // Set value for the specific system
                 switch(prediction.system) {
                     case 'ht1':
                         ht1Data.correct[index] = isCorrect ? 1 : 0;
@@ -2134,12 +2281,10 @@
                 }
             });
             
-            // Destroy previous chart if exists
             if (gameAccuracyChart) {
                 gameAccuracyChart.destroy();
             }
             
-            // Create new chart
             gameAccuracyChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -2337,7 +2482,6 @@
                 return;
             }
             
-            // Group by system
             const systemStats = {
                 ht1: { correct: 0, total: 0 },
                 ht2: { correct: 0, total: 0 },
@@ -2382,7 +2526,6 @@
             html += '</div>';
             container.innerHTML = html;
             
-            // Calculate totals
             let totalCorrect = 0;
             let totalGames = 0;
             
@@ -2460,15 +2603,11 @@
 
         // =================== INITIALIZATION ===================
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize UI
             updateCurrentSessionInfo();
             updateSystemStatus();
             updateFinalDecisionStats();
-            
-            // Initialize charts
             renderEmptyChart();
             
-            // Set up session selector change handler
             document.getElementById('masterSessionSelector').addEventListener('change', function(e) {
                 if (e.target.value) {
                     const sessionId = e.target.value;
@@ -2478,24 +2617,20 @@
                         masterState.currentSessionId = sessionId;
                         masterState.currentSessionName = session.name;
                         updateCurrentSessionInfo();
-                        
-                        // Send to all systems
                         syncAllSystems();
                     }
                 }
             });
             
-            // Set up periodic updates
             setInterval(() => {
                 if (allSystemsReady()) {
                     broadcastToAll('get_accuracy');
                     broadcastToAll('get_chot_history');
                     broadcastToAll('get_system_details');
-                    // KHÔNG gọi calculateFinalDecision() ở đây vì đã gọi trong handleSystemMessage
                 }
             }, 8000);
             
-            showToast('Hệ thống VẠN SỰ NHƯ Ý (4 hệ thống) đã sẵn sàng!', 'success');
+            showToast('Hệ thống VẠN SỰ NHƯ Ý (4 hệ thống + Pattern Matching) đã sẵn sàng!', 'success');
         });
     </script>
 </body>
