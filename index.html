@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VẠN SỰ NHƯ Ý - Hệ Thống Tổng Hợp 4 Hệ Thống với N-gram/Markov Chain</title>
+    <title>VẠN SỰ NHƯ Ý - Hệ Thống Tổng Hợp 4 Hệ Thống</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -160,42 +160,22 @@
             background-color: #ef4444;
             height: 40%;
         }
-        /* Modal lớn cho phân tích N-gram */
-        .modal-content-large {
-            background-color: #1f2937;
-            padding: 1.5rem; border-radius: 1rem;
-            width: 90%; max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid #374151;
-        }
-        .ngram-pattern-card {
-            background-color: #374151;
+        /* N-gram patterns */
+        .ngram-pattern-item {
+            border: 2px solid #374151;
             border-radius: 0.5rem;
             padding: 0.75rem;
             margin-bottom: 0.5rem;
-            border-left: 4px solid #8b5cf6;
+            transition: all 0.3s ease;
         }
-        .ngram-pattern-good {
-            border-left-color: #10b981;
+        .ngram-pattern-item.current {
+            border-color: #10b981;
+            background-color: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
         }
-        .ngram-pattern-excellent {
-            border-left-color: #f59e0b;
-        }
-        .ngram-pattern-perfect {
-            border-left-color: #ef4444;
-        }
-        .prediction-badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-left: 0.5rem;
-        }
-        .badge-player { background-color: #3b82f6; color: white; }
-        .badge-banker { background-color: #ef4444; color: white; }
+        .ngram-high-confidence { color: #10b981; font-weight: bold; }
+        .ngram-medium-confidence { color: #f59e0b; font-weight: bold; }
+        .ngram-low-confidence { color: #ef4444; font-weight: bold; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -209,13 +189,13 @@
             <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 mb-3">
                 VẠN SỰ NHƯ Ý
             </h1>
-            <p class="text-gray-300 text-lg">Hệ Thống Tổng Hợp Phân Tích Cầu Cao Cấp - 4 Hệ Thống với Thuật Toán N-gram/Markov Chain</p>
+            <p class="text-gray-300 text-lg">Hệ Thống Tổng Hợp Phân Tích Cầu Cao Cấp - 4 Hệ Thống</p>
             <div class="flex flex-wrap justify-center gap-4 mt-4">
                 <span class="px-3 py-1 bg-blue-600 rounded-full text-sm font-semibold">HT1: Pattern Matching</span>
                 <span class="px-3 py-1 bg-green-600 rounded-full text-sm font-semibold">HT2: Fixed & Optimized</span>
                 <span class="px-3 py-1 bg-orange-600 rounded-full text-sm font-semibold">HT3: Standard System</span>
                 <span class="px-3 py-1 bg-pink-600 rounded-full text-sm font-semibold">HT4: Advanced System</span>
-                <span class="px-3 py-1 bg-purple-600 rounded-full text-sm font-semibold">Tổng Hợp Thông Minh với N-gram</span>
+                <span class="px-3 py-1 bg-purple-600 rounded-full text-sm font-semibold">Tổng Hợp Thông Minh</span>
             </div>
         </div>
 
@@ -274,18 +254,6 @@
                     </div>
                 </div>
 
-                <!-- N-gram Analysis Button -->
-                <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-                    <h2 class="text-xl font-semibold mb-4 text-purple-300">🔍 Thuật Toán N-gram/Markov Chain</h2>
-                    <p class="text-gray-400 text-sm mb-4">Phân tích pattern tự động từ lịch sử</p>
-                    <button onclick="showNgramAnalysisModal()" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg w-full">
-                        🔬 Xem Phân Tích N-gram Chi Tiết
-                    </button>
-                    <button onclick="runNgramAnalysis()" class="btn bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 rounded-lg w-full mt-3">
-                        🔄 Chạy Phân Tích N-gram Ngay
-                    </button>
-                </div>
-
                 <!-- Current Session Stats -->
                 <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
                     <h2 class="text-xl font-semibold mb-4 text-green-300">📊 Thống Kê Phiên Hiện Tại</h2>
@@ -297,10 +265,6 @@
                         <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
                             <span class="font-medium text-gray-300">Phiên đang chọn</span>
                             <span id="currentSessionName" class="text-lg font-semibold text-cyan-400">Chưa chọn</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-4 rounded-lg">
-                            <span class="font-medium text-gray-300">Patterns N-gram tìm thấy</span>
-                            <span id="ngramPatternsCount" class="text-lg font-semibold text-yellow-400">0</span>
                         </div>
                     </div>
                 </div>
@@ -421,7 +385,7 @@
                             <div id="ht1-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
                         
-                        <!-- BIỂU ĐỒ KẾT HỢP -->
+                        <!-- Biểu đồ kết hợp -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht1-combined-chart" class="history-chart" style="height: 60px;">
@@ -459,7 +423,7 @@
                             <div id="ht2-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
                         
-                        <!-- BIỂU ĐỒ KẾT HỢP -->
+                        <!-- Biểu đồ kết hợp -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht2-combined-chart" class="history-chart" style="height: 60px;">
@@ -497,7 +461,7 @@
                             <div id="ht3-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
                         
-                        <!-- BIỂU ĐỒ KẾT HỢP -->
+                        <!-- Biểu đồ kết hợp -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht3-combined-chart" class="history-chart" style="height: 60px;">
@@ -535,7 +499,7 @@
                             <div id="ht4-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
                         
-                        <!-- BIỂU ĐỒ KẾT HỢP -->
+                        <!-- Biểu đồ kết hợp -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
                             <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp</h4>
                             <div id="ht4-combined-chart" class="history-chart" style="height: 60px;">
@@ -547,10 +511,44 @@
             </div>
         </div>
 
-        <!-- Final Decision Panel with N-gram Integration -->
+        <!-- Phân Tích N-Gram -->
+        <div class="mt-8 bg-gradient-to-r from-blue-900 to-cyan-900 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-semibold mb-6 text-center text-yellow-300">🔍 PHÂN TÍCH N-GRAM / MARKOV CHAIN</h2>
+            
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-300">Lịch sử hiện tại:</span>
+                    <span id="ngram-history" class="font-mono text-yellow-300">-</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-300">Pattern hiện tại (2 cuối):</span>
+                    <span id="ngram-current-pattern" class="font-mono text-green-300">-</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-300">Dự đoán N-gram:</span>
+                    <span id="ngram-prediction" class="font-mono text-xl font-bold text-cyan-300">-</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-300">Độ tin cậy:</span>
+                    <span id="ngram-confidence" class="font-mono text-lg text-green-300">-</span>
+                </div>
+            </div>
+            
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h4 class="text-lg font-semibold mb-3 text-center text-blue-300">QUY LUẬT TÌM THẤY (Tỷ lệ > 70%)</h4>
+                <div id="ngram-patterns-list" class="max-h-48 overflow-y-auto">
+                    <p class="text-gray-500 text-center">Chưa có đủ dữ liệu để phân tích (cần ít nhất 3 ván)</p>
+                </div>
+                <div class="mt-3 text-xs text-gray-400 text-center">
+                    Phân tích dựa trên thuật toán 2-gram (Markov Chain)
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Decision Panel -->
         <div class="mt-8">
             <div class="bg-gradient-to-r from-purple-900 to-pink-900 p-6 rounded-2xl shadow-lg card-glow-total">
-                <h2 class="text-2xl font-semibold mb-6 text-center text-yellow-300">🏆 PHÁN QUYẾT TỔNG HỢP - VẠN SỰ NHƯ Ý (TÍCH HỢP N-GRAM/MARKOV CHAIN)</h2>
+                <h2 class="text-2xl font-semibold mb-6 text-center text-yellow-300">🏆 PHÁN QUYẾT TỔNG HỢP - VẠN SỰ NHƯ Ý (4 HỆ THỐNG)</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <!-- System Accuracies -->
@@ -582,7 +580,7 @@
 
                     <!-- Final Decision -->
                     <div class="bg-gray-900 bg-opacity-50 p-4 rounded-xl md:col-span-2">
-                        <h3 class="text-lg font-semibold mb-3 text-center text-green-300">QUYẾT ĐỊNH CUỐI CÙNG (TÍCH HỢP N-GRAM)</h3>
+                        <h3 class="text-lg font-semibold mb-3 text-center text-green-300">QUYẾT ĐỊNH CUỐI CÙNG</h3>
                         <div class="text-center">
                             <div id="finalDecisionContainer" class="py-6 rounded-lg border-2 border-purple-500 mb-4">
                                 <p class="text-sm text-gray-400 mb-2">Đề xuất từ hệ thống tổng hợp (4 hệ thống + N-gram):</p>
@@ -597,14 +595,6 @@
                                 </button>
                                 <button onclick="forceBankerDecision()" class="btn bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg text-lg">
                                     🏦 CHỐT BANKER
-                                </button>
-                                <button onclick="calculateFinalDecisionWithNgram()" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-6 rounded-lg text-lg">
-                                    🔄 TÍNH LẠI VỚI N-GRAM
-                                </button>
-                            </div>
-                            <div class="mt-4 text-center">
-                                <button onclick="showNgramAnalysisModal()" class="btn bg-pink-600 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded-lg text-sm">
-                                    🔍 Xem Phân Tích N-Gram Chi Tiết
                                 </button>
                             </div>
                         </div>
@@ -740,8 +730,8 @@
 
         <!-- Footer -->
         <div class="mt-8 text-center text-gray-500 text-sm">
-            <p>Hệ thống "VẠN SỰ NHƯ Ý" - Tổng hợp từ 4 hệ thống (HT1, HT2, HT3, HT4) tích hợp thuật toán N-gram/Markov Chain | Phiên bản 3.0</p>
-            <p class="mt-2">Lưu ý: Các hệ thống chạy độc lập nhưng đồng bộ về dữ liệu và phiên làm việc. Thuật toán N-gram tự động phân tích pattern từ lịch sử.</p>
+            <p>Hệ thống "VẠN SỰ NHƯ Ý" - Tổng hợp từ 4 hệ thống (HT1, HT2, HT3, HT4) + N-gram | Phiên bản 2.1</p>
+            <p class="mt-2">Lưu ý: Các hệ thống chạy độc lập nhưng đồng bộ về dữ liệu và phiên làm việc</p>
         </div>
     </div>
 
@@ -783,143 +773,209 @@
             finalDecisionHistory: [], // { gameNumber: số, decision: 'P'/'B', actual: 'P'/'B', correct: boolean, reason: string, timestamp: số }
             // Lưu trữ các cảnh báo đã hiển thị để tránh trùng lặp
             displayedWarnings: {},
-            // N-gram Analysis Data
-            ngramAnalysis: null,
-            ngramPrediction: null,
-            ngramPatterns: {}
+            // N-gram analysis results
+            ngramAnalysis: {
+                currentPattern: null,
+                prediction: null,
+                confidence: 0,
+                rules: []
+            }
         };
 
         // Chart instances
         let gameAccuracyChart = null;
         let currentChartSystem = 'ht1';
 
-        // =================== THUẬT TOÁN N-GRAM/MARKOV CHAIN ===================
+        // =================== THUẬT TOÁN N-GRAM / MARKOV CHAIN ===================
         function timQuyLuatNgram(chuoiKetQua) {
             /**
-             * chuoiKetQua: Chuỗi kết quả như 'PPBPB...' (P=Player, B=Banker)
-             * Trả về: Object chứa các pattern và xác suất
+             * chuoiKetQua: Chuỗi kết quả dạng 'PPBPBB...' (P=Player, B=Banker)
+             * Trả về các quy luật có tỷ lệ > 70%
              */
             const n = chuoiKetQua.length;
             const patterns = {};
-
-            // Quét tất cả các cặp 2 con liên tiếp (N=2)
+            
+            // Quét tất cả các cặp 2 con liên tiếp
             for (let i = 0; i < n - 2; i++) {
                 const pattern = chuoiKetQua.substring(i, i + 2); // Lấy cặp hiện tại (ví dụ: PP)
-                const ketQuaSau = chuoiKetQua.charAt(i + 2); // Lấy kết quả ván kế tiếp
+                const ketQuaSau = chuoiKetQua.charAt(i + 2); // Kết quả ván kế tiếp
                 
                 if (!patterns[pattern]) {
-                    patterns[pattern] = { P: 0, B: 0 };
+                    patterns[pattern] = { 'P': 0, 'B': 0 };
                 }
                 
-                patterns[pattern][ketQuaSau]++;
+                patterns[pattern][ketQuaSau] += 1;
             }
-
-            // Tính xác suất và chỉ giữ lại những pattern có tỷ lệ cao (>70%)
-            const ketQuaPhanTich = {};
             
-            for (const [pat, counts] of Object.entries(patterns)) {
-                const tong = counts.P + counts.B;
+            // Tìm quy luật mạnh (>70%)
+            const quyLuatManh = [];
+            
+            for (const [pattern, counts] of Object.entries(patterns)) {
+                const tong = counts['P'] + counts['B'];
                 if (tong > 0) {
-                    const tiLeP = (counts.P / tong) * 100;
-                    const tiLeB = (counts.B / tong) * 100;
+                    const tiLeP = (counts['P'] / tong) * 100;
+                    const tiLeB = (counts['B'] / tong) * 100;
                     
                     if (tiLeP > 70) {
-                        ketQuaPhanTich[pat] = { 
-                            duDoan: 'P', 
+                        quyLuatManh.push({
+                            pattern: pattern,
+                            duDoan: 'P',
                             tiLe: tiLeP,
-                            mauDau: counts.P,
-                            mauTong: tong
-                        };
+                            soLan: tong
+                        });
                     } else if (tiLeB > 70) {
-                        ketQuaPhanTich[pat] = { 
-                            duDoan: 'B', 
+                        quyLuatManh.push({
+                            pattern: pattern,
+                            duDoan: 'B',
                             tiLe: tiLeB,
-                            mauDau: counts.B,
-                            mauTong: tong
-                        };
+                            soLan: tong
+                        });
                     }
                 }
             }
             
-            return ketQuaPhanTich;
+            return quyLuatManh;
         }
 
-        function duDoanNgram(chuoiKetQua) {
+        function duDoanBangNgram(history) {
             /**
-             * Dự đoán ván tiếp theo dựa trên thuật toán N-gram
-             * Trả về: { duDoan: 'P'/'B', tiLe: số, pattern: string, lyDo: string }
+             * Dự đoán kết quả tiếp theo dựa trên thuật toán N-gram
              */
-            if (!chuoiKetQua || chuoiKetQua.length < 3) {
+            if (!history || history.length < 3) {
                 return null; // Không đủ dữ liệu
             }
             
-            // Phân tích quy luật
-            const quyLuat = timQuyLuatNgram(chuoiKetQua);
+            const chuoiKetQua = history.join(''); // Chuyển mảng thành chuỗi
+            const quyLuats = timQuyLuatNgram(chuoiKetQua);
             
-            if (Object.keys(quyLuat).length === 0) {
-                return null; // Không tìm thấy quy luật đủ mạnh
+            if (quyLuats.length === 0) {
+                return null; // Không tìm thấy quy luật mạnh
             }
             
-            // Lấy 2 kết quả gần nhất để tìm pattern
-            const patternGanNhat = chuoiKetQua.substring(chuoiKetQua.length - 2);
+            // Lấy 2 kết quả gần nhất để tạo pattern hiện tại
+            const patternHienTai = chuoiKetQua.substring(chuoiKetQua.length - 2);
             
-            // Kiểm tra xem pattern gần nhất có trong quy luật không
-            if (quyLuat[patternGanNhat]) {
-                const duLieu = quyLuat[patternGanNhat];
+            // Tìm quy luật phù hợp với pattern hiện tại
+            const quyLuatApDung = quyLuats.find(q => q.pattern === patternHienTai);
+            
+            if (quyLuatApDung) {
                 return {
-                    duDoan: duLieu.duDoan,
-                    tiLe: duLieu.tiLe,
-                    pattern: patternGanNhat,
-                    lyDo: `Pattern "${patternGanNhat}" xuất hiện ${duLieu.mauDau}/${duLieu.mauTong} lần (${duLieu.tiLe.toFixed(1)}%) -> ${duLieu.duDoan === 'P' ? 'PLAYER' : 'BANKER'}`
+                    duDoan: quyLuatApDung.duDoan,
+                    tiLe: quyLuatApDung.tiLe,
+                    pattern: patternHienTai,
+                    soLanXuatHien: quyLuatApDung.soLan,
+                    lyDo: `Tìm thấy quy luật: "${patternHienTai}" -> ${quyLuatApDung.duDoan} (${quyLuatApDung.tiLe.toFixed(1)}% trong ${quyLuatApDung.soLan} lần)`
                 };
             }
             
-            // Nếu pattern gần nhất không có, tìm pattern có độ tin cậy cao nhất
-            let patternTotNhat = null;
-            let tiLeCaoNhat = 0;
+            // Nếu không tìm thấy quy luật cho pattern hiện tại, tìm quy luật mạnh nhất
+            const quyLuatManhNhat = quyLuats.reduce((max, current) => 
+                current.tiLe > max.tiLe ? current : max, quyLuats[0]);
             
-            for (const [pattern, duLieu] of Object.entries(quyLuat)) {
-                if (duLieu.tiLe > tiLeCaoNhat && duLieu.mauTong >= 2) {
-                    tiLeCaoNhat = duLieu.tiLe;
-                    patternTotNhat = { pattern, ...duLieu };
-                }
-            }
-            
-            if (patternTotNhat) {
+            if (quyLuatManhNhat.tiLe > 75) {
                 return {
-                    duDoan: patternTotNhat.duDoan,
-                    tiLe: patternTotNhat.tiLe,
-                    pattern: patternTotNhat.pattern,
-                    lyDo: `Pattern mạnh nhất: "${patternTotNhat.pattern}" (${patternTotNhat.tiLe.toFixed(1)}%) -> ${patternTotNhat.duDoan === 'P' ? 'PLAYER' : 'BANKER'}`
+                    duDoan: quyLuatManhNhat.duDoan,
+                    tiLe: quyLuatManhNhat.tiLe,
+                    pattern: quyLuatManhNhat.pattern,
+                    soLanXuatHien: quyLuatManhNhat.soLan,
+                    lyDo: `Áp dụng quy luật mạnh nhất: "${quyLuatManhNhat.pattern}" -> ${quyLuatManhNhat.duDoan} (${quyLuatManhNhat.tiLe.toFixed(1)}%)`
                 };
             }
             
             return null;
         }
 
-        function runNgramAnalysis() {
-            if (!masterState.currentSessionId) {
-                showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning');
+        function analyzeNgramPatterns() {
+            // Lấy dữ liệu từ phiên hiện tại
+            let history = [];
+            if (masterState.currentSessionId && masterState.sessions[masterState.currentSessionId]) {
+                history = masterState.sessions[masterState.currentSessionId].history || [];
+            }
+            
+            if (history.length < 3) {
+                masterState.ngramAnalysis = {
+                    currentPattern: null,
+                    prediction: null,
+                    confidence: 0,
+                    rules: []
+                };
                 return;
             }
             
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session || !session.history || session.history.length < 3) {
-                showToast('Cần ít nhất 3 ván để phân tích N-gram!', 'warning');
+            const chuoiKetQua = history.join('');
+            const quyLuats = timQuyLuatNgram(chuoiKetQua);
+            const duDoan = duDoanBangNgram(history);
+            
+            masterState.ngramAnalysis = {
+                currentPattern: chuoiKetQua.substring(chuoiKetQua.length - 2),
+                prediction: duDoan ? duDoan.duDoan : null,
+                confidence: duDoan ? duDoan.tiLe : 0,
+                rules: quyLuats
+            };
+            
+            // Cập nhật hiển thị
+            updateNgramDisplay();
+        }
+
+        function updateNgramDisplay() {
+            const analysis = masterState.ngramAnalysis;
+            
+            // Cập nhật thông tin cơ bản
+            document.getElementById('ngram-history').textContent = 
+                masterState.currentSessionId && masterState.sessions[masterState.currentSessionId] 
+                ? masterState.sessions[masterState.currentSessionId].history.join('') 
+                : '-';
+            
+            document.getElementById('ngram-current-pattern').textContent = 
+                analysis.currentPattern || '-';
+            
+            const predictionEl = document.getElementById('ngram-prediction');
+            if (analysis.prediction) {
+                predictionEl.textContent = analysis.prediction === 'P' ? 'PLAYER' : 'BANKER';
+                predictionEl.className = `font-mono text-xl font-bold ${analysis.prediction === 'P' ? 'text-blue-300' : 'text-red-300'}`;
+            } else {
+                predictionEl.textContent = '-';
+                predictionEl.className = 'font-mono text-xl font-bold text-gray-300';
+            }
+            
+            document.getElementById('ngram-confidence').textContent = 
+                analysis.confidence > 0 ? `${analysis.confidence.toFixed(1)}%` : '-';
+            
+            // Cập nhật danh sách quy luật
+            const container = document.getElementById('ngram-patterns-list');
+            if (analysis.rules.length === 0) {
+                if (masterState.currentSessionId && masterState.sessions[masterState.currentSessionId].history.length < 3) {
+                    container.innerHTML = '<p class="text-gray-500 text-center">Chưa có đủ dữ liệu để phân tích (cần ít nhất 3 ván)</p>';
+                } else {
+                    container.innerHTML = '<p class="text-gray-500 text-center">Không tìm thấy quy luật mạnh (>70%)</p>';
+                }
                 return;
             }
             
-            const chuoiKetQua = session.history.join('');
-            masterState.ngramPrediction = duDoanNgram(chuoiKetQua);
-            masterState.ngramPatterns = timQuyLuatNgram(chuoiKetQua);
-            
-            // Cập nhật UI
-            document.getElementById('ngramPatternsCount').textContent = Object.keys(masterState.ngramPatterns).length;
-            
-            // Tính lại quyết định cuối cùng với N-gram
-            calculateFinalDecisionWithNgram();
-            
-            showToast(`Đã phân tích N-gram: ${Object.keys(masterState.ngramPatterns).length} pattern tìm thấy`, 'success');
+            let html = '<div class="space-y-2">';
+            analysis.rules.forEach(q => {
+                const isCurrent = analysis.currentPattern === q.pattern;
+                const borderClass = isCurrent ? 'border-2 border-green-500' : 'border border-gray-700';
+                const bgClass = isCurrent ? 'bg-green-900 bg-opacity-30' : 'bg-gray-800';
+                const confidenceClass = q.tiLe > 80 ? 'ngram-high-confidence' : 
+                                      q.tiLe > 70 ? 'ngram-medium-confidence' : 'ngram-low-confidence';
+                
+                html += `
+                    <div class="ngram-pattern-item ${borderClass} ${bgClass}">
+                        <div class="flex justify-between items-center">
+                            <span class="font-mono text-lg ${isCurrent ? 'text-green-300' : 'text-white'}">${q.pattern}</span>
+                            <span class="text-xl font-bold ${q.duDoan === 'P' ? 'text-blue-400' : 'text-red-400'}">→ ${q.duDoan}</span>
+                        </div>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span class="text-gray-300">Tỷ lệ: <span class="${confidenceClass}">${q.tiLe.toFixed(1)}%</span></span>
+                            <span class="text-gray-300">Số lần: ${q.soLan}</span>
+                            ${isCurrent ? '<span class="text-green-400 font-bold">✓ ÁP DỤNG</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
         }
 
         // =================== HÀM HỖ TRỢ ===================
@@ -1053,231 +1109,196 @@
             showToast(message, 'warning');
         }
 
-        // =================== THUẬT TOÁN TÍNH QUYẾT ĐỊNH CUỐI CÙNG TÍCH HỢP N-GRAM ===================
-        function calculateFinalDecisionWithNgram() {
-            console.log("Tính toán quyết định cuối cùng với tích hợp N-gram...");
+        // =================== THUẬT TOÁN TÍNH QUYẾT ĐỊNH CUỐI CÙNG MỚI ===================
+        function calculateFinalDecision() {
+            console.log("Tính toán quyết định cuối cùng với thuật toán N-gram và tổng hợp 4 hệ thống...");
             
+            // Bước 1: Phân tích N-gram
+            analyzeNgramPatterns();
+            const ngramPrediction = masterState.ngramAnalysis.prediction;
+            const ngramConfidence = masterState.ngramAnalysis.confidence;
+            
+            // Bước 2: Thu thập dự đoán từ 4 hệ thống
             const systems = ['ht1', 'ht2', 'ht3', 'ht4'];
-            
-            // BƯỚC 1: Lấy dự đoán từ thuật toán N-gram
-            let ngramPrediction = null;
-            if (masterState.currentSessionId) {
-                const session = masterState.sessions[masterState.currentSessionId];
-                if (session && session.history && session.history.length >= 3) {
-                    const chuoiKetQua = session.history.join('');
-                    ngramPrediction = duDoanNgram(chuoiKetQua);
-                    masterState.ngramPrediction = ngramPrediction;
-                    masterState.ngramPatterns = timQuyLuatNgram(chuoiKetQua);
-                    
-                    // Cập nhật số lượng patterns
-                    document.getElementById('ngramPatternsCount').textContent = Object.keys(masterState.ngramPatterns).length;
-                    
-                    console.log("Dự đoán N-gram:", ngramPrediction);
-                }
-            }
-            
-            // BƯỚC 2: Thu thập thông tin từ 4 hệ thống
-            const systemInfo = [];
+            const systemPredictions = [];
             
             for (const system of systems) {
                 const details = masterState.systemDetails[system];
-                if (!details || !details.verdict) continue;
+                if (!details) continue;
                 
-                // Xác định quyết định gốc từ hệ thống
-                let decision = null;
-                let confidence = 0;
-                let reason = '';
+                // Lấy dự đoán từ hệ thống (ưu tiên 🔐 Chốt Phán Quyết, sau đó đến 🧠 Phán Quyết)
+                let prediction = null;
+                let predictionType = '';
                 
-                // Lấy từ 🧠 Phán Quyết
-                if (details.verdict.includes('P')) decision = 'P';
-                else if (details.verdict.includes('B')) decision = 'B';
-                
-                // Lấy từ 🔐 Chốt Phán Quyết
-                let chotDecision = null;
-                if (details.chot) {
-                    if (details.chot.includes('P')) chotDecision = 'P';
-                    else if (details.chot.includes('B')) chotDecision = 'B';
+                if (details.chot && details.chot !== '-') {
+                    // Phân tích chot string để lấy P/B
+                    const chotStr = details.chot.toUpperCase();
+                    if (chotStr.includes('P')) {
+                        prediction = 'P';
+                        predictionType = 'chot';
+                    } else if (chotStr.includes('B')) {
+                        prediction = 'B';
+                        predictionType = 'chot';
+                    }
                 }
                 
-                // Tính độ tin cậy dựa trên lịch sử
+                if (!prediction && details.verdict && details.verdict !== '-') {
+                    // Phân tích verdict string để lấy P/B
+                    const verdictStr = details.verdict.toUpperCase();
+                    if (verdictStr.includes('P')) {
+                        prediction = 'P';
+                        predictionType = 'verdict';
+                    } else if (verdictStr.includes('B')) {
+                        prediction = 'B';
+                        predictionType = 'verdict';
+                    }
+                }
+                
+                if (prediction) {
+                    const accuracy = masterState[`${system}Accuracy`] || 0;
+                    systemPredictions.push({
+                        system: system,
+                        prediction: prediction,
+                        type: predictionType,
+                        accuracy: accuracy,
+                        systemName: system.toUpperCase()
+                    });
+                }
+            }
+            
+            // Bước 3: Phân tích và ra quyết định
+            let finalDecision = null;
+            let finalReason = '';
+            let prioritySystem = '';
+            
+            // Trường hợp 1: Có dự đoán từ N-gram với độ tin cậy cao
+            if (ngramPrediction && ngramConfidence > 75) {
+                // Tìm hệ thống có dự đoán trùng với N-gram
+                const matchingSystems = systemPredictions.filter(s => s.prediction === ngramPrediction);
+                
+                if (matchingSystems.length > 0) {
+                    // Chọn hệ thống có độ chính xác cao nhất trong số trùng
+                    const bestSystem = matchingSystems.reduce((best, current) => 
+                        current.accuracy > best.accuracy ? current : best
+                    );
+                    
+                    finalDecision = bestSystem.prediction;
+                    prioritySystem = bestSystem.systemName;
+                    finalReason = `N-gram dự đoán ${ngramPrediction} (${ngramConfidence.toFixed(1)}%) + ${bestSystem.systemName} đồng ý (Độ chính xác: ${bestSystem.accuracy.toFixed(1)}%)`;
+                } else if (ngramConfidence > 80) {
+                    // N-gram có độ tin cậy rất cao (>80%) nhưng không hệ thống nào đồng ý
+                    // Vẫn theo N-gram nhưng cảnh báo
+                    finalDecision = ngramPrediction;
+                    prioritySystem = 'N-GRAM';
+                    finalReason = `N-gram dự đoán ${ngramPrediction} với độ tin cậy cao (${ngramConfidence.toFixed(1)}%) nhưng không hệ thống nào đồng ý`;
+                } else {
+                    // N-gram có độ tin cậy không đủ cao, quay về xét các hệ thống
+                    if (systemPredictions.length > 0) {
+                        // Phân tích sự đồng thuận giữa các hệ thống
+                        analyzeSystemConsensus(systemPredictions);
+                    } else {
+                        finalDecision = ngramPrediction;
+                        prioritySystem = 'N-GRAM';
+                        finalReason = `Chỉ có N-gram dự đoán ${ngramPrediction} (${ngramConfidence.toFixed(1)}%). Các hệ thống chưa có dự đoán.`;
+                    }
+                }
+            }
+            // Trường hợp 2: Không có dự đoán từ N-gram hoặc độ tin cậy thấp
+            else {
+                if (systemPredictions.length > 0) {
+                    analyzeSystemConsensus(systemPredictions);
+                } else if (ngramPrediction) {
+                    // Chỉ có N-gram với độ tin cậy thấp
+                    finalDecision = ngramPrediction;
+                    prioritySystem = 'N-GRAM';
+                    finalReason = `Chỉ có N-gram dự đoán ${ngramPrediction} với độ tin cậy thấp (${ngramConfidence.toFixed(1)}%)`;
+                } else {
+                    // Không có dữ liệu từ cả N-gram lẫn hệ thống
+                    finalDecision = null;
+                    finalReason = "Không đủ dữ liệu để đưa ra quyết định. Cần thêm ít nhất 3 ván để phân tích N-gram.";
+                    prioritySystem = 'CHỜ';
+                }
+            }
+            
+            // Hàm phân tích đồng thuận hệ thống
+            function analyzeSystemConsensus(predictions) {
+                const voteCount = { 'P': 0, 'B': 0 };
+                const systemsByPrediction = { 'P': [], 'B': [] };
+                
+                for (const pred of predictions) {
+                    voteCount[pred.prediction]++;
+                    systemsByPrediction[pred.prediction].push(pred);
+                }
+                
+                // Kiểm tra đồng thuận (>= 3 hệ thống cùng ý kiến)
+                if (voteCount['P'] >= 3) {
+                    const bestSystem = systemsByPrediction['P'].reduce((best, current) => 
+                        current.accuracy > best.accuracy ? current : best
+                    );
+                    finalDecision = 'P';
+                    prioritySystem = bestSystem.systemName;
+                    finalReason = `Đồng thuận cao: ${voteCount['P']}/4 hệ thống đề xuất PLAYER. Chọn ${bestSystem.systemName} (Độ chính xác: ${bestSystem.accuracy.toFixed(1)}%)`;
+                } else if (voteCount['B'] >= 3) {
+                    const bestSystem = systemsByPrediction['B'].reduce((best, current) => 
+                        current.accuracy > best.accuracy ? current : best
+                    );
+                    finalDecision = 'B';
+                    prioritySystem = bestSystem.systemName;
+                    finalReason = `Đồng thuận cao: ${voteCount['B']}/4 hệ thống đề xuất BANKER. Chọn ${bestSystem.systemName} (Độ chính xác: ${bestSystem.accuracy.toFixed(1)}%)`;
+                } else if (voteCount['P'] === 2 && voteCount['B'] === 2) {
+                    // Tỉ số hòa, chọn hệ thống có độ chính xác cao nhất
+                    const bestSystem = predictions.reduce((best, current) => 
+                        current.accuracy > best.accuracy ? current : best
+                    );
+                    finalDecision = bestSystem.prediction;
+                    prioritySystem = bestSystem.systemName;
+                    finalReason = `Tỉ số hòa 2-2. Chọn ${bestSystem.systemName} có độ chính xác cao nhất (${bestSystem.accuracy.toFixed(1)}%)`;
+                } else {
+                    // Không có đồng thuận, chọn hệ thống có độ chính xác cao nhất
+                    const bestSystem = predictions.reduce((best, current) => 
+                        current.accuracy > best.accuracy ? current : best
+                    );
+                    finalDecision = bestSystem.prediction;
+                    prioritySystem = bestSystem.systemName;
+                    finalReason = `Không có đồng thuận. Chọn ${bestSystem.systemName} có độ chính xác cao nhất (${bestSystem.accuracy.toFixed(1)}%)`;
+                }
+            }
+            
+            // Bước 4: Kiểm tra chuỗi mạnh từ biểu đồ
+            checkStrongStreaks();
+            
+            // Bước 5: Cập nhật hiển thị
+            updateFinalDecisionDisplay(finalDecision, finalReason, prioritySystem);
+            
+            // Bước 6: Log chi tiết để debug
+            console.log('Dự đoán N-gram:', ngramPrediction, 'Confidence:', ngramConfidence);
+            console.log('Dự đoán từ hệ thống:', systemPredictions);
+            console.log('Quyết định cuối cùng:', finalDecision, 'Lý do:', finalReason);
+        }
+
+        function checkStrongStreaks() {
+            const systems = ['ht1', 'ht2', 'ht3', 'ht4'];
+            
+            for (const system of systems) {
+                const details = masterState.systemDetails[system];
+                if (!details) continue;
+                
+                // Lấy dữ liệu từ hai biểu đồ
                 const intervalHistory = details.intervalHistory || [];
                 const combinedHistory = masterState[`${system}ChotHistory`] || [];
                 
-                // Tìm chuỗi mạnh nhất
+                // Tìm chuỗi mạnh nhất từ CUỐI của mỗi biểu đồ
                 const intervalStreak = findCurrentStreakFromEnd(intervalHistory);
                 const combinedStreak = findCurrentStreakFromEnd(combinedHistory);
                 
-                // Xác định chuỗi tốt nhất
-                let bestStreak = null;
-                if (intervalStreak.length >= 2 && combinedStreak.length >= 2) {
-                    bestStreak = intervalStreak.length >= combinedStreak.length ? intervalStreak : combinedStreak;
-                } else if (intervalStreak.length >= 2) {
-                    bestStreak = intervalStreak;
-                } else if (combinedStreak.length >= 2) {
-                    bestStreak = combinedStreak;
+                // Kiểm tra và cảnh báo chuỗi dài >= 4
+                if (intervalStreak.length >= 4) {
+                    showStreakWarning(system, intervalStreak.length, intervalStreak.color, 'interval');
                 }
                 
-                if (bestStreak) {
-                    // Kiểm tra cảnh báo chuỗi dài
-                    if (bestStreak.length >= 4) {
-                        showStreakWarning(system, bestStreak.length, bestStreak.color, 
-                            intervalStreak.length >= combinedStreak.length ? 'interval' : 'combined');
-                    }
-                    
-                    confidence = bestStreak.length * 10; // Mỗi cột trong chuỗi = 10% confidence
-                    reason = `Chuỗi ${bestStreak.color === 'green' ? 'XANH' : 'ĐỎ'} dài ${bestStreak.length}`;
+                if (combinedStreak.length >= 4) {
+                    showStreakWarning(system, combinedStreak.length, combinedStreak.color, 'combined');
                 }
-                
-                // Thêm vào mảng
-                systemInfo.push({
-                    system,
-                    decision: decision || chotDecision,
-                    accuracy: masterState[`${system}Accuracy`] || 0,
-                    confidence,
-                    reason,
-                    streakLength: bestStreak ? bestStreak.length : 0,
-                    streakColor: bestStreak ? bestStreak.color : null
-                });
-            }
-            
-            // BƯỚC 3: QUYẾT ĐỊNH THEO THUẬT TOÁN TÍCH HỢP (ƯU TIÊN)
-            let finalDecision = null;
-            let finalReason = '';
-            let finalPrioritySystem = '';
-            
-            // ƯU TIÊN 1: Nếu N-gram có dự đoán với tỷ lệ cao (>85%)
-            if (ngramPrediction && ngramPrediction.tiLe > 85) {
-                finalDecision = ngramPrediction.duDoan;
-                finalReason = `🎯 N-GRAM MẠNH: ${ngramPrediction.lyDo}`;
-                finalPrioritySystem = 'N-GRAM';
-            }
-            // ƯU TIÊN 2: Nếu có hệ thống có chuỗi XANH dài (>=3)
-            else {
-                // Tìm hệ thống có chuỗi XANH dài nhất
-                let bestGreenSystem = null;
-                let maxGreenStreak = 0;
-                
-                for (const info of systemInfo) {
-                    if (info.streakColor === 'green' && info.streakLength > maxGreenStreak && info.streakLength >= 3) {
-                        maxGreenStreak = info.streakLength;
-                        bestGreenSystem = info;
-                    }
-                }
-                
-                if (bestGreenSystem) {
-                    finalDecision = bestGreenSystem.decision;
-                    finalReason = `🟢 ${bestGreenSystem.system.toUpperCase()}: ${bestGreenSystem.reason} (${bestGreenSystem.accuracy.toFixed(1)}% đúng)`;
-                    finalPrioritySystem = bestGreenSystem.system.toUpperCase();
-                }
-                // ƯU TIÊN 3: Nếu N-gram có dự đoán với tỷ lệ >75%
-                else if (ngramPrediction && ngramPrediction.tiLe > 75) {
-                    finalDecision = ngramPrediction.duDoan;
-                    finalReason = `🎲 N-GRAM: ${ngramPrediction.lyDo}`;
-                    finalPrioritySystem = 'N-GRAM';
-                }
-                // ƯU TIÊN 4: Nếu có hệ thống có độ chính xác cao (>70%) và không có chuỗi đỏ
-                else {
-                    // Tìm hệ thống có độ chính xác cao nhất
-                    let bestAccuracySystem = null;
-                    let maxAccuracy = 0;
-                    
-                    for (const info of systemInfo) {
-                        if (info.accuracy > maxAccuracy && info.accuracy >= 65 && info.streakColor !== 'red') {
-                            maxAccuracy = info.accuracy;
-                            bestAccuracySystem = info;
-                        }
-                    }
-                    
-                    if (bestAccuracySystem) {
-                        finalDecision = bestAccuracySystem.decision;
-                        finalReason = `📈 ${bestAccuracySystem.system.toUpperCase()}: Độ chính xác ${bestAccuracySystem.accuracy.toFixed(1)}%`;
-                        finalPrioritySystem = bestAccuracySystem.system.toUpperCase();
-                    }
-                    // ƯU TIÊN 5: Nếu N-gram có dự đoán (bất kỳ tỷ lệ nào)
-                    else if (ngramPrediction) {
-                        finalDecision = ngramPrediction.duDoan;
-                        finalReason = `🎲 N-GRAM: ${ngramPrediction.lyDo}`;
-                        finalPrioritySystem = 'N-GRAM';
-                    }
-                    // ƯU TIÊN 6: Phân tích đa số từ 4 hệ thống
-                    else {
-                        // Đếm số phiếu cho P và B
-                        let pVotes = 0;
-                        let bVotes = 0;
-                        let voters = [];
-                        
-                        for (const info of systemInfo) {
-                            if (info.decision === 'P') {
-                                pVotes++;
-                                voters.push(info.system.toUpperCase());
-                            } else if (info.decision === 'B') {
-                                bVotes++;
-                                voters.push(info.system.toUpperCase());
-                            }
-                        }
-                        
-                        if (pVotes > bVotes && pVotes > 0) {
-                            finalDecision = 'P';
-                            finalReason = `🗳️ Đa số hệ thống đề xuất PLAYER (${pVotes}/${pVotes + bVotes} hệ thống: ${voters.join(', ')})`;
-                            finalPrioritySystem = 'ĐA SỐ';
-                        } else if (bVotes > pVotes && bVotes > 0) {
-                            finalDecision = 'B';
-                            finalReason = `🗳️ Đa số hệ thống đề xuất BANKER (${bVotes}/${pVotes + bVotes} hệ thống: ${voters.join(', ')})`;
-                            finalPrioritySystem = 'ĐA SỐ';
-                        } else if (pVotes === bVotes && pVotes > 0) {
-                            // Hòa, chọn hệ thống có độ chính xác cao nhất
-                            let bestSystem = null;
-                            let bestAcc = 0;
-                            
-                            for (const info of systemInfo) {
-                                if (info.accuracy > bestAcc) {
-                                    bestAcc = info.accuracy;
-                                    bestSystem = info;
-                                }
-                            }
-                            
-                            if (bestSystem) {
-                                finalDecision = bestSystem.decision;
-                                finalReason = `⚖️ Hòa phiếu, chọn ${bestSystem.system.toUpperCase()} (độ chính xác cao nhất: ${bestAcc.toFixed(1)}%)`;
-                                finalPrioritySystem = bestSystem.system.toUpperCase();
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // BƯỚC 4: TẠO PHÂN TÍCH CHI TIẾT
-            let detailedAnalysis = '';
-            
-            // Thêm thông tin N-gram
-            if (Object.keys(masterState.ngramPatterns).length > 0) {
-                detailedAnalysis += '📊 PHÂN TÍCH N-GRAM:\n';
-                for (const [pattern, data] of Object.entries(masterState.ngramPatterns)) {
-                    detailedAnalysis += `  • "${pattern}" → ${data.duDoan === 'P' ? 'PLAYER' : 'BANKER'} (${data.tiLe.toFixed(1)}% - ${data.mauDau}/${data.mauTong} lần)\n`;
-                }
-                if (ngramPrediction) {
-                    detailedAnalysis += `\n🎯 DỰ ĐOÁN N-GRAM: ${ngramPrediction.duDoan === 'P' ? 'PLAYER' : 'BANKER'} (${ngramPrediction.tiLe.toFixed(1)}%)\n`;
-                }
-            }
-            
-            // Thêm thông tin từng hệ thống
-            detailedAnalysis += '\n📈 PHÂN TÍCH 4 HỆ THỐNG:\n';
-            for (const info of systemInfo) {
-                detailedAnalysis += `  • ${info.system.toUpperCase()}: ${info.decision || '?'} (${info.accuracy.toFixed(1)}% đúng)`;
-                if (info.streakLength > 0) {
-                    detailedAnalysis += ` - Chuỗi ${info.streakColor === 'green' ? 'XANH' : 'ĐỎ'} ${info.streakLength}`;
-                }
-                detailedAnalysis += '\n';
-            }
-            
-            // Lưu phân tích chi tiết
-            masterState.ngramAnalysis = detailedAnalysis;
-            
-            // BƯỚC 5: CẬP NHẬT HIỂN THỊ
-            if (finalDecision) {
-                updateFinalDecisionDisplay(finalDecision, finalReason + '\n\n' + detailedAnalysis, finalPrioritySystem);
-            } else {
-                updateFinalDecisionDisplay(null, "Không đủ dữ liệu để đưa ra quyết định. Vui lòng chờ thêm kết quả.\n\n" + detailedAnalysis, "CHỜ");
             }
         }
 
@@ -1307,143 +1328,6 @@
             reasonEl.textContent = reason;
             masterState.lastDecision = decision;
             masterState.lastDecisionReason = reason;
-        }
-
-        // =================== HIỂN THỊ MODAL PHÂN TÍCH N-GRAM ===================
-        function showNgramAnalysisModal() {
-            if (!masterState.currentSessionId) {
-                showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning');
-                return;
-            }
-            
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session || !session.history || session.history.length < 3) {
-                showToast('Cần ít nhất 3 ván để phân tích N-gram!', 'warning');
-                return;
-            }
-            
-            // Chạy phân tích nếu chưa có
-            if (!masterState.ngramPatterns || Object.keys(masterState.ngramPatterns).length === 0) {
-                runNgramAnalysis();
-            }
-            
-            const patterns = masterState.ngramPatterns;
-            const prediction = masterState.ngramPrediction;
-            
-            let modalHTML = `
-                <div id="ngram-modal" class="modal-backdrop">
-                    <div class="modal-content-large">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-purple-300">🔬 PHÂN TÍCH N-GRAM/MARKOV CHAIN</h3>
-                            <button onclick="closeModal()" class="text-gray-400 hover:text-white">
-                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-4 rounded-lg mb-4">
-                            <h4 class="text-lg font-semibold mb-2 text-green-300">Giới thiệu thuật toán N-gram/Markov Chain</h4>
-                            <p class="text-gray-300 text-sm mb-3">
-                                Phân tích chuỗi kết quả theo phương pháp xác suất có điều kiện (Conditional Probability).
-                                Tìm các pattern (mẫu) 2 kết quả liên tiếp và xác suất của kết quả tiếp theo.
-                            </p>
-                            <p class="text-gray-400 text-xs">
-                                <strong>Pattern:</strong> 2 kết quả liên tiếp (ví dụ: "PP", "PB", "BP", "BB")<br>
-                                <strong>Dự đoán:</strong> Kết quả tiếp theo với xác suất cao nhất<br>
-                                <strong>Ngưỡng:</strong> Chỉ hiển thị pattern có tỷ lệ >70%
-                            </p>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-4 rounded-lg mb-4">
-                            <h4 class="text-lg font-semibold mb-2 text-yellow-300">DỰ ĐOÁN HIỆN TẠI</h4>`;
-            
-            if (prediction) {
-                const badgeClass = prediction.duDoan === 'P' ? 'badge-player' : 'badge-banker';
-                modalHTML += `
-                    <div class="bg-gray-800 p-4 rounded-lg mb-3">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-300">Pattern hiện tại:</span>
-                            <span class="font-bold text-xl text-cyan-400">"${prediction.pattern}"</span>
-                        </div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-300">Dự đoán:</span>
-                            <span class="prediction-badge ${badgeClass} font-bold text-lg">${prediction.duDoan === 'P' ? 'PLAYER' : 'BANKER'}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-300">Độ tin cậy:</span>
-                            <span class="font-bold text-xl ${prediction.tiLe > 85 ? 'text-green-400' : prediction.tiLe > 75 ? 'text-yellow-400' : 'text-orange-400'}">${prediction.tiLe.toFixed(1)}%</span>
-                        </div>
-                        <div class="mt-3 text-sm text-gray-400">
-                            ${prediction.lyDo}
-                        </div>
-                    </div>`;
-            } else {
-                modalHTML += `
-                    <div class="bg-gray-800 p-4 rounded-lg mb-3">
-                        <p class="text-center text-gray-400">Không có dự đoán N-gram cho pattern hiện tại.</p>
-                    </div>`;
-            }
-            
-            modalHTML += `</div>
-                        
-                        <div class="bg-gray-900 p-4 rounded-lg mb-4">
-                            <h4 class="text-lg font-semibold mb-2 text-blue-300">CÁC PATTERN TÌM THẤY (${Object.keys(patterns).length})</h4>`;
-            
-            if (Object.keys(patterns).length > 0) {
-                modalHTML += `<div class="space-y-2">`;
-                
-                // Sắp xếp patterns theo tỷ lệ giảm dần
-                const sortedPatterns = Object.entries(patterns).sort((a, b) => b[1].tiLe - a[1].tiLe);
-                
-                for (const [pattern, data] of sortedPatterns) {
-                    const badgeClass = data.duDoan === 'P' ? 'badge-player' : 'badge-banker';
-                    const patternClass = data.tiLe > 90 ? 'ngram-pattern-perfect' : 
-                                       data.tiLe > 80 ? 'ngram-pattern-excellent' : 
-                                       data.tiLe > 70 ? 'ngram-pattern-good' : '';
-                    
-                    modalHTML += `
-                        <div class="ngram-pattern-card ${patternClass}">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <span class="font-bold text-lg text-white">"${pattern}"</span>
-                                    <span class="text-gray-400 ml-2">→</span>
-                                    <span class="prediction-badge ${badgeClass}">${data.duDoan === 'P' ? 'PLAYER' : 'BANKER'}</span>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-bold ${data.tiLe > 90 ? 'text-red-400' : data.tiLe > 80 ? 'text-yellow-400' : 'text-green-400'}">${data.tiLe.toFixed(1)}%</div>
-                                    <div class="text-xs text-gray-400">${data.mauDau}/${data.mauTong} lần</div>
-                                </div>
-                            </div>
-                        </div>`;
-                }
-                
-                modalHTML += `</div>`;
-            } else {
-                modalHTML += `
-                    <div class="bg-gray-800 p-4 rounded-lg">
-                        <p class="text-center text-gray-400">Không tìm thấy pattern nào có tỷ lệ >70%.</p>
-                    </div>`;
-            }
-            
-            modalHTML += `</div>
-                        
-                        <div class="text-center">
-                            <button onclick="closeModal()" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg mr-2">
-                                Đóng
-                            </button>
-                            <button onclick="runNgramAnalysis(); closeModal();" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-6 rounded-lg">
-                                🔄 Cập Nhật Phân Tích
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-            
-            document.getElementById('modal-container').innerHTML = modalHTML;
-        }
-
-        function closeModal() {
-            document.getElementById('modal-container').innerHTML = '';
         }
 
         // =================== THỐNG KÊ VÀ BIỂU ĐỒ CHO QUYẾT ĐỊNH CUỐI CÙNG ===================
@@ -1637,7 +1521,7 @@
                     // Update system details for display
                     updateSystemDetails(system, data.details);
                     // Tính toán quyết định cuối cùng sau khi nhận chi tiết từ hệ thống
-                    calculateFinalDecisionWithNgram();
+                    calculateFinalDecision();
                     break;
 
                 case 'import_complete':
@@ -1829,15 +1713,10 @@
             return new Promise((resolve) => {
                 const exportData = {
                     type: 'vanSuNhuY_export',
-                    version: '3.0',
+                    version: '2.1',
                     timestamp: new Date().toISOString(),
                     sessions: masterState.sessions,
                     finalDecisionHistory: masterState.finalDecisionHistory,
-                    ngramData: {
-                        patterns: masterState.ngramPatterns,
-                        prediction: masterState.ngramPrediction,
-                        analysis: masterState.ngramAnalysis
-                    },
                     system_sessions: {
                         ht1: null,
                         ht2: null,
@@ -1867,11 +1746,11 @@
                             const url = URL.createObjectURL(dataBlob);
                             const link = document.createElement('a');
                             link.href = url;
-                            link.download = `VanSuNhuY_4Systems_Ngram_Export_${new Date().toISOString().slice(0,10)}.json`;
+                            link.download = `VanSuNhuY_4Systems_Export_${new Date().toISOString().slice(0,10)}.json`;
                             link.click();
                             URL.revokeObjectURL(url);
                             
-                            showToast('Đã xuất dữ liệu tổng hợp 4 hệ thống với N-gram', 'success');
+                            showToast('Đã xuất dữ liệu tổng hợp 4 hệ thống', 'success');
                             resolve(true);
                         }
                     }
@@ -1894,7 +1773,7 @@
                         const url = URL.createObjectURL(dataBlob);
                         const link = document.createElement('a');
                         link.href = url;
-                        link.download = `VanSuNhuY_4Systems_Ngram_Export_${new Date().toISOString().slice(0,10)}.json`;
+                        link.download = `VanSuNhuY_4Systems_Export_${new Date().toISOString().slice(0,10)}.json`;
                         link.click();
                         URL.revokeObjectURL(url);
                         
@@ -1929,14 +1808,6 @@
                             updateFinalDecisionStats();
                         }
                         
-                        // Import N-gram data
-                        if (data.ngramData) {
-                            masterState.ngramPatterns = data.ngramData.patterns || {};
-                            masterState.ngramPrediction = data.ngramData.prediction || null;
-                            masterState.ngramAnalysis = data.ngramData.analysis || null;
-                            document.getElementById('ngramPatternsCount').textContent = Object.keys(masterState.ngramPatterns).length;
-                        }
-                        
                         // Kiểm tra xem có dữ liệu hệ thống riêng không
                         const hasSystemData = data.system_sessions && 
                             (data.system_sessions.ht1 || data.system_sessions.ht2 || 
@@ -1962,7 +1833,7 @@
                             
                             setTimeout(() => {
                                 hideLoadingModal();
-                                showToast('Đã nhập dữ liệu thành công vào 4 hệ thống và N-gram!', 'success');
+                                showToast('Đã nhập dữ liệu thành công vào 4 hệ thống!', 'success');
                                 
                                 // Refresh data
                                 setTimeout(() => {
@@ -1971,9 +1842,8 @@
                                     broadcastToAll('get_chot_history');
                                     broadcastToAll('get_system_details');
                                     updateFinalDecisionStats();
-                                    
-                                    // Chạy phân tích N-gram
-                                    runNgramAnalysis();
+                                    analyzeNgramPatterns();
+                                    calculateFinalDecision();
                                 }, 1000);
                                 
                             }, 2000);
@@ -2020,15 +1890,19 @@
             // Thêm vào lịch sử quyết định cuối cùng
             addFinalDecisionToHistory(result);
             
-            // Chạy phân tích N-gram
-            runNgramAnalysis();
-            
             // Request updated data
             setTimeout(() => {
                 broadcastToAll('get_accuracy');
                 broadcastToAll('get_chot_history');
                 broadcastToAll('get_prediction');
                 broadcastToAll('get_system_details');
+                
+                // Phân tích N-gram và tính toán quyết định mới
+                setTimeout(() => {
+                    analyzeNgramPatterns();
+                    calculateFinalDecision();
+                }, 500);
+                
             }, 800);
             
             showToast(`Đã thêm kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'} đến 4 hệ thống`, 'success');
@@ -2060,14 +1934,18 @@
                 saveFinalDecisionHistory();
             }
             
-            // Chạy lại phân tích N-gram
-            runNgramAnalysis();
-            
             // Request updated data
             setTimeout(() => {
                 broadcastToAll('get_accuracy');
                 broadcastToAll('get_chot_history');
                 broadcastToAll('get_system_details');
+                
+                // Phân tích N-gram và tính toán quyết định mới
+                setTimeout(() => {
+                    analyzeNgramPatterns();
+                    calculateFinalDecision();
+                }, 500);
+                
             }, 800);
             
             showToast('Đã hoàn tác kết quả cuối cùng từ 4 hệ thống', 'info');
@@ -2095,11 +1973,17 @@
                 // Xóa tất cả cảnh báo đã lưu
                 masterState.displayedWarnings = {};
                 
-                // Xóa dữ liệu N-gram
-                masterState.ngramPatterns = {};
-                masterState.ngramPrediction = null;
-                masterState.ngramAnalysis = null;
-                document.getElementById('ngramPatternsCount').textContent = 0;
+                // Xóa phân tích N-gram
+                masterState.ngramAnalysis = {
+                    currentPattern: null,
+                    prediction: null,
+                    confidence: 0,
+                    rules: []
+                };
+                updateNgramDisplay();
+                
+                // Tính toán lại quyết định
+                calculateFinalDecision();
                 
                 showToast('Đã xóa toàn bộ lịch sử từ 4 hệ thống', 'info');
             }
@@ -2128,15 +2012,18 @@
                 document.getElementById('sync-status').className = 'text-green-400 font-semibold';
                 showToast('Đã đồng bộ 4 hệ thống', 'success');
                 
-                // Chạy phân tích N-gram
-                runNgramAnalysis();
-                
                 // Request updated data
                 setTimeout(() => {
                     broadcastToAll('get_accuracy');
                     broadcastToAll('get_chot_history');
                     broadcastToAll('get_prediction');
                     broadcastToAll('get_system_details');
+                    
+                    // Phân tích N-gram và tính toán quyết định
+                    setTimeout(() => {
+                        analyzeNgramPatterns();
+                        calculateFinalDecision();
+                    }, 1000);
                 }, 1000);
             }, 1500);
         }
@@ -2164,10 +2051,13 @@
                 // Xóa tất cả cảnh báo đã lưu
                 masterState.displayedWarnings = {};
                 
-                // Xóa dữ liệu N-gram
-                masterState.ngramPatterns = {};
-                masterState.ngramPrediction = null;
-                masterState.ngramAnalysis = null;
+                // Xóa phân tích N-gram
+                masterState.ngramAnalysis = {
+                    currentPattern: null,
+                    prediction: null,
+                    confidence: 0,
+                    rules: []
+                };
                 
                 localStorage.removeItem('vanSuNhuY_sessions_v2');
                 localStorage.removeItem('vanSuNhuY_finalDecisionHistory');
@@ -2183,13 +2073,16 @@
                 // Reset final decision stats
                 updateFinalDecisionStats();
                 
-                // Cập nhật số lượng patterns
-                document.getElementById('ngramPatternsCount').textContent = 0;
+                // Reset N-gram display
+                updateNgramDisplay();
                 
                 // Xóa tất cả cảnh báo đang hiển thị
                 document.getElementById('warning-container').innerHTML = '';
                 
-                showToast('Đã reset tất cả 4 hệ thống và N-gram', 'info');
+                // Reset decision display
+                updateFinalDecisionDisplay(null, "Hệ thống đã được reset. Vui lòng tạo phiên mới.", "RESET");
+                
+                showToast('Đã reset tất cả 4 hệ thống', 'info');
             }
         }
 
@@ -2339,17 +2232,6 @@
             }
         }
 
-        function forcePlayerDecision() {
-            updateFinalDecisionDisplay('P', 'Quyết định thủ công: CHỐT PLAYER', 'THỦ CÔNG');
-            showToast('Đã chốt PLAYER (thủ công)', 'info');
-        }
-
-        function forceBankerDecision() {
-            updateFinalDecisionDisplay('B', 'Quyết định thủ công: CHỐT BANKER', 'THỦ CÔNG');
-            showToast('Đã chốt BANKER (thủ công)', 'info');
-        }
-
-        // =================== CHART RENDERING ===================
         function renderCombinedChart(system) {
             const history = masterState[`${system}ChotHistory`];
             const chartEl = document.getElementById(`${system}-combined-chart`);
@@ -2380,6 +2262,16 @@
             });
             
             chartEl.innerHTML = chartHTML;
+        }
+
+        function forcePlayerDecision() {
+            updateFinalDecisionDisplay('P', 'Quyết định thủ công: CHỐT PLAYER', 'THỦ CÔNG');
+            showToast('Đã chốt PLAYER (thủ công)', 'info');
+        }
+
+        function forceBankerDecision() {
+            updateFinalDecisionDisplay('B', 'Quyết định thủ công: CHỐT BANKER', 'THỦ CÔNG');
+            showToast('Đã chốt BANKER (thủ công)', 'info');
         }
 
         // =================== GAME ACCURACY CHART ===================
@@ -2919,6 +2811,7 @@
             updateCurrentSessionInfo();
             updateSystemStatus();
             updateFinalDecisionStats();
+            updateNgramDisplay();
             
             // Initialize charts
             renderEmptyChart();
@@ -2936,9 +2829,6 @@
                         
                         // Send to all systems
                         syncAllSystems();
-                        
-                        // Chạy phân tích N-gram
-                        runNgramAnalysis();
                     }
                 }
             });
@@ -2950,10 +2840,10 @@
                     broadcastToAll('get_chot_history');
                     broadcastToAll('get_system_details');
                     
-                    // Chạy lại phân tích N-gram mỗi phút
-                    runNgramAnalysis();
+                    // Cập nhật phân tích N-gram
+                    analyzeNgramPatterns();
                 }
-            }, 60000); // Mỗi phút chạy lại phân tích N-gram
+            }, 8000);
             
             showToast('Hệ thống VẠN SỰ NHƯ Ý (4 hệ thống + N-gram) đã sẵn sàng!', 'success');
         });
