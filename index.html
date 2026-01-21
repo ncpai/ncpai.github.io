@@ -870,11 +870,18 @@
             if (!chartHistory || chartHistory.length < 5) {
                 return {
                     hasPattern: false,
+                    has100Percent: false,
                     confidence: 0,
                     patternType: null,
                     patternString: '',
                     transitions: {},
                     rates: {
+                        DtoS: '0',
+                        StoD: '0',
+                        DDtoS: '0',
+                        SStoD: '0'
+                    },
+                    rawRates: {
                         DtoS: 0,
                         StoD: 0,
                         DDtoS: 0,
@@ -907,9 +914,7 @@
                 DtoS: 0, DtoD: 0,
                 StoD: 0, StoS: 0,
                 DDtoS: 0, DDtoD: 0,
-                SStoD: 0, SStoS: 0,
-                DStoD: 0, DStoS: 0,
-                SDtoS: 0, SDtoD: 0
+                SStoD: 0, SStoS: 0
             };
             
             // Đếm các chuyển đổi đơn
@@ -932,74 +937,87 @@
                 if (pair === 'DD' && next === 'D') transitions.DDtoD++;
                 if (pair === 'SS' && next === 'D') transitions.SStoD++;
                 if (pair === 'SS' && next === 'S') transitions.SStoS++;
-                
-                // Thêm các cặp khác
-                if (pair === 'DS' && next === 'D') transitions.DStoD++;
-                if (pair === 'DS' && next === 'S') transitions.DStoS++;
-                if (pair === 'SD' && next === 'S') transitions.SDtoS++;
-                if (pair === 'SD' && next === 'D') transitions.SDtoD++;
             }
             
-            // Tính tỷ lệ
+            // Tính tỷ lệ CHÍNH XÁC (không làm tròn sớm)
             const DtoSTotal = transitions.DtoS + transitions.DtoD;
             const StoDTotal = transitions.StoD + transitions.StoS;
             const DDtoSTotal = transitions.DDtoS + transitions.DDtoD;
             const SStoDTotal = transitions.SStoD + transitions.SStoS;
             
-            const DtoSRate = DtoSTotal > 0 ? (transitions.DtoS / DtoSTotal * 100).toFixed(1) : 0;
-            const StoDRate = StoDTotal > 0 ? (transitions.StoD / StoDTotal * 100).toFixed(1) : 0;
-            const DDtoSRate = DDtoSTotal > 0 ? (transitions.DDtoS / DDtoSTotal * 100).toFixed(1) : 0;
-            const SStoDRate = SStoDTotal > 0 ? (transitions.SStoD / SStoDTotal * 100).toFixed(1) : 0;
+            // Tính chính xác đến 2 chữ số thập phân
+            const DtoSRate = DtoSTotal > 0 ? (transitions.DtoS / DtoSTotal * 100) : 0;
+            const StoDRate = StoDTotal > 0 ? (transitions.StoD / StoDTotal * 100) : 0;
+            const DDtoSRate = DDtoSTotal > 0 ? (transitions.DDtoS / DDtoSTotal * 100) : 0;
+            const SStoDRate = SStoDTotal > 0 ? (transitions.SStoD / SStoDTotal * 100) : 0;
             
-            // Kiểm tra xem có quy luật không (tỷ lệ > 70% hoặc < 30% cho thấy có quy luật mạnh)
-            const hasStrongPattern = 
+            // CHỈ COI LÀ QUY LUẬT 100% KHI ĐÚNG 100% (không làm tròn)
+            const has100PercentRule = 
+                DtoSRate === 100 || StoDRate === 100 || 
+                DDtoSRate === 100 || SStoDRate === 100;
+            
+            // Kiểm tra xem có quy luật không (tỷ lệ >= 70% hoặc <= 30%)
+            const hasStrongPattern = has100PercentRule || 
                 DtoSRate >= 70 || DtoSRate <= 30 ||
                 StoDRate >= 70 || StoDRate <= 30 ||
                 DDtoSRate >= 70 || DDtoSRate <= 30 ||
                 SStoDRate >= 70 || SStoDRate <= 30;
             
-            // Độ tin cậy dựa trên độ dài chuỗi và tính nhất quán
+            // Độ tin cậy: cao hơn nếu có quy luật 100%
             let confidence = 0;
             if (patternString.length >= 10) confidence += 30;
             if (patternString.length >= 15) confidence += 20;
             if (hasStrongPattern) confidence += 40;
+            if (has100PercentRule) confidence += 10; // Bonus cho quy luật 100%
             
             // Xác định loại quy luật
             let patternType = null;
             let recommendations = [];
             
-            if (DtoSRate >= 70) {
-                patternType = 'D_SANG_S_CAO';
-                recommendations.push(`Từ D sang S với tỷ lệ ${DtoSRate}% - Nên xem xét NGƯỢC kết quả sau khi đúng`);
-            }
-            if (StoDRate >= 70) {
-                patternType = 'S_SANG_D_CAO';
-                recommendations.push(`Từ S sang D với tỷ lệ ${StoDRate}% - Nên xem xét THEO kết quả sau khi sai`);
-            }
-            if (DDtoSRate >= 70) {
-                patternType = 'DD_SANG_S_CAO';
-                recommendations.push(`Từ DD sang S với tỷ lệ ${DDtoSRate}% - Sau 2 lần đúng thì thường sai`);
-            }
-            if (SStoDRate >= 70) {
-                patternType = 'SS_SANG_D_CAO';
-                recommendations.push(`Từ SS sang D với tỷ lệ ${SStoDRate}% - Sau 2 lần sai thì thường đúng`);
+            // Ưu tiên quy luật 100%
+            if (DtoSRate === 100) {
+                patternType = 'DtoS_100';
+                recommendations.push(`🚨 D→S 100% (${transitions.DtoS}/${DtoSTotal}) - Sau ĐÚNG thì LUÔN SAI -> NGƯỢC`);
+            } else if (StoDRate === 100) {
+                patternType = 'StoD_100';
+                recommendations.push(`🚨 S→D 100% (${transitions.StoD}/${StoDTotal}) - Sau SAI thì LUÔN ĐÚNG -> THEO`);
+            } else if (DDtoSRate === 100) {
+                patternType = 'DDtoS_100';
+                recommendations.push(`🚨 DD→S 100% (${transitions.DDtoS}/${DDtoSTotal}) - Sau 2 ĐÚNG thì LUÔN SAI -> NGƯỢC`);
+            } else if (SStoDRate === 100) {
+                patternType = 'SStoD_100';
+                recommendations.push(`🚨 SS→D 100% (${transitions.SStoD}/${SStoDTotal}) - Sau 2 SAI thì LUÔN ĐÚNG -> THEO`);
+            } else if (DtoSRate >= 70) {
+                patternType = 'DtoS_HIGH';
+                recommendations.push(`D→S ${DtoSRate.toFixed(1)}% - Sau đúng thường sai -> Xem xét NGƯỢC`);
+            } else if (StoDRate >= 70) {
+                patternType = 'StoD_HIGH';
+                recommendations.push(`S→D ${StoDRate.toFixed(1)}% - Sau sai thường đúng -> Xem xét THEO`);
+            } else if (DDtoSRate >= 70) {
+                patternType = 'DDtoS_HIGH';
+                recommendations.push(`DD→S ${DDtoSRate.toFixed(1)}% - Sau 2 đúng thường sai -> Xem xét NGƯỢC`);
+            } else if (SStoDRate >= 70) {
+                patternType = 'SStoD_HIGH';
+                recommendations.push(`SS→D ${SStoDRate.toFixed(1)}% - Sau 2 sai thường đúng -> Xem xét THEO`);
             }
             
-            // Kiểm tra quy luật ngược (tỷ lệ thấp)
-            if (DtoSRate <= 30 && DtoSTotal > 0) {
-                recommendations.push(`Từ D sang S chỉ ${DtoSRate}% - Đúng thường tiếp tục đúng`);
-            }
-            if (StoDRate <= 30 && StoDTotal > 0) {
-                recommendations.push(`Từ S sang D chỉ ${StoDRate}% - Sai thường tiếp tục sai`);
-            }
+            // Format tỷ lệ để hiển thị
+            const formatRate = (rate) => rate.toFixed(1);
             
             return {
                 hasPattern: hasStrongPattern,
+                has100Percent: has100PercentRule,
                 confidence: Math.min(confidence, 100),
                 patternType: patternType,
                 patternString: patternString,
                 transitions: transitions,
                 rates: {
+                    DtoS: formatRate(DtoSRate),
+                    StoD: formatRate(StoDRate),
+                    DDtoS: formatRate(DDtoSRate),
+                    SStoD: formatRate(SStoDRate)
+                },
+                rawRates: {
                     DtoS: DtoSRate,
                     StoD: StoDRate,
                     DDtoS: DDtoSRate,
@@ -1010,43 +1028,14 @@
             };
         }
 
-        // =================== HÀM HỖ TRỢ ===================
-        function getOriginalVerdict(verdictString) {
-            if (!verdictString) return null;
-            
-            verdictString = verdictString.trim().toUpperCase();
-            
-            if (verdictString === 'P' || verdictString === 'B') {
-                return verdictString;
-            }
-            
-            if (verdictString.includes('NGƯỢC')) {
-                if (verdictString.includes('P')) return 'B';
-                if (verdictString.includes('B')) return 'P';
-            }
-            
-            if (verdictString.includes('THEO')) {
-                if (verdictString.includes('P')) return 'P';
-                if (verdictString.includes('B')) return 'B';
-            }
-            
-            return null;
-        }
-
-        // =================== THUẬT TOÁN QUYẾT ĐỊNH CUỐI CÙNG MỚI ===================
+        // =================== THUẬT TOÁN QUYẾT ĐỊNH CUỐI CÙNG CHỈ DỰA TRÊN QUY LUẬT 100% ===================
         function calculateFinalDecision() {
-            console.log("Tính toán quyết định cuối cùng với thuật toán PHÂN TÍCH QUY LUẬT...");
+            console.log("Tính toán quyết định cuối cùng với thuật toán CHỈ DỰA TRÊN QUY LUẬT 100%...");
             
             const systems = ['ht1', 'ht2', 'ht3', 'ht4'];
             
-            // Lưu trữ kết quả phân tích
-            let systemAnalysis = {};
-            let allPatternsFound = false;
-            let maxConfidence = 0;
-            let bestSystem = null;
-            let bestChartType = null;
-            let bestDecision = null;
-            let bestReason = '';
+            // Lưu trữ tất cả quy luật 100%
+            let all100PercentRules = [];
             
             // Phân tích từng hệ thống
             for (const system of systems) {
@@ -1072,135 +1061,234 @@
                 // Cập nhật hiển thị phân tích
                 updatePatternAnalysisDisplay(system, intervalAnalysis, combinedAnalysis);
                 
-                // Kiểm tra xem hệ thống này có quy luật không
-                if (intervalAnalysis.hasPattern || combinedAnalysis.hasPattern) {
-                    allPatternsFound = true;
-                    
-                    // Xác định biểu đồ nào đáng tin cậy hơn
-                    const intervalConfidence = intervalAnalysis.confidence;
-                    const combinedConfidence = combinedAnalysis.confidence;
-                    
-                    let currentConfidence = 0;
-                    let currentChartType = '';
-                    
-                    // ƯU TIÊN NHỮNG BIỂU ĐỒ CÓ QUY LUẬT DÀI HƠN
-                    if (intervalAnalysis.hasPattern && combinedAnalysis.hasPattern) {
-                        if (intervalAnalysis.length >= combinedAnalysis.length) {
-                            currentConfidence = intervalConfidence;
-                            currentChartType = 'interval';
-                        } else {
-                            currentConfidence = combinedConfidence;
-                            currentChartType = 'combined';
-                        }
-                    } else if (intervalAnalysis.hasPattern) {
-                        currentConfidence = intervalConfidence;
-                        currentChartType = 'interval';
+                // CHỈ KIỂM TRA QUY LUẬT 100%
+                // Biểu đồ khoảng tỷ lệ
+                checkAndAdd100PercentRules(all100PercentRules, system, 'interval', intervalAnalysis, details);
+                
+                // Biểu đồ kết hợp
+                checkAndAdd100PercentRules(all100PercentRules, system, 'combined', combinedAnalysis, details);
+            }
+            
+            // Nếu có quy luật 100%
+            if (all100PercentRules.length > 0) {
+                // Chọn quy luật tốt nhất: độ dài chuỗi dài nhất (càng nhiều ván càng đáng tin)
+                all100PercentRules.sort((a, b) => {
+                    // Ưu tiên độ dài chuỗi
+                    if (b.length !== a.length) {
+                        return b.length - a.length;
+                    }
+                    // Nếu bằng nhau, ưu tiên confidence cao hơn
+                    return b.confidence - a.confidence;
+                });
+                
+                const bestRule = all100PercentRules[0];
+                
+                // Xác định quyết định dựa trên loại quy luật 100%
+                let decision = null;
+                let reason = `🚨 ${bestRule.system.toUpperCase()} - ${bestRule.chartName} có QUY LUẬT 100%: ${bestRule.ruleType} (${bestRule.length} ván). `;
+                
+                // Lấy kết quả gốc của hệ thống đó
+                let originalDecision = bestRule.originalDecision;
+                if (!originalDecision) {
+                    // Nếu không có dự đoán gốc, lấy dự đoán hiện tại của hệ thống đó
+                    if (bestRule.chartType === 'interval') {
+                        originalDecision = getOriginalVerdict(masterState.systemDetails[bestRule.system].verdict);
                     } else {
-                        currentConfidence = combinedConfidence;
-                        currentChartType = 'combined';
+                        originalDecision = getOriginalVerdict(masterState.systemDetails[bestRule.system].chot);
+                    }
+                }
+                
+                if (!originalDecision) {
+                    originalDecision = 'P'; // Mặc định
+                }
+                
+                // Áp dụng quy luật 100%
+                switch (bestRule.ruleType) {
+                    case 'DtoS':
+                        // D→S 100%: sau khi ĐÚNG thì LUÔN SAI -> NGƯỢC với kết quả gốc
+                        decision = originalDecision === 'P' ? 'B' : 'P';
+                        reason += `ĐÚNG luôn chuyển thành SAI -> NGƯỢC với dự đoán gốc (${originalDecision})`;
+                        break;
+                    case 'StoD':
+                        // S→D 100%: sau khi SAI thì LUÔN ĐÚNG -> THEO kết quả gốc
+                        decision = originalDecision;
+                        reason += `SAI luôn chuyển thành ĐÚNG -> THEO dự đoán gốc (${originalDecision})`;
+                        break;
+                    case 'DDtoS':
+                        // DD→S 100%: sau 2 lần ĐÚNG thì LUÔN SAI -> NGƯỢC với kết quả gốc
+                        decision = originalDecision === 'P' ? 'B' : 'P';
+                        reason += `2 ĐÚNG liên tiếp luôn chuyển thành SAI -> NGƯỢC với dự đoán gốc (${originalDecision})`;
+                        break;
+                    case 'SStoD':
+                        // SS→D 100%: sau 2 lần SAI thì LUÔN ĐÚNG -> THEO kết quả gốc
+                        decision = originalDecision;
+                        reason += `2 SAI liên tiếp luôn chuyển thành ĐÚNG -> THEO dự đoán gốc (${originalDecision})`;
+                        break;
+                    default:
+                        decision = null;
+                        reason = "Quy luật 100% không xác định";
+                }
+                
+                if (decision) {
+                    console.log(`Quyết định cuối cùng (100%): ${decision}, Lý do: ${reason}`);
+                    updateFinalDecisionDisplay(decision, reason, bestRule.system.toUpperCase());
+                    
+                    // Hiển thị cảnh báo đặc biệt cho quy luật 100%
+                    show100PercentWarning(bestRule);
+                    return;
+                }
+            }
+            
+            // Nếu KHÔNG có quy luật 100% nào
+            console.log("KHÔNG CÓ QUY LUẬT 100% - ĐỀ XUẤT DỪNG LẠI HOẶC ĐỔI BÀN");
+            updateFinalDecisionDisplay(null, "⚠️ KHÔNG CÓ QUY LUẬT 100% NÀO. KHÔNG ĐỦ CƠ SỞ ĐỂ ĐƯA RA QUYẾT ĐỊNH. ĐỀ XUẤT DỪNG LẠI HOẶC ĐỔI BÀN!", "DỪNG LẠI");
+            showWarning("⚠️ CẢNH BÁO: Không tìm thấy quy luật 100% nào trong cả 4 hệ thống. Đề xuất DỪNG LẠI hoặc ĐỔI BÀN!");
+        }
+
+        // =================== HÀM HỖ TRỢ QUYẾT ĐỊNH 100% ===================
+        function getOriginalVerdict(verdictString) {
+            if (!verdictString || verdictString === '-') return null;
+            
+            verdictString = verdictString.trim().toUpperCase();
+            
+            if (verdictString === 'P' || verdictString === 'B') {
+                return verdictString;
+            }
+            
+            if (verdictString.includes('NGƯỢC')) {
+                if (verdictString.includes('P')) return 'B';
+                if (verdictString.includes('B')) return 'P';
+            }
+            
+            if (verdictString.includes('THEO')) {
+                if (verdictString.includes('P')) return 'P';
+                if (verdictString.includes('B')) return 'B';
+            }
+            
+            return null;
+        }
+
+        function checkAndAdd100PercentRules(allRules, system, chartType, analysis, systemDetails) {
+            // Chỉ xét nếu có quy luật
+            if (!analysis.hasPattern) return;
+            
+            const chartName = chartType === 'interval' ? 'Biểu đồ khoảng tỷ lệ' : 'Biểu đồ kết hợp';
+            
+            // Lấy kết quả gốc của hệ thống
+            let originalDecision = null;
+            if (chartType === 'interval') {
+                originalDecision = getOriginalVerdict(systemDetails.verdict);
+            } else {
+                originalDecision = getOriginalVerdict(systemDetails.chot);
+            }
+            
+            // CHỈ KIỂM TRA CÁC TỶ LỆ 100% (không chấp nhận 99.9% hay 100.0% làm tròn)
+            const rulesToCheck = [
+                { type: 'DtoS', value: analysis.rawRates.DtoS, label: 'D→S' },
+                { type: 'StoD', value: analysis.rawRates.StoD, label: 'S→D' },
+                { type: 'DDtoS', value: analysis.rawRates.DDtoS, label: 'DD→S' },
+                { type: 'SStoD', value: analysis.rawRates.SStoD, label: 'SS→D' }
+            ];
+            
+            rulesToCheck.forEach(rule => {
+                // CHỈ CHẤP NHẬN CHÍNH XÁC 100%
+                if (parseFloat(rule.value) === 100) {
+                    // Kiểm tra số lượng mẫu đủ lớn (ít nhất 3 lần xuất hiện)
+                    const minOccurrences = 3;
+                    let occurrences = 0;
+                    
+                    // Đếm số lần xuất hiện của mẫu này trong chuỗi
+                    if (rule.type === 'DtoS') {
+                        occurrences = analysis.transitions.DtoS;
+                    } else if (rule.type === 'StoD') {
+                        occurrences = analysis.transitions.StoD;
+                    } else if (rule.type === 'DDtoS') {
+                        occurrences = analysis.transitions.DDtoS;
+                    } else if (rule.type === 'SStoD') {
+                        occurrences = analysis.transitions.SStoD;
                     }
                     
-                    // So sánh với kết quả tốt nhất hiện tại
-                    if (currentConfidence > maxConfidence) {
-                        maxConfidence = currentConfidence;
-                        bestSystem = system;
-                        bestChartType = currentChartType;
+                    if (occurrences >= minOccurrences) {
+                        allRules.push({
+                            system: system,
+                            chartType: chartType,
+                            chartName: chartName,
+                            ruleType: rule.type,
+                            ruleLabel: rule.label,
+                            ruleValue: rule.value,
+                            occurrences: occurrences,
+                            confidence: analysis.confidence,
+                            length: analysis.length,
+                            originalDecision: originalDecision,
+                            patternString: analysis.patternString
+                        });
                         
-                        // Xác định quyết định dựa trên phân tích
-                        const analysis = currentChartType === 'interval' ? intervalAnalysis : combinedAnalysis;
-                        const systemDetails = details;
-                        
-                        // Lấy kết quả gốc để so sánh
-                        let originalDecision = null;
-                        if (currentChartType === 'interval') {
-                            originalDecision = getOriginalVerdict(systemDetails.verdict);
-                        } else {
-                            originalDecision = getOriginalVerdict(systemDetails.chot);
-                        }
-                        
-                        if (!originalDecision) {
-                            originalDecision = 'P'; // Mặc định
-                        }
-                        
-                        // PHÂN TÍCH QUY LUẬT và đưa ra quyết định
-                        if (analysis.hasPattern && analysis.recommendations.length > 0) {
-                            const systemName = system.toUpperCase();
-                            const chartName = currentChartType === 'interval' ? 'Biểu đồ khoảng tỷ lệ' : 'Biểu đồ kết hợp';
-                            
-                            // Kiểm tra xem có mâu thuẫn giữa hai biểu đồ không
-                            const hasConflict = intervalAnalysis.hasPattern && 
-                                               combinedAnalysis.hasPattern && 
-                                               intervalAnalysis.patternType !== combinedAnalysis.patternType;
-                            
-                            if (hasConflict) {
-                                bestReason = `⚠️ ${systemName} có MÂU THUẪN giữa hai biểu đồ! Chọn ${chartName} vì có quy luật dài hơn (${analysis.length} ván). `;
-                            } else {
-                                bestReason = `${systemName} - ${chartName} có quy luật mạnh (${analysis.length} ván, độ tin cậy ${currentConfidence}%). `;
-                            }
-                            
-                            // Phân tích quy luật cụ thể
-                            if (analysis.rates.DtoS >= 70) {
-                                bestDecision = originalDecision === 'P' ? 'B' : 'P';
-                                bestReason += `Quy luật: Từ D sang S ${analysis.rates.DtoS}% - NGƯỢC với kết quả gốc (${originalDecision})`;
-                            } else if (analysis.rates.StoD >= 70) {
-                                bestDecision = originalDecision;
-                                bestReason += `Quy luật: Từ S sang D ${analysis.rates.StoD}% - THEO kết quả gốc (${originalDecision})`;
-                            } else if (analysis.rates.DDtoS >= 70) {
-                                bestDecision = originalDecision === 'P' ? 'B' : 'P';
-                                bestReason += `Quy luật: Từ DD sang S ${analysis.rates.DDtoS}% - NGƯỢC với kết quả gốc (${originalDecision})`;
-                            } else if (analysis.rates.SStoD >= 70) {
-                                bestDecision = originalDecision;
-                                bestReason += `Quy luật: Từ SS sang D ${analysis.rates.SStoD}% - THEO kết quả gốc (${originalDecision})`;
-                            } else if (analysis.rates.DtoS <= 30) {
-                                bestDecision = originalDecision;
-                                bestReason += `Quy luật: Từ D sang S chỉ ${analysis.rates.DtoS}% - ĐÚNG thường tiếp tục đúng - THEO ${originalDecision}`;
-                            } else if (analysis.rates.StoD <= 30) {
-                                bestDecision = originalDecision === 'P' ? 'B' : 'P';
-                                bestReason += `Quy luật: Từ S sang D chỉ ${analysis.rates.StoD}% - SAI thường tiếp tục sai - NGƯỢC ${originalDecision}`;
-                            } else {
-                                // Quy luật không rõ ràng
-                                bestDecision = null;
-                                bestReason = `Quy luật không rõ ràng. Chờ thêm dữ liệu.`;
-                            }
-                        }
+                        console.log(`Tìm thấy quy luật 100%: ${system} - ${chartType} - ${rule.type} (${occurrences} lần, ${analysis.length} ván)`);
                     }
                 }
-            }
+            });
+        }
+
+        function show100PercentWarning(rule) {
+            const warningContainer = document.getElementById('warning-container');
             
-            // Nếu tìm được quyết định từ thuật toán phân tích quy luật
-            if (bestDecision && bestSystem) {
-                console.log(`Quyết định cuối cùng: ${bestDecision}, Lý do: ${bestReason}`);
-                updateFinalDecisionDisplay(bestDecision, bestReason, bestSystem.toUpperCase());
-                
-                // Gợi ý số tiền cược nếu là tay chắc chắn
-                if (maxConfidence >= 80) {
-                    showToast(`✅ TAY CHẮC CHẮN: Độ tin cậy ${maxConfidence}% - Có thể cược mạnh tay!`, 'success');
-                } else if (maxConfidence >= 60) {
-                    showToast(`⚠️ Cẩn thận: Độ tin cậy ${maxConfidence}% - Nên cược nhẹ`, 'warning');
-                }
-                
-                return;
-            }
+            let warningHTML = `
+                <div class="warning-alert" style="background-color: #10b981; border-left-color: #059669;">
+                    <span>🎯 TÌM THẤY QUY LUẬT 100%!</span>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">
+                        ${rule.system.toUpperCase()} - ${rule.chartName}: ${rule.ruleLabel} = 100% 
+                        (${rule.occurrences} lần trong ${rule.length} ván)
+                    </div>
+                </div>
+            `;
             
-            // Nếu KHÔNG có hệ thống nào có quy luật
-            if (!allPatternsFound) {
-                console.log("TẤT CẢ CÁC BIỂU ĐỒ ĐỀU KHÔNG CÓ QUY LUẬT - ĐỀ XUẤT ĐỔI BÀN");
-                updateFinalDecisionDisplay(null, "TẤT CẢ CÁC BIỂU ĐỒ ĐỀU KHÔNG CÓ QUY LUẬT. ĐỀ XUẤT ĐỔI BÀN!", "ĐỔI BÀN");
-                showToast("⚠️ ĐỀ XUẤT ĐỔI BÀN: Không tìm thấy quy luật nào đáng tin cậy!", 'warning');
-                return;
-            }
+            warningContainer.innerHTML = warningHTML;
             
-            // Trường hợp còn lại: không xác định được quyết định rõ ràng
-            console.log("Không xác định được quyết định rõ ràng từ phân tích quy luật");
-            updateFinalDecisionDisplay(null, "Phân tích quy luật chưa đủ rõ ràng. Chờ thêm dữ liệu.", "CHỜ");
+            // Tự động ẩn sau 10 giây
+            setTimeout(() => {
+                warningContainer.innerHTML = '';
+            }, 10000);
+        }
+
+        function showWarning(message) {
+            const warningContainer = document.getElementById('warning-container');
+            
+            const warning = document.createElement('div');
+            warning.className = 'warning-alert';
+            warning.innerHTML = message;
+            
+            warningContainer.innerHTML = '';
+            warningContainer.appendChild(warning);
+            
+            setTimeout(() => {
+                warning.style.animation = 'fadeOut 0.5s ease';
+                setTimeout(() => {
+                    if (warningContainer.contains(warning)) {
+                        warningContainer.removeChild(warning);
+                    }
+                }, 500);
+            }, 8000);
         }
 
         // =================== CẬP NHẬT HIỂN THỊ PHÂN TÍCH QUY LUẬT ===================
         function updatePatternAnalysisDisplay(system, intervalAnalysis, combinedAnalysis) {
             // Chọn biểu đồ có quy luật mạnh hơn để hiển thị
             let displayAnalysis = intervalAnalysis;
-            if (combinedAnalysis.hasPattern && (!intervalAnalysis.hasPattern || combinedAnalysis.confidence > intervalAnalysis.confidence)) {
+            let chartType = 'interval';
+            
+            // Ưu tiên quy luật 100%
+            const intervalHas100 = intervalAnalysis.has100Percent;
+            const combinedHas100 = combinedAnalysis.has100Percent;
+            
+            if (combinedHas100 && !intervalHas100) {
                 displayAnalysis = combinedAnalysis;
+                chartType = 'combined';
+            } else if (intervalHas100 && !combinedHas100) {
+                displayAnalysis = intervalAnalysis;
+                chartType = 'interval';
+            } else if (combinedAnalysis.confidence > intervalAnalysis.confidence) {
+                displayAnalysis = combinedAnalysis;
+                chartType = 'combined';
             }
             
             // Cập nhật hiển thị
@@ -1213,25 +1301,52 @@
             
             if (patternStringEl) {
                 patternStringEl.textContent = displayAnalysis.patternString || 'Chưa có dữ liệu';
+                
+                // Highlight quy luật 100%
+                if (displayAnalysis.has100Percent) {
+                    patternStringEl.style.color = '#10b981';
+                    patternStringEl.style.fontWeight = 'bold';
+                }
             }
-            if (dToSEl) {
-                dToSEl.textContent = `${displayAnalysis.rates.DtoS}%`;
-            }
-            if (sToDEl) {
-                sToDEl.textContent = `${displayAnalysis.rates.StoD}%`;
-            }
-            if (ddToSEl) {
-                ddToSEl.textContent = `${displayAnalysis.rates.DDtoS}%`;
-            }
-            if (ssToDEl) {
-                ssToDEl.textContent = `${displayAnalysis.rates.SStoD}%`;
-            }
+            
+            // Cập nhật các tỷ lệ với highlight cho 100%
+            updateRateDisplay(dToSEl, displayAnalysis.rates.DtoS, 'D→S');
+            updateRateDisplay(sToDEl, displayAnalysis.rates.StoD, 'S→D');
+            updateRateDisplay(ddToSEl, displayAnalysis.rates.DDtoS, 'DD→S');
+            updateRateDisplay(ssToDEl, displayAnalysis.rates.SStoD, 'SS→D');
+            
             if (recommendationEl) {
                 if (displayAnalysis.recommendations.length > 0) {
-                    recommendationEl.textContent = displayAnalysis.recommendations[0];
+                    // Ưu tiên hiển thị khuyến nghị từ quy luật 100%
+                    const has100 = displayAnalysis.has100Percent;
+                    if (has100) {
+                        recommendationEl.innerHTML = `<span style="color: #10b981; font-weight: bold;">🚨 QUY LUẬT 100%: </span>${displayAnalysis.recommendations[0]}`;
+                    } else {
+                        recommendationEl.textContent = displayAnalysis.recommendations[0];
+                    }
                 } else {
                     recommendationEl.textContent = displayAnalysis.hasPattern ? 'Có quy luật nhưng chưa rõ ràng' : 'Không có quy luật rõ ràng';
                 }
+            }
+        }
+
+        function updateRateDisplay(element, value, label) {
+            if (!element) return;
+            
+            const numValue = parseFloat(value);
+            element.textContent = `${value}%`;
+            
+            // Đặt màu sắc dựa trên giá trị
+            if (numValue === 100) {
+                element.style.color = '#10b981'; // Xanh lá đậm cho 100%
+                element.style.fontWeight = 'bold';
+                element.title = `${label} = 100% - QUY LUẬT TUYỆT ĐỐI`;
+            } else if (numValue >= 70) {
+                element.style.color = '#3b82f6'; // Xanh dương cho cao
+            } else if (numValue <= 30) {
+                element.style.color = '#ef4444'; // Đỏ cho thấp
+            } else {
+                element.style.color = '#9ca3af'; // Xám cho trung bình
             }
         }
 
@@ -1266,32 +1381,32 @@
                                 <h5 class="font-semibold text-gray-300 mb-2">Biểu đồ khoảng tỷ lệ</h5>
                                 <div class="bg-gray-900 p-3 rounded">
                                     <p class="text-sm text-gray-400 mb-1">Chuỗi: ${analysis.interval.patternString || 'Chưa có dữ liệu'}</p>
-                                    <p class="text-sm ${analysis.interval.hasPattern ? 'text-green-400' : 'text-red-400'}">
-                                        ${analysis.interval.hasPattern ? '✅ CÓ QUY LUẬT' : '❌ KHÔNG CÓ QUY LUẬT'} 
+                                    <p class="text-sm ${analysis.interval.hasPattern ? (analysis.interval.has100Percent ? 'text-green-400 font-bold' : 'text-green-400') : 'text-red-400'}">
+                                        ${analysis.interval.hasPattern ? (analysis.interval.has100Percent ? '🚨 CÓ QUY LUẬT 100%' : '✅ CÓ QUY LUẬT') : '❌ KHÔNG CÓ QUY LUẬT'} 
                                         (Độ tin cậy: ${analysis.interval.confidence}%, Độ dài: ${analysis.interval.length} ván)
                                     </p>
                                     <div class="mt-2 text-xs space-y-1">
                                         <div class="flex justify-between">
                                             <span class="text-gray-400">D→S:</span>
-                                            <span class="${analysis.interval.rates.DtoS >= 70 || analysis.interval.rates.DtoS <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300'}">
+                                            <span class="${analysis.interval.rawRates.DtoS === 100 ? 'font-bold text-green-400' : (analysis.interval.rawRates.DtoS >= 70 || analysis.interval.rawRates.DtoS <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300')}">
                                                 ${analysis.interval.rates.DtoS}%
                                             </span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-400">S→D:</span>
-                                            <span class="${analysis.interval.rates.StoD >= 70 || analysis.interval.rates.StoD <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300'}">
+                                            <span class="${analysis.interval.rawRates.StoD === 100 ? 'font-bold text-green-400' : (analysis.interval.rawRates.StoD >= 70 || analysis.interval.rawRates.StoD <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300')}">
                                                 ${analysis.interval.rates.StoD}%
                                             </span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-400">DD→S:</span>
-                                            <span class="${analysis.interval.rates.DDtoS >= 70 || analysis.interval.rates.DDtoS <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300'}">
+                                            <span class="${analysis.interval.rawRates.DDtoS === 100 ? 'font-bold text-green-400' : (analysis.interval.rawRates.DDtoS >= 70 || analysis.interval.rawRates.DDtoS <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300')}">
                                                 ${analysis.interval.rates.DDtoS}%
                                             </span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-400">SS→D:</span>
-                                            <span class="${analysis.interval.rates.SStoD >= 70 || analysis.interval.rates.SStoD <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300'}">
+                                            <span class="${analysis.interval.rawRates.SStoD === 100 ? 'font-bold text-green-400' : (analysis.interval.rawRates.SStoD >= 70 || analysis.interval.rawRates.SStoD <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300')}">
                                                 ${analysis.interval.rates.SStoD}%
                                             </span>
                                         </div>
@@ -1303,32 +1418,32 @@
                                 <h5 class="font-semibold text-gray-300 mb-2">Biểu đồ kết hợp</h5>
                                 <div class="bg-gray-900 p-3 rounded">
                                     <p class="text-sm text-gray-400 mb-1">Chuỗi: ${analysis.combined.patternString || 'Chưa có dữ liệu'}</p>
-                                    <p class="text-sm ${analysis.combined.hasPattern ? 'text-green-400' : 'text-red-400'}">
-                                        ${analysis.combined.hasPattern ? '✅ CÓ QUY LUẬT' : '❌ KHÔNG CÓ QUY LUẬT'} 
+                                    <p class="text-sm ${analysis.combined.hasPattern ? (analysis.combined.has100Percent ? 'text-green-400 font-bold' : 'text-green-400') : 'text-red-400'}">
+                                        ${analysis.combined.hasPattern ? (analysis.combined.has100Percent ? '🚨 CÓ QUY LUẬT 100%' : '✅ CÓ QUY LUẬT') : '❌ KHÔNG CÓ QUY LUẬT'} 
                                         (Độ tin cậy: ${analysis.combined.confidence}%, Độ dài: ${analysis.combined.length} ván)
                                     </p>
                                     <div class="mt-2 text-xs space-y-1">
                                         <div class="flex justify-between">
                                             <span class="text-gray-400">D→S:</span>
-                                            <span class="${analysis.combined.rates.DtoS >= 70 || analysis.combined.rates.DtoS <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300'}">
+                                            <span class="${analysis.combined.rawRates.DtoS === 100 ? 'font-bold text-green-400' : (analysis.combined.rawRates.DtoS >= 70 || analysis.combined.rawRates.DtoS <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300')}">
                                                 ${analysis.combined.rates.DtoS}%
                                             </span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-400">S→D:</span>
-                                            <span class="${analysis.combined.rates.StoD >= 70 || analysis.combined.rates.StoD <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300'}">
+                                            <span class="${analysis.combined.rawRates.StoD === 100 ? 'font-bold text-green-400' : (analysis.combined.rawRates.StoD >= 70 || analysis.combined.rawRates.StoD <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300')}">
                                                 ${analysis.combined.rates.StoD}%
                                             </span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-400">DD→S:</span>
-                                            <span class="${analysis.combined.rates.DDtoS >= 70 || analysis.combined.rates.DDtoS <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300'}">
+                                            <span class="${analysis.combined.rawRates.DDtoS === 100 ? 'font-bold text-green-400' : (analysis.combined.rawRates.DDtoS >= 70 || analysis.combined.rawRates.DDtoS <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300')}">
                                                 ${analysis.combined.rates.DDtoS}%
                                             </span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-400">SS→D:</span>
-                                            <span class="${analysis.combined.rates.SStoD >= 70 || analysis.combined.rates.SStoD <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300'}">
+                                            <span class="${analysis.combined.rawRates.SStoD === 100 ? 'font-bold text-green-400' : (analysis.combined.rawRates.SStoD >= 70 || analysis.combined.rawRates.SStoD <= 30 ? 'font-bold text-yellow-300' : 'text-gray-300')}">
                                                 ${analysis.combined.rates.SStoD}%
                                             </span>
                                         </div>
@@ -1338,7 +1453,7 @@
                         </div>
                         
                         <div class="mt-3 p-2 bg-gray-900 rounded">
-                            <h6 class="font-semibold text-cyan-400 text-sm mb-2">Khuyến nghị hành động:</h6>
+                            <h6 class="font-semibold ${analysis.interval.has100Percent || analysis.combined.has100Percent ? 'text-green-400' : 'text-cyan-400'} text-sm mb-2">Khuyến nghị hành động:</h6>
                             <ul class="text-xs text-gray-300 space-y-1">
                                 ${analysis.interval.recommendations.map(rec => `<li>📊 ${rec}</li>`).join('')}
                                 ${analysis.combined.recommendations.map(rec => `<li>🔗 ${rec}</li>`).join('')}
@@ -1352,16 +1467,17 @@
             
             analysisHTML += `
                     <div class="mt-6 p-4 bg-purple-900 rounded-lg">
-                        <h4 class="font-bold text-yellow-300 mb-2">📝 HƯỚNG DẪN SỬ DỤNG PHÂN TÍCH QUY LUẬT</h4>
+                        <h4 class="font-bold text-yellow-300 mb-2">📝 THUẬT TOÁN QUYẾT ĐỊNH 100%</h4>
                         <ul class="text-sm text-gray-300 space-y-2">
                             <li>• <span class="text-green-400">D (Đúng)</span> - Kết quả dự đoán đúng</li>
                             <li>• <span class="text-red-400">S (Sai)</span> - Kết quả dự đoán sai</li>
-                            <li>• <span class="text-yellow-300">D→S ≥ 70%</span>: Sau khi đúng thường sai → NGƯỢC kết quả</li>
-                            <li>• <span class="text-yellow-300">S→D ≥ 70%</span>: Sau khi sai thường đúng → THEO kết quả</li>
-                            <li>• <span class="text-yellow-300">DD→S ≥ 70%</span>: Sau 2 lần đúng thường sai → NGƯỢC kết quả</li>
-                            <li>• <span class="text-yellow-300">SS→D ≥ 70%</span>: Sau 2 lần sai thường đúng → THEO kết quả</li>
-                            <li>• <span class="text-blue-300">Ưu tiên biểu đồ có quy luật dài hơn</span></li>
-                            <li>• <span class="text-red-300">Nếu tất cả đều không có quy luật: ĐỀ XUẤT ĐỔI BÀN</span></li>
+                            <li>• <span class="text-green-400 font-bold">🚨 QUY LUẬT 100% LÀ BẮT BUỘC:</span> Chỉ đưa ra quyết định khi có tỷ lệ chính xác 100%</li>
+                            <li>• <span class="text-green-400">D→S = 100%</span>: Sau ĐÚNG LUÔN SAI → NGƯỢC với dự đoán gốc</li>
+                            <li>• <span class="text-green-400">S→D = 100%</span>: Sau SAI LUÔN ĐÚNG → THEO dự đoán gốc</li>
+                            <li>• <span class="text-green-400">DD→S = 100%</span>: Sau 2 ĐÚNG LUÔN SAI → NGƯỢC với dự đoán gốc</li>
+                            <li>• <span class="text-green-400">SS→D = 100%</span>: Sau 2 SAI LUÔN ĐÚNG → THEO dự đoán gốc</li>
+                            <li>• <span class="text-blue-300">Ưu tiên quy luật có chuỗi dài hơn (nhiều ván hơn)</span></li>
+                            <li>• <span class="text-red-300 font-bold">Nếu không có quy luật 100% nào: ĐỀ XUẤT DỪNG LẠI HOẶC ĐỔI BÀN!</span></li>
                         </ul>
                     </div>
                 </div>
@@ -2338,7 +2454,7 @@
                 }
             }, 8000);
             
-            showToast('Hệ thống VẠN SỰ NHƯ Ý (4 hệ thống) đã sẵn sàng với thuật toán phân tích quy luật!', 'success');
+            showToast('Hệ thống VẠN SỰ NHƯ Ý (4 hệ thống) đã sẵn sàng với thuật toán phân tích quy luật 100%!', 'success');
         });
     </script>
 </body>
