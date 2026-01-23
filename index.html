@@ -208,6 +208,24 @@
         .transition-danger {
             color: #ef4444;
         }
+        /* New styles for combined analysis */
+        .combined-details {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid #334155;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .combined-chart-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+        .combined-chart-value {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -682,6 +700,22 @@
                                     <span class="text-gray-400">S→D:</span>
                                     <span id="ht1-stod" class="text-gray-300">0%</span>
                                 </div>
+                                <!-- Biểu đồ kết hợp -->
+                                <div class="combined-details">
+                                    <div class="combined-chart-label">Biểu đồ kết hợp</div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">D→S:</span>
+                                        <span id="ht1-combined-dtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">DD→S:</span>
+                                        <span id="ht1-combined-ddtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">S→D:</span>
+                                        <span id="ht1-combined-stod" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -700,6 +734,22 @@
                                 <div class="flex justify-between">
                                     <span class="text-gray-400">S→D:</span>
                                     <span id="ht2-stod" class="text-gray-300">0%</span>
+                                </div>
+                                <!-- Biểu đồ kết hợp -->
+                                <div class="combined-details">
+                                    <div class="combined-chart-label">Biểu đồ kết hợp</div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">D→S:</span>
+                                        <span id="ht2-combined-dtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">DD→S:</span>
+                                        <span id="ht2-combined-ddtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">S→D:</span>
+                                        <span id="ht2-combined-stod" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -720,6 +770,22 @@
                                     <span class="text-gray-400">S→D:</span>
                                     <span id="ht3-stod" class="text-gray-300">0%</span>
                                 </div>
+                                <!-- Biểu đồ kết hợp -->
+                                <div class="combined-details">
+                                    <div class="combined-chart-label">Biểu đồ kết hợp</div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">D→S:</span>
+                                        <span id="ht3-combined-dtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">DD→S:</span>
+                                        <span id="ht3-combined-ddtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">S→D:</span>
+                                        <span id="ht3-combined-stod" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -738,6 +804,22 @@
                                 <div class="flex justify-between">
                                     <span class="text-gray-400">S→D:</span>
                                     <span id="ht4-stod" class="text-gray-300">0%</span>
+                                </div>
+                                <!-- Biểu đồ kết hợp -->
+                                <div class="combined-details">
+                                    <div class="combined-chart-label">Biểu đồ kết hợp</div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">D→S:</span>
+                                        <span id="ht4-combined-dtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">DD→S:</span>
+                                        <span id="ht4-combined-ddtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">S→D:</span>
+                                        <span id="ht4-combined-stod" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1160,15 +1242,22 @@
             systems.forEach(system => {
                 const analysis = masterState.transitionAnalysis[system];
                 
-                if (analysis && analysis.interval) {
-                    // Cập nhật cho từng hệ thống
-                    document.getElementById(`${system}-dtos`).textContent = `${analysis.interval.DtoS}%`;
-                    document.getElementById(`${system}-ddtos`).textContent = `${analysis.interval.DDToS}%`;
-                    document.getElementById(`${system}-stod`).textContent = `${analysis.interval.StoD}%`;
+                if (analysis) {
+                    // Cập nhật cho biểu đồ khoảng tỷ lệ
+                    document.getElementById(`${system}-dtos`).textContent = `${analysis.interval ? analysis.interval.DtoS : 0}%`;
+                    document.getElementById(`${system}-ddtos`).textContent = `${analysis.interval ? analysis.interval.DDToS : 0}%`;
+                    document.getElementById(`${system}-stod`).textContent = `${analysis.interval ? analysis.interval.StoD : 0}%`;
+                    
+                    // Cập nhật cho biểu đồ kết hợp
+                    if (analysis.combined) {
+                        document.getElementById(`${system}-combined-dtos`).textContent = `${analysis.combined.DtoS}%`;
+                        document.getElementById(`${system}-combined-ddtos`).textContent = `${analysis.combined.DDToS}%`;
+                        document.getElementById(`${system}-combined-stod`).textContent = `${analysis.combined.StoD}%`;
+                    }
                     
                     // Cập nhật chuỗi hiện tại
                     const intervalHistory = masterState.systemDetails[system]?.intervalHistory || [];
-                    const combinedHistory = masterState.systemDetails[system]?.combinedHistory || masterState[`${system}ChotHistory`] || [];
+                    const combinedHistory = masterState.systemDetails[system]?.combinedHistory || [];
                     
                     const intervalStreak = findCurrentStreakFromEnd(intervalHistory);
                     const combinedStreak = findCurrentStreakFromEnd(combinedHistory);
@@ -1280,7 +1369,7 @@
             
             systems.forEach(system => {
                 const intervalHistory = masterState.systemDetails[system]?.intervalHistory || [];
-                const combinedHistory = masterState.systemDetails[system]?.combinedHistory || masterState[`${system}ChotHistory`] || [];
+                const combinedHistory = masterState.systemDetails[system]?.combinedHistory || [];
                 
                 const intervalStreak = findCurrentStreakFromEnd(intervalHistory);
                 const combinedStreak = findCurrentStreakFromEnd(combinedHistory);
@@ -1307,11 +1396,14 @@
                 const details = masterState.systemDetails[system];
                 if (!details) continue;
                 
-                // Lấy dữ liệu từ hai biểu đồ
-                const intervalHistory = details.intervalHistory || [];
-                const combinedHistory = details.combinedHistory || masterState[`${system}ChotHistory`] || [];
+                // Lấy dữ liệu từ HAI BIỂU ĐỒ RIÊNG BIỆT
+                const intervalHistory = details.intervalHistory || [];        // Biểu đồ khoảng tỷ lệ
+                const combinedHistory = details.combinedHistory || [];        // Biểu đồ kết hợp
                 
-                // Phân tích chuyển đổi
+                console.log(`${system} - Interval History:`, intervalHistory.length, "items");
+                console.log(`${system} - Combined History:`, combinedHistory.length, "items");
+                
+                // Phân tích chuyển đổi RIÊNG CHO TỪNG BIỂU ĐỒ
                 const intervalTransitions = analyzeTransitions(intervalHistory);
                 const combinedTransitions = analyzeTransitions(combinedHistory);
                 
@@ -1764,7 +1856,9 @@
 
                 case 'export_data':
                     if (data.sessions) {
-                        masterState[`${system}Sessions`] = data.sessions;
+                        // Lưu dữ liệu session từ hệ thống con
+                        // Không cần cập nhật masterState.sessions vì mỗi hệ thống có dữ liệu riêng
+                        console.log(`[Master] Received export data from ${system}`);
                     }
                     break;
             }
@@ -2288,13 +2382,14 @@
         function updateSystemDetails(system, details) {
             if (!details) return;
             
+            // Sửa lỗi: Tách biệt intervalHistory và combinedHistory
             masterState.systemDetails[system] = {
                 verdict: details.verdict || null,
                 chot: details.chot || null,
                 range: details.range || null,
                 rangeAccuracy: details.rangeAccuracy || null,
                 intervalHistory: details.intervalHistory || [],
-                combinedHistory: details.intervalHistory || [] // Tạm thời dùng intervalHistory
+                combinedHistory: details.combinedHistory || masterState[`${system}ChotHistory`] || [] // Sử dụng chotHistory nếu không có combinedHistory
             };
             
             updateSystemDetailsUI(system);
@@ -2377,7 +2472,7 @@
 
         // =================== CHART RENDERING ===================
         function renderCombinedChart(system) {
-            const history = masterState[`${system}ChotHistory`];
+            const history = masterState.systemDetails[system]?.combinedHistory || masterState[`${system}ChotHistory`] || [];
             const chartEl = document.getElementById(`${system}-combined-chart`);
             
             if (!chartEl) return;
@@ -2447,7 +2542,6 @@
             
             history.forEach((prediction, index) => {
                 const gameNumber = index + 1;
-                gameNumbers.push(gameNumber);
                 labels.push(`Ván ${gameNumber}`);
                 
                 if (prediction && prediction.predicted !== undefined && prediction.actual !== undefined) {
