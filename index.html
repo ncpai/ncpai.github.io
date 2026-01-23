@@ -208,49 +208,23 @@
         .transition-danger {
             color: #ef4444;
         }
-        /* Biểu đồ phân tích chi tiết */
-        .detailed-analysis-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
+        /* New styles for combined analysis */
+        .combined-details {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid #334155;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
         }
-        @media (max-width: 768px) {
-            .detailed-analysis-grid {
-                grid-template-columns: 1fr;
-            }
+        .combined-chart-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 0.25rem;
         }
-        .analysis-section {
-            background-color: #1f2937;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            border: 1px solid #374151;
-        }
-        .analysis-title {
-            font-size: 0.875rem;
+        .combined-chart-value {
+            font-size: 0.75rem;
             font-weight: 600;
-            color: #d1d5db;
-            margin-bottom: 0.75rem;
-            text-align: center;
-            border-bottom: 1px solid #374151;
-            padding-bottom: 0.5rem;
-        }
-        .analysis-value {
-            font-size: 1.125rem;
-            font-weight: 700;
-            text-align: center;
-        }
-        .analysis-value-good {
-            color: #10b981;
-        }
-        .analysis-value-warning {
-            color: #f59e0b;
-        }
-        .analysis-value-danger {
-            color: #ef4444;
-        }
-        .analysis-value-neutral {
-            color: #9ca3af;
         }
     </style>
 </head>
@@ -349,65 +323,64 @@
                 <!-- QUY LUẬT CHUYỂN ĐỔI - ANALYTICS PANEL -->
                 <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
                     <h2 class="text-xl font-semibold mb-4 text-purple-300">📈 QUY LUẬT CHUYỂN ĐỔI</h2>
-                    
-                    <!-- Biểu Đồ Khoảng Tỷ Lệ -->
-                    <div class="transition-analysis mb-4">
-                        <h3 class="text-lg font-semibold mb-3 text-center text-cyan-300">BIỂU ĐỒ KHOẢNG TỶ LỆ</h3>
-                        <div id="interval-transition-analysis" class="space-y-2">
-                            <div class="transition-item">
-                                <span class="transition-label">D → S:</span>
-                                <span class="transition-value" id="interval-dtos">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">DD → S:</span>
-                                <span class="transition-value" id="interval-ddtos">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">S → D:</span>
-                                <span class="transition-value" id="interval-stod">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">SS → D:</span>
-                                <span class="transition-value" id="interval-sstod">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">SSS → D:</span>
-                                <span class="transition-value" id="interval-ssstod">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">DDD → S:</span>
-                                <span class="transition-value" id="interval-dddtos">0%</span>
+                    <div class="space-y-3">
+                        <div class="transition-analysis">
+                            <h3 class="text-lg font-semibold mb-3 text-center text-cyan-300">BIỂU ĐỒ KHOẢNG TỶ LỆ</h3>
+                            <div id="interval-transition-analysis" class="space-y-2">
+                                <div class="transition-item">
+                                    <span class="transition-label">D → S:</span>
+                                    <span class="transition-value" id="interval-dtos">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">DD → S:</span>
+                                    <span class="transition-value" id="interval-ddtos">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">S → D:</span>
+                                    <span class="transition-value" id="interval-stod">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">SS → D:</span>
+                                    <span class="transition-value" id="interval-sstod">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">SSS → D:</span>
+                                    <span class="transition-value" id="interval-ssstod">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">DDD → S:</span>
+                                    <span class="transition-value" id="interval-dddtos">0%</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Biểu Đồ Kết Hợp -->
-                    <div class="transition-analysis">
-                        <h3 class="text-lg font-semibold mb-3 text-center text-pink-300">BIỂU ĐỒ KẾT HỢP</h3>
-                        <div id="combined-transition-analysis" class="space-y-2">
-                            <div class="transition-item">
-                                <span class="transition-label">D → S:</span>
-                                <span class="transition-value" id="combined-dtos">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">DD → S:</span>
-                                <span class="transition-value" id="combined-ddtos">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">S → D:</span>
-                                <span class="transition-value" id="combined-stod">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">SS → D:</span>
-                                <span class="transition-value" id="combined-sstod">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">SSS → D:</span>
-                                <span class="transition-value" id="combined-ssstod">0%</span>
-                            </div>
-                            <div class="transition-item">
-                                <span class="transition-label">DDD → S:</span>
-                                <span class="transition-value" id="combined-dddtos">0%</span>
+                        <div class="transition-analysis">
+                            <h3 class="text-lg font-semibold mb-3 text-center text-cyan-300">BIỂU ĐỒ KẾT HỢP</h3>
+                            <div id="combined-transition-analysis" class="space-y-2">
+                                <div class="transition-item">
+                                    <span class="transition-label">D → S:</span>
+                                    <span class="transition-value" id="combined-dtos">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">DD → S:</span>
+                                    <span class="transition-value" id="combined-ddtos">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">S → D:</span>
+                                    <span class="transition-value" id="combined-stod">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">SS → D:</span>
+                                    <span class="transition-value" id="combined-sstod">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">SSS → D:</span>
+                                    <span class="transition-value" id="combined-ssstod">0%</span>
+                                </div>
+                                <div class="transition-item">
+                                    <span class="transition-label">DDD → S:</span>
+                                    <span class="transition-value" id="combined-dddtos">0%</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -710,152 +683,142 @@
                 <div class="mt-6 bg-gray-900 bg-opacity-50 p-4 rounded-xl">
                     <h3 class="text-lg font-semibold mb-4 text-center text-cyan-300">📊 PHÂN TÍCH QUY LUẬT CHUYỂN ĐỔI CHI TIẾT</h3>
                     
-                    <div class="detailed-analysis-grid mb-6">
-                        <!-- Biểu Đồ Khoảng Tỷ Lệ -->
-                        <div class="analysis-section">
-                            <h4 class="analysis-title text-blue-300">BIỂU ĐỒ KHOẢNG TỶ LỆ</h4>
-                            <div class="grid grid-cols-4 gap-2">
-                                <div>
-                                    <div class="analysis-title text-xs">HT1</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">D→S:</span>
-                                            <span id="ht1-interval-dtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">DD→S:</span>
-                                            <span id="ht1-interval-ddtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">S→D:</span>
-                                            <span id="ht1-interval-stod" class="text-gray-300">0%</span>
-                                        </div>
-                                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <!-- HT1 Analysis -->
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <h4 class="text-center text-sm font-semibold mb-2 text-blue-300">HT1</h4>
+                            <div id="ht1-transition-analysis" class="space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">D→S:</span>
+                                    <span id="ht1-dtos" class="text-gray-300">0%</span>
                                 </div>
-                                <div>
-                                    <div class="analysis-title text-xs text-green-300">HT2</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">D→S:</span>
-                                            <span id="ht2-interval-dtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">DD→S:</span>
-                                            <span id="ht2-interval-ddtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">S→D:</span>
-                                            <span id="ht2-interval-stod" class="text-gray-300">0%</span>
-                                        </div>
-                                    </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">DD→S:</span>
+                                    <span id="ht1-ddtos" class="text-gray-300">0%</span>
                                 </div>
-                                <div>
-                                    <div class="analysis-title text-xs text-orange-300">HT3</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">D→S:</span>
-                                            <span id="ht3-interval-dtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">DD→S:</span>
-                                            <span id="ht3-interval-ddtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">S→D:</span>
-                                            <span id="ht3-interval-stod" class="text-gray-300">0%</span>
-                                        </div>
-                                    </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">S→D:</span>
+                                    <span id="ht1-stod" class="text-gray-300">0%</span>
                                 </div>
-                                <div>
-                                    <div class="analysis-title text-xs text-pink-300">HT4</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">D→S:</span>
-                                            <span id="ht4-interval-dtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">DD→S:</span>
-                                            <span id="ht4-interval-ddtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">S→D:</span>
-                                            <span id="ht4-interval-stod" class="text-gray-300">0%</span>
-                                        </div>
+                                <!-- Biểu đồ kết hợp -->
+                                <div class="combined-details">
+                                    <div class="combined-chart-label">Biểu đồ kết hợp</div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">D→S:</span>
+                                        <span id="ht1-combined-dtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">DD→S:</span>
+                                        <span id="ht1-combined-ddtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">S→D:</span>
+                                        <span id="ht1-combined-stod" class="text-cyan-400 text-xs">0%</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Biểu Đồ Kết Hợp -->
-                        <div class="analysis-section">
-                            <h4 class="analysis-title text-pink-300">BIỂU ĐỒ KẾT HỢP</h4>
-                            <div class="grid grid-cols-4 gap-2">
-                                <div>
-                                    <div class="analysis-title text-xs">HT1</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">D→S:</span>
-                                            <span id="ht1-combined-dtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">DD→S:</span>
-                                            <span id="ht1-combined-ddtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">S→D:</span>
-                                            <span id="ht1-combined-stod" class="text-gray-300">0%</span>
-                                        </div>
+                        <!-- HT2 Analysis -->
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <h4 class="text-center text-sm font-semibold mb-2 text-green-300">HT2</h4>
+                            <div id="ht2-transition-analysis" class="space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">D→S:</span>
+                                    <span id="ht2-dtos" class="text-gray-300">0%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">DD→S:</span>
+                                    <span id="ht2-ddtos" class="text-gray-300">0%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">S→D:</span>
+                                    <span id="ht2-stod" class="text-gray-300">0%</span>
+                                </div>
+                                <!-- Biểu đồ kết hợp -->
+                                <div class="combined-details">
+                                    <div class="combined-chart-label">Biểu đồ kết hợp</div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">D→S:</span>
+                                        <span id="ht2-combined-dtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">DD→S:</span>
+                                        <span id="ht2-combined-ddtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">S→D:</span>
+                                        <span id="ht2-combined-stod" class="text-cyan-400 text-xs">0%</span>
                                     </div>
                                 </div>
-                                <div>
-                                    <div class="analysis-title text-xs text-green-300">HT2</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">D→S:</span>
-                                            <span id="ht2-combined-dtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">DD→S:</span>
-                                            <span id="ht2-combined-ddtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">S→D:</span>
-                                            <span id="ht2-combined-stod" class="text-gray-300">0%</span>
-                                        </div>
+                            </div>
+                        </div>
+
+                        <!-- HT3 Analysis -->
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <h4 class="text-center text-sm font-semibold mb-2 text-orange-300">HT3</h4>
+                            <div id="ht3-transition-analysis" class="space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">D→S:</span>
+                                    <span id="ht3-dtos" class="text-gray-300">0%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">DD→S:</span>
+                                    <span id="ht3-ddtos" class="text-gray-300">0%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">S→D:</span>
+                                    <span id="ht3-stod" class="text-gray-300">0%</span>
+                                </div>
+                                <!-- Biểu đồ kết hợp -->
+                                <div class="combined-details">
+                                    <div class="combined-chart-label">Biểu đồ kết hợp</div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">D→S:</span>
+                                        <span id="ht3-combined-dtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">DD→S:</span>
+                                        <span id="ht3-combined-ddtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">S→D:</span>
+                                        <span id="ht3-combined-stod" class="text-cyan-400 text-xs">0%</span>
                                     </div>
                                 </div>
-                                <div>
-                                    <div class="analysis-title text-xs text-orange-300">HT3</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">D→S:</span>
-                                            <span id="ht3-combined-dtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">DD→S:</span>
-                                            <span id="ht3-combined-ddtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">S→D:</span>
-                                            <span id="ht3-combined-stod" class="text-gray-300">0%</span>
-                                        </div>
-                                    </div>
+                            </div>
+                        </div>
+
+                        <!-- HT4 Analysis -->
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <h4 class="text-center text-sm font-semibold mb-2 text-pink-300">HT4</h4>
+                            <div id="ht4-transition-analysis" class="space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">D→S:</span>
+                                    <span id="ht4-dtos" class="text-gray-300">0%</span>
                                 </div>
-                                <div>
-                                    <div class="analysis-title text-xs text-pink-300">HT4</div>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">D→S:</span>
-                                            <span id="ht4-combined-dtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">DD→S:</span>
-                                            <span id="ht4-combined-ddtos" class="text-gray-300">0%</span>
-                                        </div>
-                                        <div class="flex justify-between text-xs">
-                                            <span class="text-gray-400">S→D:</span>
-                                            <span id="ht4-combined-stod" class="text-gray-300">0%</span>
-                                        </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">DD→S:</span>
+                                    <span id="ht4-ddtos" class="text-gray-300">0%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">S→D:</span>
+                                    <span id="ht4-stod" class="text-gray-300">0%</span>
+                                </div>
+                                <!-- Biểu đồ kết hợp -->
+                                <div class="combined-details">
+                                    <div class="combined-chart-label">Biểu đồ kết hợp</div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">D→S:</span>
+                                        <span id="ht4-combined-dtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">DD→S:</span>
+                                        <span id="ht4-combined-ddtos" class="text-cyan-400 text-xs">0%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400 text-xs">S→D:</span>
+                                        <span id="ht4-combined-stod" class="text-cyan-400 text-xs">0%</span>
                                     </div>
                                 </div>
                             </div>
@@ -1197,37 +1160,31 @@
             };
         }
 
-        // =================== PHÂN TÍCH CHUYỂN ĐỔI MỚI ===================
-        function analyzeTransitions(history, chartType = 'interval') {
+        // =================== PHÂN TÍCH CHUYỂN ĐỔI ===================
+        function analyzeTransitions(history) {
             if (!history || history.length < 2) {
                 return {
                     DtoS: 0, DDToS: 0, StoD: 0, SStoD: 0, SSStoD: 0, DDDtoS: 0,
-                    totalD: 0, totalDD: 0, totalS: 0, totalSS: 0, totalSSS: 0, totalDDD: 0,
-                    chartType: chartType
+                    totalD: 0, totalDD: 0, totalS: 0, totalSS: 0, totalSSS: 0, totalDDD: 0
                 };
             }
             
-            // Tạo chuỗi ký tự từ lịch sử
             let patternString = '';
+            let isCorrectHistory = [];
             
             history.forEach(item => {
                 let isCorrect = false;
-                
-                // Xử lý các định dạng khác nhau của dữ liệu
                 if (item.correct !== undefined) {
                     isCorrect = item.correct === true;
                 } else if (item.predicted !== undefined && item.actual !== undefined) {
                     isCorrect = item.predicted === item.actual;
                 } else if (item.isCorrect !== undefined) {
                     isCorrect = item.isCorrect === true;
-                } else if (typeof item === 'boolean') {
-                    isCorrect = item;
                 }
                 
-                patternString += isCorrect ? 'S' : 'D'; // S = Sai (Đỏ), D = Đúng (Xanh)
+                patternString += isCorrect ? 'S' : 'D';
+                isCorrectHistory.push(isCorrect);
             });
-            
-            console.log(`Phân tích ${chartType}: Chuỗi = ${patternString}, Độ dài = ${patternString.length}`);
             
             let counts = {
                 DtoS: 0, DDToS: 0, StoD: 0, SStoD: 0, SSStoD: 0, DDDtoS: 0
@@ -1236,210 +1193,84 @@
                 D: 0, DD: 0, S: 0, SS: 0, SSS: 0, DDD: 0
             };
             
-            // Đếm các mẫu chuyển đổi
             for (let i = 0; i < patternString.length - 1; i++) {
                 const current = patternString[i];
                 const next = patternString[i + 1];
                 
-                // Đếm các trường hợp đơn lẻ
-                if (current === 'D') {
-                    occurrences.D++;
-                    if (next === 'S') counts.DtoS++;
-                }
+                if (current === 'D') occurrences.D++;
+                if (current === 'S') occurrences.S++;
                 
-                if (current === 'S') {
-                    occurrences.S++;
-                    if (next === 'D') counts.StoD++;
-                }
+                if (current === 'D' && next === 'S') counts.DtoS++;
+                if (current === 'S' && next === 'D') counts.StoD++;
                 
-                // Kiểm tra cho 2 ký tự liên tiếp
-                if (i < patternString.length - 1) {
-                    const twoChar = patternString.substring(i, i + 2);
-                    if (twoChar === 'DD') {
-                        occurrences.DD++;
-                        if (i + 2 < patternString.length && patternString[i + 2] === 'S') {
-                            counts.DDToS++;
-                        }
-                    }
-                    if (twoChar === 'SS') {
-                        occurrences.SS++;
-                        if (i + 2 < patternString.length && patternString[i + 2] === 'D') {
-                            counts.SStoD++;
-                        }
-                    }
-                }
-                
-                // Kiểm tra cho 3 ký tự liên tiếp
                 if (i < patternString.length - 2) {
+                    const twoChar = patternString.substring(i, i + 2);
                     const threeChar = patternString.substring(i, i + 3);
-                    if (threeChar === 'SSS') {
-                        occurrences.SSS++;
-                        if (i + 3 < patternString.length && patternString[i + 3] === 'D') {
-                            counts.SSStoD++;
-                        }
-                    }
-                    if (threeChar === 'DDD') {
-                        occurrences.DDD++;
-                        if (i + 3 < patternString.length && patternString[i + 3] === 'S') {
-                            counts.DDDtoS++;
-                        }
-                    }
+                    
+                    if (twoChar === 'DD') occurrences.DD++;
+                    if (twoChar === 'SS') occurrences.SS++;
+                    
+                    if (threeChar === 'SSS') occurrences.SSS++;
+                    if (threeChar === 'DDD') occurrences.DDD++;
+                    
+                    if (twoChar === 'DD' && patternString[i + 2] === 'S') counts.DDToS++;
+                    if (twoChar === 'SS' && patternString[i + 2] === 'D') counts.SStoD++;
+                    if (threeChar === 'SSS' && patternString[i + 3] === 'D') counts.SSStoD++;
+                    if (threeChar === 'DDD' && patternString[i + 3] === 'S') counts.DDDtoS++;
                 }
             }
             
-            // Tính tỷ lệ phần trăm
-            const calculatePercentage = (count, total) => {
-                return total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-            };
-            
-            const result = {
-                DtoS: calculatePercentage(counts.DtoS, occurrences.D),
-                DDToS: calculatePercentage(counts.DDToS, occurrences.DD),
-                StoD: calculatePercentage(counts.StoD, occurrences.S),
-                SStoD: calculatePercentage(counts.SStoD, occurrences.SS),
-                SSStoD: calculatePercentage(counts.SSStoD, occurrences.SSS),
-                DDDtoS: calculatePercentage(counts.DDDtoS, occurrences.DDD),
+            return {
+                DtoS: occurrences.D > 0 ? (counts.DtoS / occurrences.D * 100).toFixed(1) : 0,
+                DDToS: occurrences.DD > 0 ? (counts.DDToS / occurrences.DD * 100).toFixed(1) : 0,
+                StoD: occurrences.S > 0 ? (counts.StoD / occurrences.S * 100).toFixed(1) : 0,
+                SStoD: occurrences.SS > 0 ? (counts.SStoD / occurrences.SS * 100).toFixed(1) : 0,
+                SSStoD: occurrences.SSS > 0 ? (counts.SSStoD / occurrences.SSS * 100).toFixed(1) : 0,
+                DDDtoS: occurrences.DDD > 0 ? (counts.DDDtoS / occurrences.DDD * 100).toFixed(1) : 0,
                 totalD: occurrences.D,
                 totalDD: occurrences.DD,
                 totalS: occurrences.S,
                 totalSS: occurrences.SS,
                 totalSSS: occurrences.SSS,
-                totalDDD: occurrences.DDD,
-                chartType: chartType,
-                rawData: {
-                    counts,
-                    occurrences,
-                    patternString
-                }
+                totalDDD: occurrences.DDD
             };
-            
-            console.log(`Kết quả phân tích ${chartType}:`, result);
-            return result;
         }
 
-        // =================== CẬP NHẬT CHI TIẾT HỆ THỐNG VỚI DỮ LIỆU RIÊNG BIỆT ===================
-        function updateSystemDetails(system, details) {
-            if (!details) return;
-            
-            // Đảm bảo dữ liệu riêng biệt cho hai biểu đồ
-            masterState.systemDetails[system] = {
-                verdict: details.verdict || null,
-                chot: details.chot || null,
-                range: details.range || null,
-                rangeAccuracy: details.rangeAccuracy || null,
-                // Biểu đồ khoảng tỷ lệ - từ phân tích khoảng tỷ lệ
-                intervalHistory: details.intervalHistory || [],
-                // Biểu đồ kết hợp - từ lịch sử chốt
-                combinedHistory: masterState[`${system}ChotHistory`] || []
-            };
-            
-            console.log(`${system} - Dữ liệu biểu đồ:`, {
-                intervalLength: masterState.systemDetails[system].intervalHistory.length,
-                combinedLength: masterState.systemDetails[system].combinedHistory.length
-            });
-            
-            updateSystemDetailsUI(system);
-        }
-
-        // =================== CẬP NHẬT UI VỚI PHÂN TÍCH CHI TIẾT CẢ HAI BIỂU ĐỒ ===================
         function updateTransitionAnalysisUI() {
             const systems = ['ht1', 'ht2', 'ht3', 'ht4'];
             
             systems.forEach(system => {
-                const details = masterState.systemDetails[system];
-                if (!details) return;
+                const analysis = masterState.transitionAnalysis[system];
                 
-                // Phân tích riêng cho từng biểu đồ
-                const intervalHistory = details.intervalHistory || [];
-                const combinedHistory = details.combinedHistory || [];
-                
-                // Phân tích biểu đồ khoảng tỷ lệ
-                if (intervalHistory.length >= 2) {
-                    const intervalAnalysis = analyzeTransitions(intervalHistory, 'interval');
-                    masterState.transitionAnalysis[system] = {
-                        ...masterState.transitionAnalysis[system],
-                        interval: intervalAnalysis
-                    };
+                if (analysis) {
+                    // Cập nhật cho biểu đồ khoảng tỷ lệ
+                    document.getElementById(`${system}-dtos`).textContent = `${analysis.interval ? analysis.interval.DtoS : 0}%`;
+                    document.getElementById(`${system}-ddtos`).textContent = `${analysis.interval ? analysis.interval.DDToS : 0}%`;
+                    document.getElementById(`${system}-stod`).textContent = `${analysis.interval ? analysis.interval.StoD : 0}%`;
                     
-                    // Cập nhật UI cho biểu đồ khoảng tỷ lệ
-                    updateIntervalTransitionUI(system, intervalAnalysis);
-                }
-                
-                // Phân tích biểu đồ kết hợp
-                if (combinedHistory.length >= 2) {
-                    const combinedAnalysis = analyzeTransitions(combinedHistory, 'combined');
-                    masterState.transitionAnalysis[system] = {
-                        ...masterState.transitionAnalysis[system],
-                        combined: combinedAnalysis
-                    };
+                    // Cập nhật cho biểu đồ kết hợp
+                    if (analysis.combined) {
+                        document.getElementById(`${system}-combined-dtos`).textContent = `${analysis.combined.DtoS}%`;
+                        document.getElementById(`${system}-combined-ddtos`).textContent = `${analysis.combined.DDToS}%`;
+                        document.getElementById(`${system}-combined-stod`).textContent = `${analysis.combined.StoD}%`;
+                    }
                     
-                    // Cập nhật UI cho biểu đồ kết hợp
-                    updateCombinedTransitionUI(system, combinedAnalysis);
+                    // Cập nhật chuỗi hiện tại
+                    const intervalHistory = masterState.systemDetails[system]?.intervalHistory || [];
+                    const combinedHistory = masterState.systemDetails[system]?.combinedHistory || [];
+                    
+                    const intervalStreak = findCurrentStreakFromEnd(intervalHistory);
+                    const combinedStreak = findCurrentStreakFromEnd(combinedHistory);
+                    
+                    document.getElementById(`${system}-interval-streak`).textContent = 
+                        intervalStreak.length > 0 ? `${intervalStreak.length}${intervalStreak.color === 'green' ? '✅' : '❌'}` : '-';
+                    document.getElementById(`${system}-combined-streak`).textContent = 
+                        combinedStreak.length > 0 ? `${combinedStreak.length}${combinedStreak.color === 'green' ? '✅' : '❌'}` : '-';
                 }
-                
-                // Cập nhật chuỗi hiện tại
-                updateCurrentStreakDisplay(system);
             });
             
             // Cập nhật tổng hợp quy luật chuyển đổi
             updateOverallTransitionAnalysis();
-        }
-
-        function updateIntervalTransitionUI(system, analysis) {
-            if (!analysis) return;
-            
-            // Cập nhật các giá trị cho biểu đồ khoảng tỷ lệ
-            const elements = {
-                dtos: document.getElementById(`${system}-interval-dtos`),
-                ddtos: document.getElementById(`${system}-interval-ddtos`),
-                stod: document.getElementById(`${system}-interval-stod`)
-            };
-            
-            // Cập nhật các giá trị nếu phần tử tồn tại
-            if (elements.dtos) elements.dtos.textContent = `${analysis.DtoS}%`;
-            if (elements.ddtos) elements.ddtos.textContent = `${analysis.DDToS}%`;
-            if (elements.stod) elements.stod.textContent = `${analysis.StoD}%`;
-        }
-
-        function updateCombinedTransitionUI(system, analysis) {
-            if (!analysis) return;
-            
-            // Cập nhật các giá trị cho biểu đồ kết hợp
-            const elements = {
-                dtos: document.getElementById(`${system}-combined-dtos`),
-                ddtos: document.getElementById(`${system}-combined-ddtos`),
-                stod: document.getElementById(`${system}-combined-stod`)
-            };
-            
-            // Cập nhật các giá trị nếu phần tử tồn tại
-            if (elements.dtos) elements.dtos.textContent = `${analysis.DtoS}%`;
-            if (elements.ddtos) elements.ddtos.textContent = `${analysis.DDToS}%`;
-            if (elements.stod) elements.stod.textContent = `${analysis.StoD}%`;
-        }
-
-        function updateCurrentStreakDisplay(system) {
-            const details = masterState.systemDetails[system];
-            if (!details) return;
-            
-            const intervalHistory = details.intervalHistory || [];
-            const combinedHistory = details.combinedHistory || [];
-            
-            const intervalStreak = findCurrentStreakFromEnd(intervalHistory);
-            const combinedStreak = findCurrentStreakFromEnd(combinedHistory);
-            
-            // Cập nhật hiển thị chuỗi
-            const intervalElement = document.getElementById(`${system}-interval-streak`);
-            const combinedElement = document.getElementById(`${system}-combined-streak`);
-            
-            if (intervalElement) {
-                intervalElement.textContent = intervalStreak.length > 0 ? 
-                    `${intervalStreak.length}${intervalStreak.color === 'green' ? '✅' : '❌'}` : '-';
-            }
-            
-            if (combinedElement) {
-                combinedElement.textContent = combinedStreak.length > 0 ? 
-                    `${combinedStreak.length}${combinedStreak.color === 'green' ? '✅' : '❌'}` : '-';
-            }
         }
 
         function updateOverallTransitionAnalysis() {
@@ -1565,18 +1396,16 @@
                 const details = masterState.systemDetails[system];
                 if (!details) continue;
                 
-                // Lấy dữ liệu từ hai biểu đồ RIÊNG BIỆT
-                const intervalHistory = details.intervalHistory || [];
-                const combinedHistory = details.combinedHistory || [];
+                // Lấy dữ liệu từ HAI BIỂU ĐỒ RIÊNG BIỆT
+                const intervalHistory = details.intervalHistory || [];        // Biểu đồ khoảng tỷ lệ
+                const combinedHistory = details.combinedHistory || [];        // Biểu đồ kết hợp
                 
-                console.log(`${system} - Độ dài dữ liệu:`, {
-                    interval: intervalHistory.length,
-                    combined: combinedHistory.length
-                });
+                console.log(`${system} - Interval History:`, intervalHistory.length, "items");
+                console.log(`${system} - Combined History:`, combinedHistory.length, "items");
                 
                 // Phân tích chuyển đổi RIÊNG CHO TỪNG BIỂU ĐỒ
-                const intervalTransitions = analyzeTransitions(intervalHistory, 'interval');
-                const combinedTransitions = analyzeTransitions(combinedHistory, 'combined');
+                const intervalTransitions = analyzeTransitions(intervalHistory);
+                const combinedTransitions = analyzeTransitions(combinedHistory);
                 
                 // Lưu phân tích
                 masterState.transitionAnalysis[system] = {
@@ -1601,12 +1430,8 @@
                         confidence,
                         intervalStreak,
                         combinedStreak,
-                        details,
-                        intervalTransitions,
-                        combinedTransitions
+                        details
                     });
-                    
-                    console.log(`${system} - Quyết định: ${systemDecision}, Độ tin cậy: ${confidence}%`);
                 }
             }
             
@@ -2031,9 +1856,9 @@
 
                 case 'export_data':
                     if (data.sessions) {
-                        // Lưu sessions từ hệ thống con
-                        Object.assign(masterState.sessions, data.sessions);
-                        saveMasterSessions();
+                        // Lưu dữ liệu session từ hệ thống con
+                        // Không cần cập nhật masterState.sessions vì mỗi hệ thống có dữ liệu riêng
+                        console.log(`[Master] Received export data from ${system}`);
                     }
                     break;
             }
@@ -2557,13 +2382,14 @@
         function updateSystemDetails(system, details) {
             if (!details) return;
             
+            // Sửa lỗi: Tách biệt intervalHistory và combinedHistory
             masterState.systemDetails[system] = {
                 verdict: details.verdict || null,
                 chot: details.chot || null,
                 range: details.range || null,
                 rangeAccuracy: details.rangeAccuracy || null,
                 intervalHistory: details.intervalHistory || [],
-                combinedHistory: masterState[`${system}ChotHistory`] || [] // Sử dụng chotHistory cho biểu đồ kết hợp
+                combinedHistory: details.combinedHistory || masterState[`${system}ChotHistory`] || [] // Sử dụng chotHistory nếu không có combinedHistory
             };
             
             updateSystemDetailsUI(system);
@@ -2646,7 +2472,7 @@
 
         // =================== CHART RENDERING ===================
         function renderCombinedChart(system) {
-            const history = masterState[`${system}ChotHistory`];
+            const history = masterState.systemDetails[system]?.combinedHistory || masterState[`${system}ChotHistory`] || [];
             const chartEl = document.getElementById(`${system}-combined-chart`);
             
             if (!chartEl) return;
