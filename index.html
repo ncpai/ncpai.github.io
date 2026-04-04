@@ -186,7 +186,7 @@
     <div id="toast-container"></div>
     <div id="warning-container"></div>
 
-    <!-- Pattern DB Modal (Thêm mới) -->
+    <!-- Pattern DB Modal -->
     <div id="pattern-db-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-gray-800 border border-yellow-500/30 rounded-2xl w-11/12 max-w-4xl p-6 shadow-[0_0_30px_rgba(202,138,4,0.15)] flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
@@ -278,7 +278,7 @@
                             <input type="range" id="minConfidenceSlider" min="50" max="100" value="100" class="w-full">
                         </div>
                         <div class="text-xs text-gray-400 italic bg-gray-900 p-2 rounded border border-gray-700">
-                            * AI chỉ đọc dữ liệu duy nhất từ khoảng tỷ lệ 90-100% của biểu đồ HT1, đem so khớp với kho mẫu chuẩn.
+                            * AI CHỈ ĐƯỢC KÍCH HOẠT khi Khoảng tỷ lệ HT1 đạt chính xác 90-100%. Lệnh gốc ưu tiên theo 🧠 Phán Quyết.
                         </div>
                         <!-- Nút mở modal chỉnh sửa mẫu -->
                         <button onclick="openPatternDBModal()" class="w-full mt-2 py-2 bg-yellow-600/20 text-yellow-400 border border-yellow-500/50 hover:bg-yellow-600 hover:text-black rounded-lg text-sm font-bold transition-all flex justify-center items-center gap-2">
@@ -452,7 +452,7 @@
                         <!-- Biểu đồ khoảng tỷ lệ (NGUỒN DỮ LIỆU CỦA AI) -->
                         <div class="bg-gray-900 p-3 rounded-lg mt-4 border border-yellow-500/30 relative">
                             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">NGUỒN DỮ LIỆU AI</div>
-                            <h4 class="text-center text-sm text-yellow-300 mb-2 font-bold">Biểu đồ khoảng tỷ lệ 90-100%</h4>
+                            <h4 class="text-center text-sm text-yellow-300 mb-2 font-bold">Biểu đồ khoảng tỷ lệ (Chỉ lọc 90-100%)</h4>
                             <div id="ht1-interval-chart" class="history-chart" style="height: 60px;"></div>
                             <div id="ht1-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
                         </div>
@@ -596,14 +596,14 @@
                     <div class="bg-gray-900 bg-opacity-60 p-5 rounded-xl border border-gray-700">
                         <h3 class="text-lg font-bold mb-4 text-center text-indigo-300 border-b border-gray-700 pb-2">Thông Số Não Bộ AI</h3>
                         <div class="space-y-4 text-sm">
-                            <div class="flex justify-between items-center"><span class="text-gray-400">Nguồn cấp dữ liệu:</span><span class="font-bold text-blue-400">Biểu đồ HT1 (90-100%)</span></div>
+                            <div class="flex justify-between items-center"><span class="text-gray-400">Nguồn cấp dữ liệu:</span><span class="font-bold text-blue-400">HT1 (Khi đạt 90-100%)</span></div>
                             <div class="flex justify-between items-center"><span class="text-gray-400">Kho dữ liệu mẫu:</span><span class="font-bold text-green-400"><span id="db-pattern-display-count">102</span> Gốc <span id="learned-count-display" class="text-yellow-400 text-xs ml-1">(+0 Tự học)</span></span></div>
                             <div class="flex justify-between items-center"><span class="text-gray-400">Số lượng Bit soi:</span><span id="display-ngram" class="font-bold text-yellow-300">Tất cả (3-9)</span></div>
                             <div class="flex justify-between items-center"><span class="text-gray-400">Yêu cầu lặp tối thiểu:</span><span id="display-occur" class="font-bold text-pink-400">10 lần</span></div>
                             <div class="flex justify-between items-center"><span class="text-gray-400">Độ tin cậy tối thiểu:</span><span id="display-conf" class="font-bold text-purple-400">100%</span></div>
                             <div class="flex justify-between items-center"><span class="text-gray-400">Trạng Thái Quét:</span><span id="priority-system" class="font-bold text-cyan-400 text-xs">CHỜ TÍN HIỆU</span></div>
                             <div class="mt-4 pt-3 border-t border-gray-700 text-xs text-gray-500 italic">
-                                *AI sẽ liên tục học tập từ các chuỗi mới của HT1 sau mỗi ván để tăng cường độ chính xác.
+                                *Hệ thống dịch lệnh D/S qua 🧠 Phán Quyết. NGƯỢC = Kỳ vọng S(Đỏ). THEO = Kỳ vọng D(Xanh).
                             </div>
                         </div>
                     </div>
@@ -752,7 +752,7 @@
 
         <!-- Footer -->
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 4.1 Pro</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 4.5 Pro</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
@@ -1076,6 +1076,14 @@
                 return;
             }
 
+            // KIỂM TRA ĐIỀU KIỆN 1: Khoảng tỷ lệ HT1 PHẢI LÀ 90-100% MỚI KÍCH HOẠT
+            const currentRange = ht1Details.range || '';
+            if (!currentRange.includes('90') && !currentRange.includes('100')) {
+                updateFinalDecisionDisplay(null, `BỎ QUA DO KHOẢNG TỶ LỆ HT1 CHƯA ĐẠT 90-100% (Hiện tại đang là ${currentRange || 'Chưa rõ'}). Hệ thống đang chờ nhịp đẹp...`, "KHÔNG ĐẠT ĐIỀU KIỆN RANGE");
+                return;
+            }
+
+            // Dịch lịch sử HT1 thành chuỗi D/S
             let dsSequence = "";
             ht1Details.intervalHistory.forEach(item => {
                 const isCorrect = item.correct === true || item.isCorrect === true || item.predicted === item.actual;
@@ -1094,38 +1102,49 @@
 
             const bestMatch = findBestMatch(dsSequence, patternConfig.ngram, patternConfig.minOccurrences, patternConfig.minConfidence);
 
-            // Xử lý thông báo theo đúng Requirement 4
             if (!bestMatch) {
                 updateFinalDecisionDisplay(null, `<span class="text-red-400 font-bold tracking-widest">${currentBitCluster}</span> CHƯA CÓ CỤM BIT TIN CẬY NÀO NÊN BỎ QUA.`, "BỎ QUA TÍN HIỆU");
                 return;
             }
 
-            const ht1CurrentSignal = ht1Details.chot || ht1Details.verdict;
-            let originalSignal = null;
-            if (ht1CurrentSignal) {
-                if (ht1CurrentSignal.includes('P')) originalSignal = 'P';
-                else if (ht1CurrentSignal.includes('B')) originalSignal = 'B';
+            // KIỂM TRA ĐIỀU KIỆN 2: Lấy lệnh gốc từ 🧠 Phán Quyết thay vì Chốt Phán Quyết
+            const ht1VerdictRaw = ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
+            
+            let baseSignal = null;
+            let impliedResult = 'D'; // Mặc định là THEO (Cột Xanh / D)
+
+            // Tìm tín hiệu gốc P hoặc B
+            if (ht1VerdictRaw.includes('P')) baseSignal = 'P';
+            else if (ht1VerdictRaw.includes('B')) baseSignal = 'B';
+
+            // Nếu Phán Quyết có chữ NGƯỢC, nghĩa là nó đang kỳ vọng ra Cột Đỏ (S)
+            if (ht1VerdictRaw.includes('NGƯỢC')) {
+                impliedResult = 'S'; 
             }
 
-            if (!originalSignal) {
-                updateFinalDecisionDisplay(null, `ĐÃ PHÁT HIỆN CỤM BIT TƯƠNG TỰ VỚI TỈ LỆ ${bestMatch.confidence.toFixed(0)}% VỚI ${bestMatch.total} LẦN CHỐT ${bestMatch.target}. Nhưng HT1 chưa báo lệnh.`, "CHỜ LỆNH GỐC HT1");
+            if (!baseSignal) {
+                updateFinalDecisionDisplay(null, `ĐÃ PHÁT HIỆN CỤM BIT TƯƠNG TỰ VỚI TỈ LỆ ${bestMatch.confidence.toFixed(0)}% VỚI ${bestMatch.total} LẦN CHỐT ${bestMatch.target}. Nhưng chưa có lệnh tại 🧠 Phán Quyết.`, "CHỜ LỆNH TỪ PHÁN QUYẾT");
                 return;
             }
 
-            let decision = '';
-            let actionText = '';
+            // Dịch lệnh theo logic: So sánh Target của AI với ImpliedResult của Phán Quyết
+            let finalDecision = '';
             
-            if (bestMatch.target === 'D') {
-                decision = originalSignal; 
-                actionText = 'ĐÁNH THUẬN';
+            if (bestMatch.target === impliedResult) {
+                // AI muốn kết quả trùng với kỳ vọng của Phán Quyết -> Giữ nguyên Lệnh Gốc
+                finalDecision = baseSignal; 
             } else {
-                decision = originalSignal === 'P' ? 'B' : 'P'; 
-                actionText = 'ĐÁNH BẺ (NGƯỢC)';
+                // AI muốn kết quả khác với kỳ vọng của Phán Quyết -> Đánh ngược lại Lệnh Gốc
+                finalDecision = (baseSignal === 'P') ? 'B' : 'P'; 
             }
 
-            const reason = `ĐÃ PHÁT HIỆN CỤM BIT TƯƠNG TỰ VỚI TỈ LỆ <span class="text-green-400 font-bold">${bestMatch.confidence.toFixed(0)}%</span> VỚI <span class="text-pink-400 font-bold">${bestMatch.total}</span> LẦN CHỐT <span class="text-blue-400 font-bold">${bestMatch.target}</span><br/><br/>➜ Quyết định <b>${actionText}</b> lệnh hiện tại HT1 (<span class="text-${originalSignal==='P'?'blue':'red'}-400 font-bold">${originalSignal}</span>) ➜ Chốt <b>${decision === 'P' ? 'PLAYER' : 'BANKER'}</b>.`;
+            // Soạn thông báo giải thích chi tiết
+            let impliedText = impliedResult === 'S' ? 'CỘT ĐỎ (NGƯỢC)' : 'CỘT XANH (THEO)';
+            let actionText = bestMatch.target === impliedResult ? 'GIỮ NGUYÊN' : 'BẺ NGƯỢC';
+
+            const reason = `ĐÃ PHÁT HIỆN CỤM BIT TƯƠNG TỰ VỚI TỈ LỆ <span class="text-green-400 font-bold">${bestMatch.confidence.toFixed(0)}%</span> VỚI <span class="text-pink-400 font-bold">${bestMatch.total}</span> LẦN CHỐT <span class="text-blue-400 font-bold">${bestMatch.target}</span><br/><br/>➜ Xem 🧠 Phán Quyết: <b>${ht1VerdictRaw}</b> (Kỳ vọng ${impliedText}).<br/>➜ AI KẾT LUẬN: Cần ra <b>CỘT ${bestMatch.target === 'D' ? 'XANH' : 'ĐỎ'} (${bestMatch.target})</b> ➜ Phải ${actionText} Lệnh ➜ <b>${finalDecision === 'P' ? 'PLAYER' : 'BANKER'}</b>.`;
             
-            updateFinalDecisionDisplay(decision, reason, `AI MATCH: ${bestMatch.confidence.toFixed(0)}%`);
+            updateFinalDecisionDisplay(finalDecision, reason, `AI KÍCH HOẠT: ${bestMatch.confidence.toFixed(0)}%`);
         }
 
         function updateFinalDecisionDisplay(decision, reason, prioritySystem) {
@@ -1435,7 +1454,7 @@
                 broadcastToAll('get_accuracy');
                 broadcastToAll('get_chot_history');
                 broadcastToAll('get_system_details');
-                setTimeout(calculateFinalDecision, 200); // Thêm dòng này để backup chắc chắn AI sẽ quét lại UI sau khi thêm số
+                setTimeout(calculateFinalDecision, 200); 
             }, 800);
             showToast(`Đã lưu kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'}`, 'success');
         }
@@ -1477,7 +1496,7 @@
                 
                 updateFinalDecisionStats();
                 saveFinalDecisionHistory();
-                calculateFinalDecision(); // Reset lại UI
+                calculateFinalDecision(); 
                 showToast('Lịch sử đã được xoá trắng', 'info');
             }
         }
@@ -1767,4 +1786,5 @@
     </script>
 </body>
 </html>
+
 
