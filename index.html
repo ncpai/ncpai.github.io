@@ -179,11 +179,11 @@
             </div>
         </header>
 
-        <!-- MAIN LAYOUT -->
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+        <!-- MAIN LAYOUT (Sửa thành grid 4 cột: 1/4 và 3/4) -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
             
-            <!-- LEFT SIDEBAR: CONTROLS (3/12 columns on XL) -->
-            <div class="xl:col-span-3 space-y-6">
+            <!-- LEFT SIDEBAR: CONTROLS (1/4 columns on LG) -->
+            <div class="lg:col-span-1 space-y-6">
                 
                 <!-- Nhập Lệnh -->
                 <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-xl">
@@ -227,10 +227,10 @@
                         <span class="text-slate-400 italic">Hệ thống đang quét tín hiệu...</span>
                     </div>
 
-                    <!-- MỚI THÊM: Biểu đồ lịch sử AI (Mini) -->
+                    <!-- Lịch sử AI (Mini) Đã sửa lỗi chiều cao hiển thị -->
                     <div class="bg-slate-950 p-3 rounded-xl mt-3 shadow-inner border border-slate-800">
                         <h4 class="text-center text-[10px] text-slate-500 mb-2 uppercase font-bold tracking-wider">Lịch sử chốt lệnh AI</h4>
-                        <div id="mini-final-decision-chart" class="history-chart h-[60px]">
+                        <div id="mini-final-decision-chart" class="history-chart" style="height: 60px !important;">
                             <p class="text-slate-600 text-xs text-center w-full pt-2">Trống</p>
                         </div>
                     </div>
@@ -316,8 +316,8 @@
                 
             </div>
 
-            <!-- RIGHT SIDE: IFRAMES & DECISION (9/12 columns on XL) -->
-            <div class="xl:col-span-9 flex flex-col gap-6 lg:gap-8">
+            <!-- RIGHT SIDE: IFRAMES & DECISION (3/4 columns on LG) -->
+            <div class="lg:col-span-3 flex flex-col gap-6 lg:gap-8">
                 
                 <!-- 4 IFRAMES GRID -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
@@ -598,7 +598,8 @@
                                 <div class="flex items-center gap-1.5"><div class="w-3 h-3 bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">WIN</span></div>
                                 <div class="flex items-center gap-1.5"><div class="w-3 h-3 bg-red-500 rounded-sm shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LOSE</span></div>
                             </div>
-                            <div id="final-decision-chart" class="history-chart mt-6 h-[80px]">
+                            <!-- Khung chứa Chart chính -->
+                            <div id="final-decision-chart" class="history-chart mt-6" style="height: 80px;">
                                 <p class="text-slate-600 text-center text-sm w-full pt-4">Chưa có lịch sử khớp lệnh</p>
                             </div>
                         </div>
@@ -1139,7 +1140,7 @@
         });
 
         /* =========================================================================
-           4. LƯU TRỮ VÀ VẼ LỊCH SỬ CHỐT LỆNH
+           4. LƯU TRỮ VÀ VẼ LỊCH SỬ CHỐT LỆNH (ĐÃ FIX LỖI QUICK VIEW CHART)
            ========================================================================= */
         function addFinalDecisionToHistory(actualResult) {
             if (!masterState.lastDecision) return; 
@@ -1176,11 +1177,12 @@
                 return; 
             }
             
+            /* Thêm h-full vào thẻ wrapper flex để fix lỗi sập layout ở mini chart */
             let chartHTML = '<div class="flex items-end justify-start h-full gap-[3px] min-w-max px-1">'; 
             history.forEach((item, index) => {
                 const isCorrect = item.correct;
                 const barClass = isCorrect ? 'h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'h-[30%] bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]';
-                chartHTML += `<div class="w-2 flex items-end"><div class="w-full rounded-[1px] ${barClass}" title="Ván ${index + 1}: Đánh ${item.decision} - Về ${item.actual} -> ${isCorrect ? 'WIN' : 'LOSE'}"></div></div>`;
+                chartHTML += `<div class="w-2 flex items-end h-full"><div class="w-full rounded-[1px] ${barClass}" title="Ván ${index + 1}: Đánh ${item.decision} - Về ${item.actual} -> ${isCorrect ? 'WIN' : 'LOSE'}"></div></div>`;
             });
             chartHTML += '</div>';
             
@@ -1560,5 +1562,4 @@
     </script>
 </body>
 </html>
-
 
