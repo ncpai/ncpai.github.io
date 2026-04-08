@@ -883,7 +883,6 @@
             initializeOriginalPatternDB();
             closePatternDBModal();
             showToast('Đã lưu và dạy lại AI thành công!', 'success');
-            // Gọi tính toán ngay lập tức không delay
             calculateFinalDecision();
         }
 
@@ -993,6 +992,7 @@
                 ht4: { verdict: null, chot: null, range: null, rangeAccuracy: null, intervalHistory: [] }
             },
             finalDecisionHistory: [],
+            pendingResultToEvaluate: null, // MỚI: Biến lưu trữ chờ vẽ xong biểu đồ để đối chiếu
             
             lastLearnedGameCount: 0,
             totalLearnedPatterns: 0
@@ -1358,9 +1358,16 @@
                     if (data.prediction) masterState.predictions[system] = data.prediction;
                     break;
                 case 'system_details_update':
+                    // 1. VẼ BIỂU ĐỒ KHOẢNG TỈ LỆ LÊN MÀN HÌNH
                     updateSystemDetails(system, data.details);
-                    // Thực thi tính toán chốt ngay lập tức (Đồng bộ, không chờ) thay vì setTimeout 100ms
+                    
                     if (system === 'ht1') {
+                        // 2. KHI BIỂU ĐỒ ĐÃ VẼ XONG -> TÍNH TOÁN ĐỐI CHIẾU VÀ LƯU LỊCH SỬ NGAY LẬP TỨC
+                        if (masterState.pendingResultToEvaluate !== null) {
+                            addFinalDecisionToHistory(masterState.pendingResultToEvaluate);
+                            masterState.pendingResultToEvaluate = null;
+                        }
+                        // 3. TÍNH TOÁN LỆNH CHỐT CHO VÁN TIẾP THEO
                         learnFromNewData(data.details.intervalHistory); 
                         calculateFinalDecision();       
                     }
@@ -1477,8 +1484,11 @@
             
             saveMasterSessions();
             updateCurrentSessionInfo();
+            
+            // LƯU KẾT QUẢ TẠM ĐỂ CHỜ HT1 VẼ BIỂU ĐỒ RỒI MỚI ĐỐI CHIẾU
+            masterState.pendingResultToEvaluate = result; 
+            
             broadcastToAll('add_result', result);
-            addFinalDecisionToHistory(result);
             
             // Ép các hệ thống con trả về dữ liệu đối chiếu ngay lập tức (không delay)
             broadcastToAll('get_accuracy');
@@ -1504,6 +1514,8 @@
                 saveFinalDecisionHistory();
             }
             
+            masterState.pendingResultToEvaluate = null; // Xoá bỏ lệnh chờ đối chiếu
+            
             // Gửi lệnh lấy dữ liệu ngay lập tức
             broadcastToAll('get_accuracy'); 
             broadcastToAll('get_chot_history'); 
@@ -1520,6 +1532,7 @@
                 broadcastToAll('clear_history');
                 
                 masterState.finalDecisionHistory = [];
+                masterState.pendingResultToEvaluate = null;
                 initializeOriginalPatternDB();
                 
                 updateFinalDecisionStats();
@@ -1576,6 +1589,7 @@
             const session = masterState.sessions[masterState.currentSessionId];
             
             initializeOriginalPatternDB();
+            masterState.pendingResultToEvaluate = null;
             
             broadcastToAll('load_session', { id: masterState.currentSessionId, name: session.name, history: session.history });
             document.getElementById('sync-status').textContent = '🔄 Đang đồng bộ...';
@@ -1591,6 +1605,7 @@
             if (confirm('Xoá tất cả phiên làm việc và reset toàn bộ hệ thống?')) {
                 masterState.sessions = {}; masterState.currentSessionId = null; masterState.currentSessionName = 'Chưa chọn';
                 masterState.finalDecisionHistory = []; 
+                masterState.pendingResultToEvaluate = null;
                 initializeOriginalPatternDB();
                 
                 localStorage.removeItem('vanSuNhuY_sessions_v2'); localStorage.removeItem('vanSuNhuY_finalDecisionHistory_v5');
@@ -1815,3 +1830,4 @@
     </script>
 </body>
 </html>
+
