@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -85,11 +86,10 @@
             border-color: #8b5cf6;
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
         }
-        /* YÊU CẦU 3: SỬA LẠI CHART CHO PHÉP SCROLL NGANG */
         .history-chart {
             display: flex;
             align-items: flex-end;
-            justify-content: flex-start; /* Sửa từ center sang flex-start để cuộn mượt */
+            justify-content: flex-start;
             gap: 2px;
             height: 60px;
             padding: 5px 0 8px 0;
@@ -98,8 +98,8 @@
             scroll-behavior: smooth;
         }
         .history-bar {
-            flex-shrink: 0; /* Ngăn chặn việc tự động bóp nhỏ cột */
-            width: 4px; /* Tăng độ rộng cột cho dễ nhìn */
+            flex-shrink: 0;
+            width: 4px;
             border-radius: 1px;
         }
         .history-bar-correct {
@@ -883,7 +883,8 @@
             initializeOriginalPatternDB();
             closePatternDBModal();
             showToast('Đã lưu và dạy lại AI thành công!', 'success');
-            setTimeout(calculateFinalDecision, 200);
+            // Gọi tính toán ngay lập tức không delay
+            calculateFinalDecision();
         }
 
         function resetPatternDBToDefault() {
@@ -1358,9 +1359,10 @@
                     break;
                 case 'system_details_update':
                     updateSystemDetails(system, data.details);
+                    // Thực thi tính toán chốt ngay lập tức (Đồng bộ, không chờ) thay vì setTimeout 100ms
                     if (system === 'ht1') {
                         learnFromNewData(data.details.intervalHistory); 
-                        setTimeout(calculateFinalDecision, 100);       
+                        calculateFinalDecision();       
                     }
                     break;
                 case 'export_data':
@@ -1478,12 +1480,11 @@
             broadcastToAll('add_result', result);
             addFinalDecisionToHistory(result);
             
-            setTimeout(() => {
-                broadcastToAll('get_accuracy');
-                broadcastToAll('get_chot_history');
-                broadcastToAll('get_system_details');
-                setTimeout(calculateFinalDecision, 200); 
-            }, 800);
+            // Ép các hệ thống con trả về dữ liệu đối chiếu ngay lập tức (không delay)
+            broadcastToAll('get_accuracy');
+            broadcastToAll('get_chot_history');
+            broadcastToAll('get_system_details');
+            
             showToast(`Đã lưu kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'}`, 'success');
         }
 
@@ -1503,12 +1504,11 @@
                 saveFinalDecisionHistory();
             }
             
-            setTimeout(() => { 
-                broadcastToAll('get_accuracy'); 
-                broadcastToAll('get_chot_history'); 
-                broadcastToAll('get_system_details'); 
-                setTimeout(calculateFinalDecision, 200);
-            }, 800);
+            // Gửi lệnh lấy dữ liệu ngay lập tức
+            broadcastToAll('get_accuracy'); 
+            broadcastToAll('get_chot_history'); 
+            broadcastToAll('get_system_details'); 
+            
             showToast('Đã hoàn tác 1 kết quả', 'info');
         }
 
@@ -1579,10 +1579,13 @@
             
             broadcastToAll('load_session', { id: masterState.currentSessionId, name: session.name, history: session.history });
             document.getElementById('sync-status').textContent = '🔄 Đang đồng bộ...';
+            // Giảm độ trễ đồng bộ từ 1500ms xuống còn 100ms
             setTimeout(() => {
                 document.getElementById('sync-status').textContent = '🟢 Đã đồng bộ';
-                setTimeout(() => { broadcastToAll('get_accuracy'); broadcastToAll('get_chot_history'); broadcastToAll('get_system_details'); }, 1000);
-            }, 1500);
+                broadcastToAll('get_accuracy'); 
+                broadcastToAll('get_chot_history'); 
+                broadcastToAll('get_system_details');
+            }, 100);
         }
         function resetAllSystems() {
             if (confirm('Xoá tất cả phiên làm việc và reset toàn bộ hệ thống?')) {
