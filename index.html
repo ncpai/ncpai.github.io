@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -202,7 +202,7 @@
             <p class="text-gray-400 text-sm mb-4 flex-shrink-0">Bạn có thể dán danh sách mẫu (hoặc bất kỳ số lượng mẫu nào) vào đây. Mỗi mẫu trên 1 dòng. Dữ liệu sẽ được lưu vĩnh viễn trên máy của bạn.</p>
             <textarea id="pattern-db-textarea" class="w-full flex-grow bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg border border-gray-700 focus:border-yellow-500 focus:outline-none custom-scrollbar" spellcheck="false"></textarea>
             <div class="flex justify-between items-center mt-6 flex-shrink-0">
-                <div class="text-sm text-gray-500 italic">Lưu ý: Sau khi lưu, AI sẽ xoá não bộ cũ và học lại toàn bộ từ kho mẫu mới.</div>
+                <div class="text-sm text-gray-500 italic">Lưu ý: Sau khi lưu, AI sẽ xoá não bộ cũ và học lại toàn bộ từ kho mẫu mới. Việc này có thể mất vài giây nếu dữ liệu lớn.</div>
                 <div class="flex gap-4">
                     <button onclick="resetPatternDBToDefault()" class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-all border border-gray-600">Khôi Phục Gốc (102 Mẫu)</button>
                     <button onclick="savePatternDB()" class="px-6 py-2 bg-yellow-600 hover:bg-yellow-500 text-black font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(202,138,4,0.4)]">Lưu & Dạy Lại AI</button>
@@ -681,7 +681,7 @@
                     </div>
                 </div>
 
-                <!-- Biểu đồ cột thống kê đúng sai từng ván (cho từng hệ thống) - GIỮ LẠI THEO CODE CŨ -->
+                <!-- Biểu đồ cột thống kê đúng sai từng ván (cho từng hệ thống) -->
                 <div class="mt-6 bg-gray-900 bg-opacity-60 p-5 rounded-xl border border-gray-700 overflow-hidden">
                     <h3 class="text-lg font-bold mb-4 text-center text-cyan-300 uppercase tracking-wide">📈 Biểu Đồ So Sánh Hiệu Suất 4 HT</h3>
                     
@@ -746,12 +746,26 @@
 
         <!-- Footer -->
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 4.5 Pro</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 4.6 Pro (Fixed)</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
 
     <script>
+        /* =========================================================================
+           0. TIỆN ÍCH AN TOÀN BỘ NHỚ (FIX ISSUE 4)
+           ========================================================================= */
+        function safeStorageSet(key, dataObj) {
+            try {
+                localStorage.setItem(key, JSON.stringify(dataObj));
+            } catch (e) {
+                console.error("Storage Error:", e);
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    showToast('Bộ nhớ trình duyệt đã đầy! Hãy dọn dẹp hoặc tạo phiên mới.', 'error');
+                }
+            }
+        }
+
         /* =========================================================================
            1. CƠ SỞ DỮ LIỆU PATTERN MẪU GỐC & CƠ CHẾ KHỞI TẠO (QUẢN LÝ KHO MẪU)
            ========================================================================= */
@@ -875,13 +889,17 @@
             document.getElementById('pattern-db-modal').classList.add('hidden');
         }
 
-        function savePatternDB() {
+        // Đã sửa để hỗ trợ async
+        async function savePatternDB() {
             const newSamples = document.getElementById('pattern-db-textarea').value.trim();
             if(!newSamples) { showToast('Không được để trống kho mẫu', 'error'); return; }
             currentRawSamples = newSamples;
-            localStorage.setItem('vanSuNhuY_customPatterns', currentRawSamples);
-            initializeOriginalPatternDB();
+            
+            try { localStorage.setItem('vanSuNhuY_customPatterns', currentRawSamples); } catch(e){}
+            
             closePatternDBModal();
+            showToast('Đang xử lý Kho Mẫu AI...', 'info');
+            await initializeOriginalPatternDB();
             showToast('Đã lưu và dạy lại AI thành công!', 'success');
             calculateFinalDecision();
         }
@@ -900,49 +918,58 @@
             }).filter(s => s.length > 0);
         }
 
-        // Global Pattern Database
         let patternDatabase = {};
 
-        function buildPatternDatabase(samples) {
+        // (FIX ISSUE 2: Chống đơ trình duyệt bằng Chunking + Async)
+        async function buildPatternDatabaseAsync(samples) {
             const db = {};
-            // YÊU CẦU 2: Quét tất cả từ 3-20
             const ngramSizes = Array.from({length: 18}, (_, i) => i + 3); 
-            for (const line of samples) {
-                const binaryLine = line.replace(/D/g, '1').replace(/S/g, '0');
-                for (const size of ngramSizes) {
-                    for (let i = 0; i <= binaryLine.length - size - 1; i++) {
-                        const seqBin = binaryLine.substring(i, i + size);
-                        const nextBit = binaryLine[i + size];
-                        const seqDS = seqBin.replace(/1/g, 'D').replace(/0/g, 'S');
-                        
-                        const key = `${size}|${seqDS}`;
-                        if (!db[key]) {
-                            db[key] = { seq: seqDS, length: size, total: 0, nextD: 0, nextS: 0 };
+            const chunkSize = 50; // Xử lý 50 dòng mỗi khung hình để không đơ web
+            
+            for (let idx = 0; idx < samples.length; idx += chunkSize) {
+                const chunk = samples.slice(idx, idx + chunkSize);
+                for (const line of chunk) {
+                    const binaryLine = line.replace(/D/g, '1').replace(/S/g, '0');
+                    for (const size of ngramSizes) {
+                        for (let i = 0; i <= binaryLine.length - size - 1; i++) {
+                            const seqBin = binaryLine.substring(i, i + size);
+                            const nextBit = binaryLine[i + size];
+                            const seqDS = seqBin.replace(/1/g, 'D').replace(/0/g, 'S');
+                            
+                            const key = `${size}|${seqDS}`;
+                            if (!db[key]) {
+                                db[key] = { seq: seqDS, length: size, total: 0, nextD: 0, nextS: 0 };
+                            }
+                            db[key].total++;
+                            if (nextBit === '1') db[key].nextD++;
+                            else db[key].nextS++;
                         }
-                        db[key].total++;
-                        if (nextBit === '1') db[key].nextD++;
-                        else db[key].nextS++;
                     }
                 }
+                // Nhường quyền lại cho Main Thread để giao diện không bị giật lag
+                await new Promise(resolve => setTimeout(resolve, 0));
             }
             return db;
         }
 
-        function initializeOriginalPatternDB() {
+        async function initializeOriginalPatternDB() {
+            const displayEl = document.getElementById('db-pattern-display-count');
+            if(displayEl) displayEl.textContent = 'Đang học...';
+
             const sampleStrings = parseSampleStrings();
-            patternDatabase = buildPatternDatabase(sampleStrings);
+            patternDatabase = await buildPatternDatabaseAsync(sampleStrings); // Dùng bản Async
+
             masterState.totalLearnedPatterns = 0;
             masterState.lastLearnedGameCount = 0;
             updatePatternCountUI();
             updateLearnedCountDisplay();
         }
 
-        // YÊU CẦU 2: HÀM TÌM MẪU TỰ ĐỘNG LỰA CHỌN MẪU CÓ TỈ LỆ VÀ SỐ LẦN LẶP CAO NHẤT
+        // YÊU CẦU 2 & FIX ISSUE 3: CÔNG THỨC AI THÔNG MINH HƠN
         function findBestMatch(inputSeq, minOccur, minConf) {
             let bestRule = null;
             let bestScore = -1;
             
-            // Tìm kiếm tất cả các độ dài từ 3 đến max(20, độ dài chuỗi hiện tại)
             const maxSearchLen = Math.min(inputSeq.length, 20);
             
             for (let size = 3; size <= maxSearchLen; size++) {
@@ -957,8 +984,10 @@
                     
                     if (confidence >= minConf) {
                         const target = pD > pS ? 'D' : 'S';
-                        // Tính điểm: ưu tiên confidence cao (nhân 1000), nếu bằng nhau thì ưu tiên số lần lặp
-                        const score = confidence * 1000 + rule.total;
+                        // SỬA LỖI LOGIC: Dùng Logarit cho lần lặp để cân bằng giữa Độ Tin Cậy và Độ Phổ Biến
+                        const logTotal = Math.log10(rule.total > 0 ? rule.total : 1);
+                        const score = (confidence * 1000) + (logTotal * 100);
+                        
                         if (score > bestScore) {
                             bestScore = score;
                             bestRule = { target, confidence, total: rule.total, seq: subSeq, size };
@@ -992,7 +1021,7 @@
                 ht4: { verdict: null, chot: null, range: null, rangeAccuracy: null, intervalHistory: [] }
             },
             finalDecisionHistory: [],
-            pendingResultToEvaluate: null, // MỚI: Biến lưu trữ chờ vẽ xong biểu đồ để đối chiếu
+            pendingResultToEvaluate: null, 
             
             lastLearnedGameCount: 0,
             totalLearnedPatterns: 0
@@ -1026,7 +1055,7 @@
                 const newBit = dsSequence.slice(-1);
                 const contextSeq = dsSequence.slice(0, -1);
 
-                const ngramSizes = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; // Dạy học cho các độ dài lớn hơn
+                const ngramSizes = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; 
                 
                 for (const size of ngramSizes) {
                     if (contextSeq.length >= size) {
@@ -1092,7 +1121,6 @@
                 return;
             }
 
-            // Gọi hàm Tự động tìm kiếm mẫu tối ưu nhất
             const bestMatch = findBestMatch(dsSequence, patternConfig.minOccurrences, patternConfig.minConfidence);
 
             if (!bestMatch) {
@@ -1127,7 +1155,6 @@
             let impliedText = impliedResult === 'S' ? 'CỘT ĐỎ (NGƯỢC)' : 'CỘT XANH (THEO)';
             let actionText = bestMatch.target === impliedResult ? 'GIỮ NGUYÊN' : 'BẺ NGƯỢC';
 
-            // YÊU CẦU 1: Giao diện chốt lệnh gọn gàng, rõ ràng nằm trong 1 block Box
             const reasonHtml = `
                 <div class="bg-gray-900 border border-gray-600 rounded-lg p-5 text-left w-full max-w-md mx-auto shadow-lg relative">
                     <div class="absolute -top-3 right-4 bg-purple-600 text-[10px] font-black px-2 py-0.5 rounded shadow-sm text-white">MẪU ${bestMatch.size} BIT</div>
@@ -1183,7 +1210,6 @@
                 container.className = "py-8 rounded-xl border-2 border-dashed border-gray-600 mb-5 bg-gray-800/50 transition-all duration-500 shadow-inner";
             }
             
-            // Xử lý render lý do
             if (decision === null) {
                 reasonEl.innerHTML = `<div class="text-gray-400 font-mono text-sm">${reasonHtml}</div>`;
             } else {
@@ -1191,10 +1217,9 @@
             }
             
             masterState.lastDecision = decision;
-            masterState.lastDecisionReason = reasonHtml.replace(/<[^>]*>?/gm, ' '); // Strip HTML cho log table
+            masterState.lastDecisionReason = reasonHtml.replace(/<[^>]*>?/gm, ' '); 
         }
 
-        /* --- GIAO DIỆN CẤU HÌNH AI PATTERN --- */
         function updatePatternConfig() {
             const occ = parseInt(document.getElementById('minOccurrencesSlider').value);
             const conf = parseInt(document.getElementById('minConfidenceSlider').value);
@@ -1262,7 +1287,7 @@
                 return; 
             }
             
-            let chartHTML = '<div class="flex items-end justify-start h-full gap-1 min-w-max px-1">'; // Đảm bảo min-w-max để nội dung tràn ra cho scroll ngang
+            let chartHTML = '<div class="flex items-end justify-start h-full gap-1 min-w-max px-1">'; 
             
             history.forEach((item, index) => {
                 const isCorrect = item.correct;
@@ -1272,7 +1297,7 @@
             });
             chartHTML += '</div>';
             chartEl.innerHTML = chartHTML;
-            chartEl.scrollLeft = chartEl.scrollWidth; // Tự động cuộn sang phải
+            chartEl.scrollLeft = chartEl.scrollWidth; 
         }
 
         function updateFinalDecisionHistoryTable() {
@@ -1309,7 +1334,8 @@
             tableBody.innerHTML = tableHTML;
         }
 
-        function saveFinalDecisionHistory() { try { localStorage.setItem('vanSuNhuY_finalDecisionHistory_v5', JSON.stringify(masterState.finalDecisionHistory)); } catch(e){} }
+        // Dùng safeStorageSet để bọc chống lỗi bộ nhớ đầy
+        function saveFinalDecisionHistory() { safeStorageSet('vanSuNhuY_finalDecisionHistory_v5', masterState.finalDecisionHistory); }
         function loadFinalDecisionHistory() { try { const saved = localStorage.getItem('vanSuNhuY_finalDecisionHistory_v5'); if(saved) { masterState.finalDecisionHistory = JSON.parse(saved); updateFinalDecisionStats(); } } catch(e){} }
 
 
@@ -1348,7 +1374,6 @@
                     break;
                 case 'chot_history_update':
                     updateChotHistory(system, data.history);
-                    // YÊU CẦU 4: VẼ BIỂU ĐỒ KẾT HỢP DỰA TRÊN DỮ LIỆU TỪ CHỐT
                     updateCombinedChart(system, data.history);
                     break;
                 case 'session_update':
@@ -1358,16 +1383,13 @@
                     if (data.prediction) masterState.predictions[system] = data.prediction;
                     break;
                 case 'system_details_update':
-                    // 1. VẼ BIỂU ĐỒ KHOẢNG TỈ LỆ LÊN MÀN HÌNH
                     updateSystemDetails(system, data.details);
                     
                     if (system === 'ht1') {
-                        // 2. KHI BIỂU ĐỒ ĐÃ VẼ XONG -> TÍNH TOÁN ĐỐI CHIẾU VÀ LƯU LỊCH SỬ NGAY LẬP TỨC
                         if (masterState.pendingResultToEvaluate !== null) {
                             addFinalDecisionToHistory(masterState.pendingResultToEvaluate);
                             masterState.pendingResultToEvaluate = null;
                         }
-                        // 3. TÍNH TOÁN LỆNH CHỐT CHO VÁN TIẾP THEO
                         learnFromNewData(data.details.intervalHistory); 
                         calculateFinalDecision();       
                     }
@@ -1429,7 +1451,7 @@
                 return;
             }
             
-            let chartHTML = '<div class="flex items-end justify-start h-full gap-1 min-w-max px-1">'; // Đảm bảo kéo dài container
+            let chartHTML = '<div class="flex items-end justify-start h-full gap-1 min-w-max px-1">'; 
             let correctCount = 0;
             
             history.forEach(pred => {
@@ -1441,7 +1463,7 @@
             });
             chartHTML += '</div>';
             chartEl.innerHTML = chartHTML;
-            chartEl.scrollLeft = chartEl.scrollWidth; // Tự động cuộn sang phải
+            chartEl.scrollLeft = chartEl.scrollWidth; 
             
             if (rangeGamesEl) {
                 const acc = history.length > 0 ? ((correctCount / history.length) * 100).toFixed(1) : 0;
@@ -1449,7 +1471,6 @@
             }
         }
 
-        // YÊU CẦU 4: VẼ BIỂU ĐỒ KẾT HỢP DỰA THEO CHỐT HISTORY (GIỐNG CODE GỐC)
         function updateCombinedChart(system, chotHistory) {
             const chartEl = document.getElementById(`${system}-combined-chart`);
             if (!chartEl) return;
@@ -1463,14 +1484,13 @@
             chotHistory.forEach(pred => {
                 if(pred && pred.predicted && pred.actual) {
                     const isCorrect = pred.predicted === pred.actual;
-                    // Sử dụng màu tím cho chốt để phân biệt với HT chính
                     const barClass = isCorrect ? 'bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.6)] h-full' : 'bg-gray-500 h-2/5';
                     chartHTML += `<div class="w-1.5 rounded-[1px] ${barClass}" title="Chốt: ${pred.predicted} - Ra: ${pred.actual}"></div>`;
                 }
             });
             chartHTML += '</div>';
             chartEl.innerHTML = chartHTML;
-            chartEl.scrollLeft = chartEl.scrollWidth; // Tự động cuộn sang phải
+            chartEl.scrollLeft = chartEl.scrollWidth; 
         }
 
         /* =========================================================================
@@ -1485,15 +1505,15 @@
             saveMasterSessions();
             updateCurrentSessionInfo();
             
-            // LƯU KẾT QUẢ TẠM ĐỂ CHỜ HT1 VẼ BIỂU ĐỒ RỒI MỚI ĐỐI CHIẾU
             masterState.pendingResultToEvaluate = result; 
-            
             broadcastToAll('add_result', result);
             
-            // Ép các hệ thống con trả về dữ liệu đối chiếu ngay lập tức (không delay)
-            broadcastToAll('get_accuracy');
-            broadcastToAll('get_chot_history');
-            broadcastToAll('get_system_details');
+            // FIX ISSUE 1: Đợi một chút 20ms cho sự kiện add_result đi trước
+            setTimeout(() => {
+                broadcastToAll('get_accuracy');
+                broadcastToAll('get_chot_history');
+                broadcastToAll('get_system_details');
+            }, 20);
             
             showToast(`Đã lưu kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'}`, 'success');
         }
@@ -1514,12 +1534,14 @@
                 saveFinalDecisionHistory();
             }
             
-            masterState.pendingResultToEvaluate = null; // Xoá bỏ lệnh chờ đối chiếu
+            masterState.pendingResultToEvaluate = null; 
             
-            // Gửi lệnh lấy dữ liệu ngay lập tức
-            broadcastToAll('get_accuracy'); 
-            broadcastToAll('get_chot_history'); 
-            broadcastToAll('get_system_details'); 
+            // FIX ISSUE 1: Đợi một chút 20ms cho sự kiện undo_last đi trước
+            setTimeout(() => {
+                broadcastToAll('get_accuracy'); 
+                broadcastToAll('get_chot_history'); 
+                broadcastToAll('get_system_details'); 
+            }, 20);
             
             showToast('Đã hoàn tác 1 kết quả', 'info');
         }
@@ -1545,9 +1567,10 @@
         function forcePlayerDecision() { updateFinalDecisionDisplay('P', 'BẠN ÉP HỆ THỐNG LÊN LỆNH: PLAYER', 'THỦ CÔNG'); showToast('Đã ép chốt PLAYER', 'info'); }
         function forceBankerDecision() { updateFinalDecisionDisplay('B', 'BẠN ÉP HỆ THỐNG LÊN LỆNH: BANKER', 'THỦ CÔNG'); showToast('Đã ép chốt BANKER', 'info'); }
 
-        // --- Session ---
+        // Dùng safeStorageSet để bọc chống lỗi bộ nhớ đầy
         function loadMasterSessions() { try { const saved = localStorage.getItem('vanSuNhuY_sessions_v2'); if (saved) { masterState.sessions = JSON.parse(saved); updateMasterSessionSelector(); } } catch (e) {} }
-        function saveMasterSessions() { localStorage.setItem('vanSuNhuY_sessions_v2', JSON.stringify(masterState.sessions)); }
+        function saveMasterSessions() { safeStorageSet('vanSuNhuY_sessions_v2', masterState.sessions); }
+
         function updateMasterSessionSelector() {
             const selector = document.getElementById('masterSessionSelector');
             selector.innerHTML = '<option value="">Chọn phiên để đồng bộ...</option>';
@@ -1591,9 +1614,10 @@
             initializeOriginalPatternDB();
             masterState.pendingResultToEvaluate = null;
             
-            broadcastToAll('load_session', { id: masterState.currentSessionId, name: session.name, history: session.history });
+            // FIX ISSUE 6: Deep Copy [...history] để tránh lỗi tham chiếu vòng lặp
+            broadcastToAll('load_session', { id: masterState.currentSessionId, name: session.name, history: [...session.history] });
             document.getElementById('sync-status').textContent = '🔄 Đang đồng bộ...';
-            // Giảm độ trễ đồng bộ từ 1500ms xuống còn 100ms
+            
             setTimeout(() => {
                 document.getElementById('sync-status').textContent = '🟢 Đã đồng bộ';
                 broadcastToAll('get_accuracy'); 
@@ -1619,7 +1643,7 @@
 
 
         /* =========================================================================
-           7. XỬ LÝ BIỂU ĐỒ 4 HỆ THỐNG GIAO DIỆN CHÍNH (FULL BẢN GỐC CỦA BẠN)
+           7. XỬ LÝ BIỂU ĐỒ 4 HỆ THỐNG GIAO DIỆN CHÍNH
            ========================================================================= */
         function updateChotHistory(system, history) {
             masterState[`${system}ChotHistory`] = history;
@@ -1750,7 +1774,7 @@
 
 
         /* =========================================================================
-           8. XUẤT NHẬP DỮ LIỆU & TIỆN ÍCH KHÁC (BẢN GỐC CỦA BẠN)
+           8. XUẤT NHẬP DỮ LIỆU & TIỆN ÍCH KHÁC
            ========================================================================= */
         function exportMasterData() {
             const exportData = { type: 'vanSuNhuY_export', version: '4.1', timestamp: new Date().toISOString(), sessions: masterState.sessions, finalDecisionHistory: masterState.finalDecisionHistory, system_sessions: {} };
@@ -1822,12 +1846,22 @@
                     updateCurrentSessionInfo(); syncAllSystems();
                 }
             });
-            setInterval(() => {
-                if (allSystemsReady()) { broadcastToAll('get_accuracy'); broadcastToAll('get_chot_history'); broadcastToAll('get_system_details'); }
-            }, 8000);
+            
+            // FIX ISSUE 5: Xoá bỏ vòng lặp 8s gây hao tài nguyên và chớp biểu đồ. 
+            // Giờ đây chúng ta chỉ gọi 1 lần khi load để kiểm tra trạng thái khởi tạo.
+            let checkInit = setInterval(() => {
+                if (allSystemsReady()) { 
+                    broadcastToAll('get_accuracy'); 
+                    broadcastToAll('get_chot_history'); 
+                    broadcastToAll('get_system_details');
+                    clearInterval(checkInit);
+                }
+            }, 1000);
         });
 
     </script>
 </body>
 </html>
 
+
+```
