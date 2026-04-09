@@ -746,14 +746,14 @@
 
         <!-- Footer -->
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 4.6 Pro (Fixed)</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 4.7 Pro (Auto-Backtest)</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
 
     <script>
         /* =========================================================================
-           0. TIỆN ÍCH AN TOÀN BỘ NHỚ (FIX ISSUE 4)
+           0. TIỆN ÍCH AN TOÀN BỘ NHỚ
            ========================================================================= */
         function safeStorageSet(key, dataObj) {
             try {
@@ -889,7 +889,6 @@
             document.getElementById('pattern-db-modal').classList.add('hidden');
         }
 
-        // Đã sửa để hỗ trợ async
         async function savePatternDB() {
             const newSamples = document.getElementById('pattern-db-textarea').value.trim();
             if(!newSamples) { showToast('Không được để trống kho mẫu', 'error'); return; }
@@ -920,11 +919,10 @@
 
         let patternDatabase = {};
 
-        // (FIX ISSUE 2: Chống đơ trình duyệt bằng Chunking + Async)
         async function buildPatternDatabaseAsync(samples) {
             const db = {};
             const ngramSizes = Array.from({length: 18}, (_, i) => i + 3); 
-            const chunkSize = 50; // Xử lý 50 dòng mỗi khung hình để không đơ web
+            const chunkSize = 50; 
             
             for (let idx = 0; idx < samples.length; idx += chunkSize) {
                 const chunk = samples.slice(idx, idx + chunkSize);
@@ -946,7 +944,6 @@
                         }
                     }
                 }
-                // Nhường quyền lại cho Main Thread để giao diện không bị giật lag
                 await new Promise(resolve => setTimeout(resolve, 0));
             }
             return db;
@@ -957,7 +954,7 @@
             if(displayEl) displayEl.textContent = 'Đang học...';
 
             const sampleStrings = parseSampleStrings();
-            patternDatabase = await buildPatternDatabaseAsync(sampleStrings); // Dùng bản Async
+            patternDatabase = await buildPatternDatabaseAsync(sampleStrings);
 
             masterState.totalLearnedPatterns = 0;
             masterState.lastLearnedGameCount = 0;
@@ -965,7 +962,6 @@
             updateLearnedCountDisplay();
         }
 
-        // YÊU CẦU 2 & FIX ISSUE 3: CÔNG THỨC AI THÔNG MINH HƠN
         function findBestMatch(inputSeq, minOccur, minConf) {
             let bestRule = null;
             let bestScore = -1;
@@ -984,7 +980,6 @@
                     
                     if (confidence >= minConf) {
                         const target = pD > pS ? 'D' : 'S';
-                        // SỬA LỖI LOGIC: Dùng Logarit cho lần lặp để cân bằng giữa Độ Tin Cậy và Độ Phổ Biến
                         const logTotal = Math.log10(rule.total > 0 ? rule.total : 1);
                         const score = (confidence * 1000) + (logTotal * 100);
                         
@@ -1244,8 +1239,57 @@
 
 
         /* =========================================================================
-           4. LƯU TRỮ VÀ VẼ LỊCH SỬ CHỐT LỆNH CỦA AI CORE
+           4. ĐỒNG BỘ TỰ ĐỘNG & LƯU TRỮ LỊCH SỬ LÕI AI (FIX ISSUE 1)
            ========================================================================= */
+           
+        // HÀM MỚI: Quét ngược lại toàn bộ quá khứ của HT1 để tính ra lịch sử AI ngay lập tức
+        function syncFinalDecisionHistoryFromHT1(intervalHistory) {
+            if (!intervalHistory || intervalHistory.length < 4) return;
+            
+            let newHistory = [];
+            let dsSequence = "";
+            
+            for (let i = 0; i < intervalHistory.length; i++) {
+                const item = intervalHistory[i];
+                const isCorrect = item.correct === true || item.isCorrect === true || item.predicted === item.actual;
+                const currentBit = isCorrect ? "D" : "S";
+                
+                // Thuật toán của AI bắt đầu đánh từ ván thứ 4 trở đi
+                if (i >= 3) {
+                    const bestMatch = findBestMatch(dsSequence, patternConfig.minOccurrences, patternConfig.minConfidence);
+                    
+                    if (bestMatch && item.predicted && item.actual) {
+                        const ht1Verdict = item.predicted.toUpperCase().trim();
+                        let baseSignal = null;
+                        if (ht1Verdict.includes('P')) baseSignal = 'P';
+                        else if (ht1Verdict.includes('B')) baseSignal = 'B';
+                        
+                        if (baseSignal) {
+                            let finalDecision = '';
+                            if (bestMatch.target === 'D') finalDecision = baseSignal;
+                            else finalDecision = (baseSignal === 'P') ? 'B' : 'P';
+                            
+                            newHistory.push({
+                                gameNumber: i + 1,
+                                decision: finalDecision,
+                                actual: item.actual,
+                                correct: finalDecision === item.actual,
+                                reason: `[Auto-Sync] Mẫu ${bestMatch.size} Bit (${bestMatch.confidence.toFixed(0)}%)`,
+                                timestamp: Date.now() - (intervalHistory.length - i) * 1000
+                            });
+                        }
+                    }
+                }
+                dsSequence += currentBit; // Cộng dồn bit cho ván sau
+            }
+            
+            if (newHistory.length > 0) {
+                masterState.finalDecisionHistory = newHistory;
+                updateFinalDecisionStats();
+                saveFinalDecisionHistory();
+            }
+        }
+
         function addFinalDecisionToHistory(actualResult) {
             if (!masterState.lastDecision) return; 
 
@@ -1292,8 +1336,9 @@
             history.forEach((item, index) => {
                 const isCorrect = item.correct;
                 const barClass = isCorrect ? 'h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'h-2/5 bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]';
-                const gameNumber = index + 1;
-                chartHTML += `<div class="w-2.5 flex items-end"><div class="w-full rounded-[1px] ${barClass}" title="Ván khớp ${gameNumber}: Cược ${item.decision} - KQ ${item.actual} -> ${isCorrect ? 'WIN' : 'LOSE'}"></div></div>`;
+                // Lấy số thứ tự ván thực tế (item.gameNumber) thay vì dựa vào index
+                const gameNum = item.gameNumber || (index + 1);
+                chartHTML += `<div class="w-2.5 flex items-end"><div class="w-full rounded-[1px] ${barClass}" title="Ván ${gameNum}: Đánh ${item.decision} - Ra ${item.actual} -> ${isCorrect ? 'WIN' : 'LOSE'}"></div></div>`;
             });
             chartHTML += '</div>';
             chartEl.innerHTML = chartHTML;
@@ -1313,8 +1358,8 @@
             const recentHistory = history.slice(-15).reverse();
             let tableHTML = '';
             
-            recentHistory.forEach((item, index) => {
-                const gameNumber = history.length - index;
+            recentHistory.forEach((item) => {
+                const gameNum = item.gameNumber;
                 const decisionText = item.decision === 'P' ? 'PLAYER' : 'BANKER';
                 const actualText = item.actual === 'P' ? 'PLAYER' : 'BANKER';
                 const isWin = item.correct;
@@ -1324,7 +1369,7 @@
                 
                 tableHTML += `
                     <tr class="hover:bg-gray-800/80 transition-colors">
-                        <td class="p-3 text-gray-300 font-mono">${gameNumber}</td>
+                        <td class="p-3 text-gray-300 font-mono">${gameNum}</td>
                         <td class="p-3 font-bold ${item.decision === 'P' ? 'text-blue-400' : 'text-red-400'}">${decisionText}</td>
                         <td class="p-3 font-bold ${item.actual === 'P' ? 'text-blue-400' : 'text-red-400'}">${actualText}</td>
                         <td class="p-3">${statusBadge}</td>
@@ -1334,7 +1379,6 @@
             tableBody.innerHTML = tableHTML;
         }
 
-        // Dùng safeStorageSet để bọc chống lỗi bộ nhớ đầy
         function saveFinalDecisionHistory() { safeStorageSet('vanSuNhuY_finalDecisionHistory_v5', masterState.finalDecisionHistory); }
         function loadFinalDecisionHistory() { try { const saved = localStorage.getItem('vanSuNhuY_finalDecisionHistory_v5'); if(saved) { masterState.finalDecisionHistory = JSON.parse(saved); updateFinalDecisionStats(); } } catch(e){} }
 
@@ -1386,11 +1430,18 @@
                     updateSystemDetails(system, data.details);
                     
                     if (system === 'ht1') {
+                        learnFromNewData(data.details.intervalHistory); 
+
+                        // Nếu có lệnh click từ người dùng, lưu lại 1 ván
                         if (masterState.pendingResultToEvaluate !== null) {
                             addFinalDecisionToHistory(masterState.pendingResultToEvaluate);
                             masterState.pendingResultToEvaluate = null;
+                        } 
+                        // Nếu Lịch sử AI trống trơn (Do load lại web, clear history) -> TỰ ĐỘNG VẼ BACKTEST
+                        else if (masterState.finalDecisionHistory.length === 0 && data.details.intervalHistory && data.details.intervalHistory.length >= 4) {
+                            syncFinalDecisionHistoryFromHT1(data.details.intervalHistory);
                         }
-                        learnFromNewData(data.details.intervalHistory); 
+
                         calculateFinalDecision();       
                     }
                     break;
@@ -1508,12 +1559,12 @@
             masterState.pendingResultToEvaluate = result; 
             broadcastToAll('add_result', result);
             
-            // FIX ISSUE 1: Đợi một chút 20ms cho sự kiện add_result đi trước
+            // FIX LỖI NHỊP THỜI GIAN: Chờ 150ms để Iframe xử lý xong thuật toán cực nặng
             setTimeout(() => {
                 broadcastToAll('get_accuracy');
                 broadcastToAll('get_chot_history');
                 broadcastToAll('get_system_details');
-            }, 20);
+            }, 150);
             
             showToast(`Đã lưu kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'}`, 'success');
         }
@@ -1536,12 +1587,11 @@
             
             masterState.pendingResultToEvaluate = null; 
             
-            // FIX ISSUE 1: Đợi một chút 20ms cho sự kiện undo_last đi trước
             setTimeout(() => {
                 broadcastToAll('get_accuracy'); 
                 broadcastToAll('get_chot_history'); 
                 broadcastToAll('get_system_details'); 
-            }, 20);
+            }, 150);
             
             showToast('Đã hoàn tác 1 kết quả', 'info');
         }
@@ -1567,7 +1617,6 @@
         function forcePlayerDecision() { updateFinalDecisionDisplay('P', 'BẠN ÉP HỆ THỐNG LÊN LỆNH: PLAYER', 'THỦ CÔNG'); showToast('Đã ép chốt PLAYER', 'info'); }
         function forceBankerDecision() { updateFinalDecisionDisplay('B', 'BẠN ÉP HỆ THỐNG LÊN LỆNH: BANKER', 'THỦ CÔNG'); showToast('Đã ép chốt BANKER', 'info'); }
 
-        // Dùng safeStorageSet để bọc chống lỗi bộ nhớ đầy
         function loadMasterSessions() { try { const saved = localStorage.getItem('vanSuNhuY_sessions_v2'); if (saved) { masterState.sessions = JSON.parse(saved); updateMasterSessionSelector(); } } catch (e) {} }
         function saveMasterSessions() { safeStorageSet('vanSuNhuY_sessions_v2', masterState.sessions); }
 
@@ -1613,8 +1662,8 @@
             
             initializeOriginalPatternDB();
             masterState.pendingResultToEvaluate = null;
+            masterState.finalDecisionHistory = []; // Xoá sạch để ép chạy Backtest đồng bộ lại
             
-            // FIX ISSUE 6: Deep Copy [...history] để tránh lỗi tham chiếu vòng lặp
             broadcastToAll('load_session', { id: masterState.currentSessionId, name: session.name, history: [...session.history] });
             document.getElementById('sync-status').textContent = '🔄 Đang đồng bộ...';
             
@@ -1623,7 +1672,7 @@
                 broadcastToAll('get_accuracy'); 
                 broadcastToAll('get_chot_history'); 
                 broadcastToAll('get_system_details');
-            }, 100);
+            }, 150);
         }
         function resetAllSystems() {
             if (confirm('Xoá tất cả phiên làm việc và reset toàn bộ hệ thống?')) {
@@ -1807,6 +1856,7 @@
                         sendToIframe(`${sys}-iframe`, 'import_data', { sessions: data.system_sessions?.[sys] || data.sessions, simulate: true, isMasterData: !data.system_sessions?.[sys] });
                     });
                     
+                    masterState.finalDecisionHistory = []; // Ép load lại biểu đồ AI cho khớp
                     initializeOriginalPatternDB(); 
                     
                     showToast('Phục hồi dữ liệu thành công', 'success');
@@ -1840,6 +1890,11 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             renderEmptyChart();
+            
+            // FIX MẤT DỮ LIỆU: Bắt buộc load Session và History ngay khi vừa mở trình duyệt
+            loadMasterSessions();
+            loadFinalDecisionHistory();
+            
             document.getElementById('masterSessionSelector').addEventListener('change', function(e) {
                 if (e.target.value && masterState.sessions[e.target.value]) {
                     masterState.currentSessionId = e.target.value; masterState.currentSessionName = masterState.sessions[e.target.value].name;
@@ -1847,8 +1902,6 @@
                 }
             });
             
-            // FIX ISSUE 5: Xoá bỏ vòng lặp 8s gây hao tài nguyên và chớp biểu đồ. 
-            // Giờ đây chúng ta chỉ gọi 1 lần khi load để kiểm tra trạng thái khởi tạo.
             let checkInit = setInterval(() => {
                 if (allSystemsReady()) { 
                     broadcastToAll('get_accuracy'); 
@@ -1856,7 +1909,7 @@
                     broadcastToAll('get_system_details');
                     clearInterval(checkInit);
                 }
-            }, 1000);
+            }, 500);
         });
 
     </script>
