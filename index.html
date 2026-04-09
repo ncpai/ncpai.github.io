@@ -229,7 +229,7 @@
                 <span class="px-3 py-1 bg-purple-600 rounded-full text-sm font-semibold shadow-lg border border-purple-400">🧠 QUYẾT ĐỊNH = AI PATTERN TỰ HỌC</span>
             </div>
             
-            <!-- THÊM LỐI TẮT Ở ĐÂY -->
+            <!-- LỐI TẮT -->
             <div class="flex flex-wrap justify-center gap-4 mt-6 border-t border-gray-700/50 pt-6">
                 <a href="#input-section" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 rounded-full text-white font-bold shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all flex items-center gap-2 transform hover:-translate-y-1 active:scale-95">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
@@ -265,7 +265,6 @@
                 <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-purple-500/30 relative overflow-hidden">
                     <div class="absolute top-0 right-0 bg-purple-600 text-xs font-bold px-2 py-1 rounded-bl-lg z-10">CORE AI</div>
                     
-                    <!-- SỬA: Thêm nút MẶC ĐỊNH -->
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold text-yellow-300">🧠 Cấu Hình AI Pattern</h2>
                         <button onclick="resetPatternConfigToDefault()" class="text-[10px] font-bold bg-gray-700 hover:bg-gray-500 px-2 py-1 rounded text-white border border-gray-600 transition-colors shadow-sm" title="Khôi phục về mặc định 10 lần, 100%">MẶC ĐỊNH</button>
@@ -319,7 +318,7 @@
                     </div>
                 </div>
 
-                <!-- Input Section (Đã thêm ID input-section để làm điểm neo) -->
+                <!-- Input Section -->
                 <div id="input-section" class="bg-gray-800 p-6 rounded-2xl shadow-lg scroll-mt-8">
                     <h2 class="text-xl font-semibold mb-4 text-blue-300">🎲 Nhập Kết Quả Ván Hiện Tại</h2>
                     <p class="text-gray-400 text-sm mb-4">Kết quả sẽ được đồng bộ đến tất cả hệ thống</p>
@@ -595,9 +594,7 @@
             </div>
         </div>
 
-        <!-- YÊU CẦU 1: GIAO DIỆN CHỐT LỆNH ĐƯỢC RÚT GỌN VÀ NẰM TRONG KHUNG -->
-        <!-- MỚI: FINAL DECISION DỰA TRÊN AI PATTERN MATCHING (HT1) -->
-        <!-- Đã thêm ID final-decision-section để làm điểm neo -->
+        <!-- KHU VỰC ĐỀ XUẤT CHỐT LỆNH VÀ THỐNG KÊ (ĐIỂM NEO) -->
         <div id="final-decision-section" class="mt-8 scroll-mt-8">
             <div class="bg-gradient-to-r from-purple-900 to-indigo-900 p-6 rounded-2xl shadow-lg card-glow-total border border-purple-500">
                 <h2 class="text-2xl font-black mb-6 text-center text-yellow-300 uppercase tracking-wide flex items-center justify-center gap-3">
@@ -643,9 +640,70 @@
                     </div>
                 </div>
 
-                <!-- PHẦN THỐNG KÊ VÀ BIỂU ĐỒ CHO QUYẾT ĐỊNH CUỐI CÙNG -->
+                <!-- MỚI: PHÂN TÍCH ĐA CHIỀU (TẤT CẢ MẪU KHỚP) -->
+                <div class="mb-6 bg-gray-900 bg-opacity-80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                        <h3 class="text-lg font-bold text-cyan-300 uppercase tracking-wide flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Phân Tích Đa Chiều Các Mẫu (N-Gram)
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-400 text-sm">Sắp xếp theo:</span>
+                            <select id="matchesSortMode" onchange="renderMatchesAnalysis()" class="bg-gray-800 text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors cursor-pointer">
+                                <option value="score_desc">Độ ưu tiên AI (Giảm dần)</option>
+                                <option value="size_asc">Số Bit (Nhỏ -> Lớn)</option>
+                                <option value="size_desc">Số Bit (Lớn -> Nhỏ)</option>
+                                <option value="conf_desc">Tỉ lệ % (Cao -> Thấp)</option>
+                                <option value="conf_asc">Tỉ lệ % (Thấp -> Cao)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bảng Thống Kê Tổng Quan Xanh/Đỏ -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center">
+                            <div class="text-gray-400 text-[10px] font-bold uppercase">Tổng Trường Hợp</div>
+                            <div class="text-2xl font-black text-white" id="analysis-total-matches">0</div>
+                        </div>
+                        <div class="bg-blue-900/20 p-3 rounded-lg border border-blue-500/30 text-center">
+                            <div class="text-blue-300 text-[10px] font-bold uppercase">Thiên Hướng XANH (D)</div>
+                            <div class="text-2xl font-black text-blue-400" id="analysis-d-count">0</div>
+                            <div class="text-xs font-bold text-blue-300 mt-1" id="analysis-d-perc">0%</div>
+                        </div>
+                        <div class="bg-red-900/20 p-3 rounded-lg border border-red-500/30 text-center">
+                            <div class="text-red-300 text-[10px] font-bold uppercase">Thiên Hướng ĐỎ (S)</div>
+                            <div class="text-2xl font-black text-red-400" id="analysis-s-count">0</div>
+                            <div class="text-xs font-bold text-red-300 mt-1" id="analysis-s-perc">0%</div>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center flex flex-col justify-center">
+                            <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">Kết Luận Đám Đông</div>
+                            <div class="text-lg font-black drop-shadow-md text-gray-500" id="analysis-verdict">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Bảng Chi Tiết Tất Cả Trường Hợp -->
+                    <div class="overflow-x-auto border border-gray-700 rounded-lg custom-scrollbar max-h-64">
+                        <table class="w-full text-sm text-left whitespace-nowrap">
+                            <thead class="bg-gray-800 sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th class="p-3 text-gray-400 font-bold uppercase text-xs">Bit</th>
+                                    <th class="p-3 text-gray-400 font-bold uppercase text-xs">Cụm Pattern</th>
+                                    <th class="p-3 text-gray-400 font-bold uppercase text-xs text-center">Đề Xuất</th>
+                                    <th class="p-3 text-gray-400 font-bold uppercase text-xs text-center">Tỉ Lệ %</th>
+                                    <th class="p-3 text-gray-400 font-bold uppercase text-xs text-center">Lần Lặp</th>
+                                    <th class="p-3 text-gray-400 font-bold uppercase text-xs text-right">Điểm AI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matches-analysis-body" class="divide-y divide-gray-700 bg-gray-900/50">
+                                <tr><td colspan="6" class="p-4 text-center text-gray-500 italic">Đang chờ tín hiệu quét từ HT1...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PHẦN THỐNG KÊ VÀ BIỂU ĐỒ LỊCH SỬ CHỐT -->
                 <div class="mt-6 bg-gray-900 bg-opacity-60 p-5 rounded-xl border border-gray-700">
-                    <h3 class="text-lg font-bold mb-5 text-center text-cyan-300 uppercase tracking-wide">📊 Thống Kê Quyết Định Của Lõi AI</h3>
+                    <h3 class="text-lg font-bold mb-5 text-center text-cyan-300 uppercase tracking-wide">📊 Thống Kê Lịch Sử Chốt Của AI</h3>
                     
                     <!-- Stats Summary -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
@@ -768,7 +826,7 @@
 
         <!-- Footer -->
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 4.8 Pro (UI Enhancements)</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 4.9 Pro</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
@@ -984,10 +1042,9 @@
             updateLearnedCountDisplay();
         }
 
-        function findBestMatch(inputSeq, minOccur, minConf) {
-            let bestRule = null;
-            let bestScore = -1;
-            
+        // MỚI: TÌM TẤT CẢ CÁC TRƯỜNG HỢP KHỚP THAY VÌ CHỈ TÌM 1 CÁI
+        function findAllMatches(inputSeq, minOccur, minConf) {
+            let matches = [];
             const maxSearchLen = Math.min(inputSeq.length, 20);
             
             for (let size = 3; size <= maxSearchLen; size++) {
@@ -1005,21 +1062,17 @@
                         const logTotal = Math.log10(rule.total > 0 ? rule.total : 1);
                         const score = (confidence * 1000) + (logTotal * 100);
                         
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestRule = { target, confidence, total: rule.total, seq: subSeq, size };
-                        }
+                        matches.push({ target, confidence, total: rule.total, seq: subSeq, size, score, pD, pS });
                     }
                 }
             }
-            return bestRule;
+            return matches;
         }
 
 
         /* =========================================================================
            2. GLOBAL STATE & CƠ CHẾ AI TỰ HỌC (CONTINUOUS LEARNING)
            ========================================================================= */
-        // SỬA: Set mặc định khởi tạo luôn là 10 lần và 100%
         let patternConfig = { minOccurrences: 10, minConfidence: 100 };
 
         const masterState = {
@@ -1040,6 +1093,9 @@
             },
             finalDecisionHistory: [],
             pendingResultToEvaluate: null, 
+            
+            // LƯU CÁC MATCHES ĐỂ RENDER BẢNG PHÂN TÍCH
+            currentMatches: [],
             
             lastLearnedGameCount: 0,
             totalLearnedPatterns: 0
@@ -1119,12 +1175,16 @@
             
             if (!ht1Details || !ht1Details.intervalHistory || ht1Details.intervalHistory.length === 0) {
                 updateFinalDecisionDisplay(null, "Hệ thống đang chờ bạn nhập kết quả ván đầu tiên để quét HT1...", "CHỜ DỮ LIỆU HT1");
+                masterState.currentMatches = [];
+                renderMatchesAnalysis();
                 return;
             }
 
             const currentRange = ht1Details.range || '';
             if (!currentRange.includes('90') && !currentRange.includes('100')) {
                 updateFinalDecisionDisplay(null, `BỎ QUA DO KHOẢNG TỶ LỆ HT1 CHƯA ĐẠT 90-100% (Hiện tại đang là ${currentRange || 'Chưa rõ'}).`, "KHÔNG ĐẠT ĐIỀU KIỆN RANGE");
+                masterState.currentMatches = [];
+                renderMatchesAnalysis();
                 return;
             }
 
@@ -1136,30 +1196,36 @@
 
             if (dsSequence.length < 3) {
                 updateFinalDecisionDisplay(null, `Cần tối thiểu 3 tín hiệu từ HT1 (hiện có ${dsSequence.length}). Hệ thống đang tích luỹ...`, "TÍCH LUỸ TÍN HIỆU");
+                masterState.currentMatches = [];
+                renderMatchesAnalysis();
                 return;
             }
 
-            const bestMatch = findBestMatch(dsSequence, patternConfig.minOccurrences, patternConfig.minConfidence);
+            // MỚI: LẤY TẤT CẢ MATCHES ĐỂ RENDER PHÂN TÍCH ĐA CHIỀU
+            const allMatches = findAllMatches(dsSequence, patternConfig.minOccurrences, patternConfig.minConfidence);
+            masterState.currentMatches = allMatches;
 
-            if (!bestMatch) {
+            if (allMatches.length === 0) {
                 updateFinalDecisionDisplay(null, `CHƯA CÓ CỤM BIT TIN CẬY NÀO ĐẠT YÊU CẦU NÊN BỎ QUA.`, "BỎ QUA TÍN HIỆU");
+                renderMatchesAnalysis();
                 return;
             }
+
+            // TÌM MATCH CÓ ĐIỂM CAO NHẤT CHO QUYẾT ĐỊNH CHÍNH
+            const bestMatch = allMatches.reduce((prev, current) => (prev.score > current.score) ? prev : current);
 
             const ht1VerdictRaw = ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
-            
             let baseSignal = null;
             let impliedResult = 'D'; 
 
             if (ht1VerdictRaw.includes('P')) baseSignal = 'P';
             else if (ht1VerdictRaw.includes('B')) baseSignal = 'B';
 
-            if (ht1VerdictRaw.includes('NGƯỢC')) {
-                impliedResult = 'S'; 
-            }
+            if (ht1VerdictRaw.includes('NGƯỢC')) { impliedResult = 'S'; }
 
             if (!baseSignal) {
                 updateFinalDecisionDisplay(null, `ĐÃ PHÁT HIỆN MẪU (${bestMatch.confidence.toFixed(0)}%). Nhưng chưa có lệnh tại 🧠 Phán Quyết.`, "CHỜ LỆNH TỪ PHÁN QUYẾT");
+                renderMatchesAnalysis();
                 return;
             }
 
@@ -1175,9 +1241,9 @@
 
             const reasonHtml = `
                 <div class="bg-gray-900 border border-gray-600 rounded-lg p-5 text-left w-full max-w-md mx-auto shadow-lg relative">
-                    <div class="absolute -top-3 right-4 bg-purple-600 text-[10px] font-black px-2 py-0.5 rounded shadow-sm text-white">MẪU ${bestMatch.size} BIT</div>
+                    <div class="absolute -top-3 right-4 bg-purple-600 text-[10px] font-black px-2 py-0.5 rounded shadow-sm text-white">MẪU TỐT NHẤT ${bestMatch.size} BIT</div>
                     <div class="mb-3 text-gray-300">
-                        ĐÃ PHÁT HIỆN CỤM BIT TƯƠNG TỰ VỚI TỈ LỆ <br/>
+                        HỆ THỐNG ƯU TIÊN CỤM BIT VỚI TỈ LỆ <br/>
                         <span class="text-green-400 font-black text-2xl">${bestMatch.confidence.toFixed(0)}%</span>
                         VỚI
                         <span class="text-pink-400 font-black text-2xl">${bestMatch.total}</span>
@@ -1203,7 +1269,86 @@
                 </div>
             `;
             
-            updateFinalDecisionDisplay(finalDecision, reasonHtml, `AI KÍCH HOẠT: Mẫu ${bestMatch.size} Bit`);
+            updateFinalDecisionDisplay(finalDecision, reasonHtml, `AI KÍCH HOẠT: Mẫu ưu tiên ${bestMatch.size} Bit`);
+            renderMatchesAnalysis(); // GỌI RENDER BẢNG PHÂN TÍCH ĐA CHIỀU
+        }
+
+        // HÀM RENDER BẢNG PHÂN TÍCH ĐA CHIỀU TẤT CẢ MATCHES
+        function renderMatchesAnalysis() {
+            const matches = [...masterState.currentMatches];
+            const tbody = document.getElementById('matches-analysis-body');
+            const totalEl = document.getElementById('analysis-total-matches');
+            const dCountEl = document.getElementById('analysis-d-count');
+            const dPercEl = document.getElementById('analysis-d-perc');
+            const sCountEl = document.getElementById('analysis-s-count');
+            const sPercEl = document.getElementById('analysis-s-perc');
+            const verdictEl = document.getElementById('analysis-verdict');
+            
+            if (matches.length === 0) {
+                totalEl.textContent = '0'; dCountEl.textContent = '0'; dPercEl.textContent = '0%';
+                sCountEl.textContent = '0'; sPercEl.textContent = '0%'; verdictEl.textContent = '-';
+                verdictEl.className = 'text-lg font-black text-gray-500';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 italic">Không có cụm Pattern nào thoả mãn điều kiện N-Gram.</td></tr>';
+                return;
+            }
+
+            // Xử lý Sort
+            const sortMode = document.getElementById('matchesSortMode').value;
+            matches.sort((a, b) => {
+                if (sortMode === 'score_desc') return b.score - a.score;
+                if (sortMode === 'size_asc') return a.size - b.size;
+                if (sortMode === 'size_desc') return b.size - a.size;
+                if (sortMode === 'conf_desc') return b.confidence - a.confidence;
+                if (sortMode === 'conf_asc') return a.confidence - b.confidence;
+                return 0;
+            });
+
+            // Tính Thống kê tổng quan
+            const total = matches.length;
+            const countD = matches.filter(m => m.target === 'D').length;
+            const countS = matches.filter(m => m.target === 'S').length;
+            const percD = ((countD / total) * 100).toFixed(1);
+            const percS = ((countS / total) * 100).toFixed(1);
+
+            totalEl.textContent = total;
+            dCountEl.textContent = countD; dPercEl.textContent = percD + '%';
+            sCountEl.textContent = countS; sPercEl.textContent = percS + '%';
+
+            // Kết luận đám đông
+            if (countD > countS) {
+                verdictEl.textContent = 'THIÊN VỀ XANH (D)';
+                verdictEl.className = 'text-lg font-black text-blue-400 drop-shadow-md';
+            } else if (countS > countD) {
+                verdictEl.textContent = 'THIÊN VỀ ĐỎ (S)';
+                verdictEl.className = 'text-lg font-black text-red-400 drop-shadow-md';
+            } else {
+                verdictEl.textContent = 'CÂN BẰNG NHAU (50/50)';
+                verdictEl.className = 'text-lg font-black text-yellow-400 drop-shadow-md';
+            }
+
+            // Render Table
+            let html = '';
+            matches.forEach((m, index) => {
+                const targetBadge = m.target === 'D' 
+                    ? '<span class="bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded font-bold border border-blue-500/30 inline-block w-16 text-center">XANH (D)</span>'
+                    : '<span class="bg-red-900/40 text-red-400 px-2 py-0.5 rounded font-bold border border-red-500/30 inline-block w-16 text-center">ĐỎ (S)</span>';
+                
+                // Highlight dòng top 1 nếu đang sort theo ưu tiên AI
+                const isTop1 = (sortMode === 'score_desc' && index === 0);
+                const trClass = isTop1 ? 'bg-purple-900/20 border-l-4 border-purple-500' : 'hover:bg-gray-800/80 transition-colors';
+                
+                html += `
+                    <tr class="${trClass}">
+                        <td class="p-3 text-yellow-300 font-bold">${m.size}</td>
+                        <td class="p-3 text-gray-400 font-mono tracking-widest">${m.seq}</td>
+                        <td class="p-3 text-center">${targetBadge}</td>
+                        <td class="p-3 text-center font-bold text-green-400">${m.confidence.toFixed(1)}%</td>
+                        <td class="p-3 text-center font-bold text-pink-400">${m.total}</td>
+                        <td class="p-3 text-right text-gray-500 font-mono text-[10px]">${m.score.toFixed(0)} pt</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
         }
 
         function updateFinalDecisionDisplay(decision, reasonHtml, prioritySystem) {
@@ -1254,7 +1399,6 @@
             calculateFinalDecision();
         }
 
-        // SỬA: Hàm khôi phục thông số AI về 10 lần - 100%
         function resetPatternConfigToDefault() {
             document.getElementById('minOccurrencesSlider').value = 10;
             document.getElementById('minConfidenceSlider').value = 100;
@@ -1266,7 +1410,6 @@
             document.getElementById('minOccurrencesSlider').addEventListener('input', updatePatternConfig);
             document.getElementById('minConfidenceSlider').addEventListener('input', updatePatternConfig);
             
-            // Cập nhật giao diện thanh trượt theo config mặc định khi mới mở web
             document.getElementById('minOccurrencesSlider').value = patternConfig.minOccurrences;
             document.getElementById('minConfidenceSlider').value = patternConfig.minConfidence;
             updatePatternConfig(); 
