@@ -1683,24 +1683,31 @@ function updateFinalDecisionHistoryTable() {
     const recentHistory = [...history].reverse();
     let tableHTML = '';
     
-    recentHistory.forEach((item) => {
-        const gameNum = item.gameNumber;
-        const decisionText = item.decision === 'P' ? 'PLAYER' : 'BANKER';
-        const actualText = item.actual === 'P' ? 'PLAYER' : 'BANKER';
-        const isWin = item.correct;
-        const statusBadge = isWin 
-            ? '<span class="bg-green-900/40 text-green-400 px-2 py-0.5 rounded font-bold text-xs border border-green-500/30">WIN</span>'
-            : '<span class="bg-red-900/40 text-red-400 px-2 py-0.5 rounded font-bold text-xs border border-red-500/30">LOSE</span>';
-        
-        tableHTML += `
-            <tr class="hover:bg-gray-800/80 transition-colors">
-                <td class="p-3 text-gray-300 font-mono">${gameNum}</td>
-                <td class="p-3 font-bold ${item.decision === 'P' ? 'text-blue-400' : 'text-red-400'}">${decisionText}</td>
-                <td class="p-3 font-bold ${item.actual === 'P' ? 'text-blue-400' : 'text-red-400'}">${actualText}</td>
-                <td class="p-3">${statusBadge}</td>
-                <td class="p-3 text-[11px] text-gray-400 leading-relaxed font-mono opacity-80 hover:opacity-100 truncate max-w-[200px]" title="${item.reason}">${item.reason.substring(0, 50)}...</td>
-            </tr>`;
-    });
+recentHistory.forEach((item) => {
+    const gameNum = item.gameNumber;
+    
+    // Đã fix lỗi ép kiểu BỎ QUA thành BANKER
+    const decisionText = item.decision === 'P' ? 'PLAYER' : (item.decision === 'B' ? 'BANKER' : item.decision);
+    const actualText = item.actual === 'P' ? 'PLAYER' : 'BANKER';
+    const isWin = item.correct;
+    
+    // Nếu trạng thái là BỎ QUA, có thể bạn muốn status badge hiển thị khác đi (ví dụ: SKIP), 
+    // nhưng nếu giữ nguyên thì nó sẽ hiển thị LOSE hợp lý với logic hiện tại.
+    const statusBadge = isWin 
+        ? '<span class="bg-green-900/40 text-green-400 px-2 py-0.5 rounded font-bold text-xs border border-green-500/30">WIN</span>'
+        : '<span class="bg-red-900/40 text-red-400 px-2 py-0.5 rounded font-bold text-xs border border-red-500/30">LOSE</span>';
+    
+    const decisionColorClass = item.decision === 'P' ? 'text-blue-400' : (item.decision === 'B' ? 'text-red-400' : 'text-gray-400');
+    
+    tableHTML += `
+        <tr class="hover:bg-gray-800/80 transition-colors">
+            <td class="p-3 text-gray-300 font-mono">${gameNum}</td>
+            <td class="p-3 font-bold ${decisionColorClass}">${decisionText}</td>
+            <td class="p-3 font-bold ${item.actual === 'P' ? 'text-blue-400' : 'text-red-400'}">${actualText}</td>
+            <td class="p-3">${statusBadge}</td>
+            <td class="p-3 text-[11px] text-gray-400 leading-relaxed font-mono opacity-80 hover:opacity-100 truncate max-w-[200px]" title="${item.reason}">${item.reason.substring(0, 50)}...</td>
+        </tr>`;
+});
     tableBody.innerHTML = tableHTML;
 }
 
