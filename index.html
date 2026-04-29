@@ -204,16 +204,16 @@
     <div id="toast-container"></div>
     <div id="warning-container"></div>
 
-    <div class="fixed bottom-6 right-6 z-[200] flex flex-col items-center gap-3">
-        <div id="fab-menu" class="flex flex-col gap-3 transition-all duration-300 translate-y-4 opacity-0 pointer-events-none origin-bottom">
-            <a href="#ge-section" class="w-12 h-12 bg-purple-700 rounded-full text-white font-bold shadow-lg hover:bg-purple-600 hover:scale-110 transition-all flex justify-center items-center text-sm select-none" title="Tới thuật toán God Eye (GE)">GE</a>
-            <a href="#ht1-chart-section" class="w-12 h-12 bg-indigo-600 rounded-full text-white font-bold shadow-lg hover:bg-indigo-500 hover:scale-110 transition-all flex justify-center items-center text-sm select-none" title="Tới biểu đồ HT1">HT1</a>
-            <a href="#input-section" class="w-12 h-12 bg-gray-700 rounded-full text-white font-bold shadow-lg hover:bg-gray-600 hover:scale-110 transition-all flex justify-center items-center text-xl select-none" title="Lên chỗ Nhập">⬆️</a>
-            <button onclick="addResultToAll('P')" class="w-12 h-12 bg-blue-600 rounded-full text-white font-bold shadow-[0_0_15px_rgba(37,99,235,0.5)] hover:bg-blue-500 hover:scale-110 transition-all flex justify-center items-center select-none" title="Nhập PLAYER (P)">P</button>
-            <button onclick="addResultToAll('B')" class="w-12 h-12 bg-red-600 rounded-full text-white font-bold shadow-[0_0_15px_rgba(239,68,68,0.5)] hover:bg-red-500 hover:scale-110 transition-all flex justify-center items-center select-none" title="Nhập BANKER (B)">B</button>
+    <div class="fixed bottom-6 right-6 z-[200] flex flex-col items-center gap-4">
+        <div id="fab-menu" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom">
+            <a href="#ge-section" class="w-[60px] h-[60px] bg-purple-700 rounded-full text-white font-black shadow-[0_0_15px_rgba(126,34,206,0.5)] hover:bg-purple-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới thuật toán God Eye (GE)">GE</a>
+            <a href="#ht1-chart-section" class="w-[60px] h-[60px] bg-indigo-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới biểu đồ HT1">HT1</a>
+            <a href="#input-section" class="w-[60px] h-[60px] bg-gray-700 rounded-full text-white font-bold shadow-[0_0_15px_rgba(55,65,81,0.5)] hover:bg-gray-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Lên chỗ Nhập">⬆️</a>
+            <button onclick="addResultToAll('P')" class="w-[60px] h-[60px] bg-blue-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(37,99,235,0.6)] hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập PLAYER (P)">P</button>
+            <button onclick="addResultToAll('B')" class="w-[60px] h-[60px] bg-red-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(239,68,68,0.6)] hover:bg-red-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập BANKER (B)">B</button>
         </div>
-        <button onclick="toggleFAB()" id="fab-main-btn" class="w-14 h-14 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full text-black font-black text-2xl shadow-[0_0_20px_rgba(202,138,4,0.6)] hover:scale-110 transition-all flex justify-center items-center transform z-10 select-none">
-            <svg id="fab-icon" class="w-7 h-7 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+        <button onclick="toggleFAB()" id="fab-main-btn" class="w-[72px] h-[72px] bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full text-black font-black shadow-[0_0_25px_rgba(202,138,4,0.7)] hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center transform z-10 select-none">
+            <svg id="fab-icon" class="w-10 h-10 transition-transform duration-500 ease-out" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
         </button>
     </div>
 
@@ -678,11 +678,11 @@
             const isClosed = menu.classList.contains('opacity-0');
             
             if (isClosed) {
-                menu.classList.remove('translate-y-4', 'opacity-0', 'pointer-events-none');
-                icon.classList.add('rotate-45'); 
+                menu.classList.remove('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
+                icon.classList.add('rotate-[135deg]'); 
             } else {
-                menu.classList.add('translate-y-4', 'opacity-0', 'pointer-events-none');
-                icon.classList.remove('rotate-45');
+                menu.classList.add('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
+                icon.classList.remove('rotate-[135deg]');
             }
         }
 
@@ -1775,6 +1775,28 @@
                 }
             }, 500);
         });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     </script>
 </body>
