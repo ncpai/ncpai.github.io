@@ -990,7 +990,11 @@
            2. GLOBAL STATE & CƠ CHẾ AI TỰ HỌC (CONTINUOUS LEARNING)
            ========================================================================= */
         let patternConfig = { minOccurrences: 10, minConfidence: 100 }; 
-        let isProcessingInput = false; // Biến khóa chống spam click (Race condition lock)
+        
+        // CÁC BIẾN CHO HỆ THỐNG QUEUE (PHƯƠNG ÁN 3)
+        let isProcessingInput = false; 
+        let inputQueue = [];
+        let isQueueRunning = false;
 
         const masterState = {
             currentSessionId: null,
@@ -1748,7 +1752,7 @@
                         // GỌI HÀM GOD EYE SAU KHI HT1 UPDATE
                         calculateGodEye();       
                         
-                        // MỞ KHÓA NGAY LẬP TỨC SAU KHI TOÀN BỘ AI TÍNH TOÁN XONG
+                        // MỞ KHÓA KHI HT1 GỬI DATA VỀ CHO HÀNG ĐỢI XỬ LÝ TIẾP
                         isProcessingInput = false;
                     }
                     break;
@@ -1829,86 +1833,117 @@
 
 
         /* =========================================================================
-           7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION
+           7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION VÀ HÀNG ĐỢI (QUEUE SYSTEM)
            ========================================================================= */
         function addResultToAll(result) {
-            // 1. CHẶN NẾU HỆ THỐNG ĐANG XỬ LÝ CHƯA XONG
-            if (isProcessingInput) {
-                showToast('Hệ thống đang tính toán, vui lòng không bấm quá nhanh!', 'warning');
-                return;
-            }
-            
             if (!masterState.currentSessionId) { 
                 showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning'); 
                 return; 
             }
-
-            // Khóa nhập liệu
-            isProcessingInput = true;
             
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session.history) session.history = [];
-            session.history.push(result);
+            // Đẩy vào hàng đợi
+            inputQueue.push(result);
             
-            // ---> LƯU LỊCH SỬ GOD EYE KHI CÓ KẾT QUẢ THỰC TẾ
-            if (masterState.currentGeState && masterState.currentGeState !== "Chưa rõ - Chưa rõ") {
-                if (!session.geHistory) session.geHistory = [];
-                session.geHistory.push({
-                    gameNum: session.history.length,
-                    state: masterState.currentGeState,
-                    predicted: masterState.currentGePrediction,
-                    actual: result,
-                    correct: masterState.currentGePrediction === result
-                });
-                
-                // GỌI HÀM VẼ LẠI BIỂU ĐỒ GE TỨC THÌ
-                updateGeHistoryChart(session.geHistory);
+            // Nếu queue chưa chạy thì kích hoạt nó
+            if (!isQueueRunning) {
+                processQueue();
             }
+        }
 
-            // ---> LƯU LỊCH SỬ SGE (SUPPORT GOD EYE)
-            if (masterState.currentSgePending && masterState.currentSgePending.prediction) {
-                if (!session.sgeHistory) session.sgeHistory = [];
-                const p = masterState.currentSgePending;
+        async function processQueue() {
+            isQueueRunning = true;
+            
+            while (inputQueue.length > 0) {
+                // Khóa hệ thống
+                isProcessingInput = true; 
                 
-                let agreeCount = 0;
-                let agreedKLs = [];
-                if (p.prediction === p.kl1) { agreeCount++; agreedKLs.push(1); }
-                if (p.prediction === p.kl2) { agreeCount++; agreedKLs.push(2); }
-                if (p.prediction === p.kl3) { agreeCount++; agreedKLs.push(3); }
+                let currentResult = inputQueue.shift(); 
                 
-                session.sgeHistory.push({
-                    gameNum: session.history.length,
-                    predicted: p.prediction,
-                    actual: result,
-                    correct: p.prediction === result,
-                    kl1: p.kl1, kl2: p.kl2, kl3: p.kl3,
-                    agreeCount: agreeCount,
-                    agreedKLs: agreedKLs
+                // 1. Lưu vào history tổng
+                const session = masterState.sessions[masterState.currentSessionId];
+                if (!session.history) session.history = [];
+                session.history.push(currentResult);
+                
+                // ---> LƯU LỊCH SỬ GOD EYE KHI CÓ KẾT QUẢ THỰC TẾ
+                if (masterState.currentGeState && masterState.currentGeState !== "Chưa rõ - Chưa rõ") {
+                    if (!session.geHistory) session.geHistory = [];
+                    session.geHistory.push({
+                        gameNum: session.history.length,
+                        state: masterState.currentGeState,
+                        predicted: masterState.currentGePrediction,
+                        actual: currentResult,
+                        correct: masterState.currentGePrediction === currentResult
+                    });
+                    
+                    updateGeHistoryChart(session.geHistory);
+                }
+
+                // ---> LƯU LỊCH SỬ SGE (SUPPORT GOD EYE)
+                if (masterState.currentSgePending && masterState.currentSgePending.prediction) {
+                    if (!session.sgeHistory) session.sgeHistory = [];
+                    const p = masterState.currentSgePending;
+                    
+                    let agreeCount = 0;
+                    let agreedKLs = [];
+                    if (p.prediction === p.kl1) { agreeCount++; agreedKLs.push(1); }
+                    if (p.prediction === p.kl2) { agreeCount++; agreedKLs.push(2); }
+                    if (p.prediction === p.kl3) { agreeCount++; agreedKLs.push(3); }
+                    
+                    session.sgeHistory.push({
+                        gameNum: session.history.length,
+                        predicted: p.prediction,
+                        actual: currentResult,
+                        correct: p.prediction === currentResult,
+                        kl1: p.kl1, kl2: p.kl2, kl3: p.kl3,
+                        agreeCount: agreeCount,
+                        agreedKLs: agreedKLs
+                    });
+                    updateSGEStatsUI(session.sgeHistory);
+                }
+                
+                saveMasterSessions();
+                updateCurrentSessionInfo();
+                
+                masterState.pendingResultToEvaluate = currentResult; 
+                broadcastToAll('add_result', currentResult);
+                
+                setTimeout(() => {
+                    broadcastToAll('get_accuracy');
+                    broadcastToAll('get_chot_history');
+                    broadcastToAll('get_system_details');
+                }, 150);
+
+                showToast(`Đang xử lý: ${currentResult === 'P' ? 'PLAYER' : 'BANKER'} (Còn ${inputQueue.length} ván trong hàng chờ)`, 'info');
+
+                // Đợi Iframe trả lời (hoặc đợi timeout failsafe 1.5s) trước khi xử lý phần tử tiếp theo
+                await new Promise(resolve => {
+                    let checkInterval = setInterval(() => {
+                        if (!isProcessingInput) { 
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 50);
+                    
+                    // Failsafe tránh treo vô hạn nếu Iframe lỗi
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        isProcessingInput = false;
+                        resolve();
+                    }, 1500);
                 });
-                updateSGEStatsUI(session.sgeHistory);
             }
             
-            saveMasterSessions();
-            updateCurrentSessionInfo();
-            
-            masterState.pendingResultToEvaluate = result; 
-            broadcastToAll('add_result', result);
-            
-            setTimeout(() => {
-                broadcastToAll('get_accuracy');
-                broadcastToAll('get_chot_history');
-                broadcastToAll('get_system_details');
-            }, 150);
-            
-            showToast(`Đã lưu kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'}`, 'success');
-
-            // Failsafe: Tự động mở khóa sau 1.5 giây đề phòng iframe bị lỗi không phản hồi
-            setTimeout(() => {
-                isProcessingInput = false;
-            }, 1500);
+            isQueueRunning = false;
+            showToast('Hệ thống đã đồng bộ xong toàn bộ kết quả!', 'success');
         }
 
         function undoLastAll() {
+            // Chặn nếu hàng đợi đang chạy
+            if (isQueueRunning) { 
+                showToast('Đang xử lý hàng chờ, không thể hoàn tác lúc này!', 'warning'); 
+                return; 
+            }
+            
             if (isProcessingInput) return; // Chặn bấm đúp
             if (!masterState.currentSessionId) return;
             
@@ -1955,6 +1990,11 @@
         function clearHistoryAll() {
             if (!masterState.currentSessionId) return;
             if (confirm('Xóa sạch lịch sử của phiên hiện tại?')) {
+                // Xoá hàng chờ nếu có
+                inputQueue = [];
+                isQueueRunning = false;
+                isProcessingInput = false;
+
                 const session = masterState.sessions[masterState.currentSessionId];
                 session.history = [];
                 session.geHistory = []; // Reset GE
@@ -2229,4 +2269,4 @@
 
     </script>
 </body>
-    </html>
+            </html>
