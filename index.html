@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         html {
-            scroll-behavior: smooth; /* Thêm cuộn mượt cho lối tắt */
+            scroll-behavior: smooth;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -292,7 +292,7 @@
                         <button onclick="createNewSessionAll()" class="btn bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg">➕ Tạo Mới</button>
                         <button onclick="renameMasterSession()" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg">✏️ Đổi Tên</button>
                         <button onclick="exportMasterData()" class="btn bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-lg col-span-2">📤 Xuất Tổng Thể</button>
-                        <button onclick="document.getElementById('masterFileInput').click()" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg col-span-2">📥 Nhập Dữ Liệu</button>
+                        <button onclick="document.getElementById('masterFileInput').click()" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg col-span-2">📥 Nhập Dữ LUệU</button>
                         <input type="file" id="masterFileInput" class="hidden" accept=".json" onchange="importMasterData(event)">
                     </div>
                 </div>
@@ -611,7 +611,70 @@
                 </div>
                 <div class="mt-2 text-xs text-gray-500 text-center">Mỗi cột là 1 ván: <span class="text-green-500 font-bold">Xanh = Đúng</span>, <span class="text-red-500 font-bold">Đỏ = Sai</span>. Rê chuột để xem chi tiết.</div>
             </div>
-        </div>
+
+            <div id="sge-panel" class="mt-8 bg-gradient-to-br from-black via-gray-900 to-black p-6 rounded-2xl border-4 border-yellow-500 shadow-[0_0_40px_rgba(234,179,8,0.3)] relative transition-all duration-500">
+                <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-black px-8 py-2 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.8)] text-xl flex items-center gap-2 border-2 border-black whitespace-nowrap">
+                    🔥 HỆ THỐNG SGE (TỔNG HỢP 3 TRẠNG THÁI) 🔥
+                </div>
+
+                <div class="mt-4 bg-gray-800/80 p-6 rounded-xl border border-yellow-500/50 flex flex-col items-center justify-center text-center backdrop-blur-sm">
+                    <h2 class="text-gray-400 font-bold tracking-widest uppercase mb-2">Quyết Định Tối Cao</h2>
+                    <div id="sge-final-decision" class="text-5xl md:text-6xl font-black text-gray-500 drop-shadow-xl transition-all duration-300">ĐANG TÍNH TOÁN...</div>
+                    
+                    <div class="w-full mt-6 text-left bg-black/50 p-4 rounded-lg border border-gray-700">
+                        <h3 class="text-yellow-400 font-bold mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Lí do phán quyết:
+                        </h3>
+                        <ul id="sge-reasoning-list" class="space-y-3 text-sm text-gray-300 font-medium">
+                            <li class="italic text-gray-500">Chờ dữ liệu từ các hệ thống...</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-800 p-4 rounded-xl border border-blue-500/30">
+                        <div class="text-center font-bold text-blue-300 mb-2 border-b border-gray-700 pb-2 text-lg">TT1. BIG ROAD</div>
+                        <div id="sge-chart-br" class="flex items-center justify-start overflow-x-auto h-16 gap-2 mb-4 custom-scrollbar px-2 py-2 bg-gray-900/50 rounded-lg"></div>
+                        <div class="flex justify-between items-center text-sm bg-gray-900 p-3 rounded-lg border border-gray-700">
+                            <span class="text-gray-400">Đề xuất:</span>
+                            <span id="sge-prop-br" class="font-bold text-gray-500 text-lg">-</span>
+                        </div>
+                        <div id="sge-desc-br" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
+                    </div>
+
+                    <div class="bg-gray-800 p-4 rounded-xl border border-green-500/30">
+                        <div class="text-center font-bold text-green-300 mb-2 border-b border-gray-700 pb-2 text-lg">TT2. BĐKTL (HT1)</div>
+                        <div id="sge-chart-ht1" class="flex items-end justify-start overflow-x-auto h-16 gap-2 mb-4 custom-scrollbar px-2 py-2 bg-gray-900/50 rounded-lg"></div>
+                        <div class="flex justify-between items-center text-sm bg-gray-900 p-3 rounded-lg border border-gray-700">
+                            <span class="text-gray-400">Đề xuất:</span>
+                            <span id="sge-prop-ht1" class="font-bold text-gray-500 text-lg">-</span>
+                        </div>
+                        <div id="sge-desc-ht1" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
+                    </div>
+
+                    <div class="bg-gray-800 p-4 rounded-xl border border-purple-500/30">
+                        <div class="text-center font-bold text-purple-300 mb-2 border-b border-gray-700 pb-2 text-lg">TT3. GE HISTORY</div>
+                        <div id="sge-chart-ge" class="flex items-end justify-start overflow-x-auto h-16 gap-2 mb-4 custom-scrollbar px-2 py-2 bg-gray-900/50 rounded-lg"></div>
+                        <div class="flex justify-between items-center text-sm bg-gray-900 p-3 rounded-lg border border-gray-700">
+                            <span class="text-gray-400">Đề xuất:</span>
+                            <span id="sge-prop-ge" class="font-bold text-gray-500 text-lg">-</span>
+                        </div>
+                        <div id="sge-desc-ge" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col items-center border-t border-gray-700/50 pt-4">
+                    <button onclick="toggleSGEStats()" class="px-6 py-2 bg-yellow-900/30 text-yellow-400 border border-yellow-500/50 rounded-full font-bold text-sm hover:bg-yellow-600/30 hover:scale-105 transition-all flex items-center gap-2 shadow-[0_0_10px_rgba(234,179,8,0.2)]">
+                        📊 XEM CHI TIẾT HIỆU SUẤT SGE
+                        <svg id="sge-stats-icon" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    
+                    <div id="sge-stats-container" class="w-full mt-4 hidden flex-col gap-3 bg-gray-900/90 p-5 rounded-xl border border-yellow-500/30 shadow-inner">
+                        </div>
+                </div>
+            </div>
+            </div>
 
         <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="text-center p-3 bg-gray-800 rounded-lg border border-gray-700/50">
@@ -637,8 +700,8 @@
         </div>
 
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye)</p>
-            <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 để đưa ra đề xuất chính xác nhất.</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE</p>
+            <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 và 3 biểu đồ khác để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
 
@@ -927,6 +990,7 @@
            2. GLOBAL STATE & CƠ CHẾ AI TỰ HỌC (CONTINUOUS LEARNING)
            ========================================================================= */
         let patternConfig = { minOccurrences: 10, minConfidence: 100 }; 
+        let isProcessingInput = false; // Biến khóa chống spam click (Race condition lock)
 
         const masterState = {
             currentSessionId: null,
@@ -953,7 +1017,10 @@
 
             // BIẾN CHO GOD EYE
             currentGeState: "Chưa rõ - Chưa rõ",
-            currentGePrediction: null
+            currentGePrediction: null,
+            
+            // BIẾN CHO SGE
+            currentSgePending: null
         };
 
         let gameAccuracyChart = null;
@@ -1296,7 +1363,7 @@
             if (!session.geHistory) session.geHistory = [];
             const geHistory = session.geHistory;
 
-            // --- DỰ ĐOÁN DỰA TRÊN LUẬT GOD EYE (ĐÃ LOẠI BỎ RULE CỨNG & XEN KẼ) ---
+            // --- DỰ ĐOÁN DỰA TRÊN LUẬT GOD EYE ---
             let prediction = null;
             let reason = "";
             let winRateText = "";
@@ -1333,6 +1400,9 @@
 
             // --- RENDER GOD EYE UI ---
             renderGodEyeUI(currentState, prediction, reason, winRateText, geHistory);
+            
+            // --- KÍCH HOẠT SUPPORT GE (SGE) ---
+            calculateSGE();
         }
 
         function renderGodEyeUI(currentState, prediction, reason, winRateText, geHistory) {
@@ -1390,6 +1460,239 @@
             updateGeHistoryChart(geHistory);
         }
 
+        /* =========================================================================
+           5.5 THUẬT TOÁN SUPPORT GE (SGE) - PHÁN QUYẾT TỐI CAO TỪ 3 TRẠNG THÁI
+           ========================================================================= */
+        function analyzeSGETrend(array, type) {
+            // type: 'PB' (BigRoad) hoặc 'DS' (HT1/GE)
+            if (!array || array.length < 3) return { signal: null, desc: "Cầu quá ngắn", weight: 0 };
+
+            // Phân tích thành các chuỗi (streaks)
+            let streaks = [];
+            let currentStr = array[0]; let count = 1;
+            for(let i=1; i<array.length; i++) {
+                if(array[i] === currentStr) count++;
+                else { streaks.push({val: currentStr, count: count}); currentStr = array[i]; count = 1; }
+            }
+            streaks.push({val: currentStr, count: count});
+
+            const last = streaks[streaks.length-1];
+            const prev1 = streaks.length > 1 ? streaks[streaks.length-2] : null;
+            const prev2 = streaks.length > 2 ? streaks[streaks.length-3] : null;
+            const prev3 = streaks.length > 3 ? streaks[streaks.length-4] : null;
+
+            // 1. Check BỆT (Từ 3 trở lên)
+            if (last.count >= 3) {
+                return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: last.count };
+            }
+
+            // 2. Check Cầu 1-1 (Ping Pong) - Tối thiểu 3 nhịp
+            if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
+                const nextExpected = last.val === (type === 'PB' ? 'P' : 'S') ? (type === 'PB' ? 'B' : 'D') : (type === 'PB' ? 'P' : 'S');
+                return { signal: nextExpected, desc: "Cầu 1-1 rõ ràng", weight: 3 };
+            }
+
+            // 3. Check Cầu 2-2 
+            // Nếu đang là 2,2,1 -> Đánh giống last để đủ 2
+            if (last.count === 1 && prev1 && prev1.count === 2 && prev2 && prev2.count === 2) {
+                return { signal: last.val, desc: "Đang cầu 2-2 (nhịp 1 sang 2)", weight: 3.5 };
+            }
+            // Nếu đang là 2,2,2 -> Đánh ngược last để gãy sang màu kia
+            if (last.count === 2 && prev1 && prev1.count === 2 && prev2 && prev2.count >= 1) {
+                const nextExpected = last.val === (type === 'PB' ? 'P' : 'S') ? (type === 'PB' ? 'B' : 'D') : (type === 'PB' ? 'P' : 'S');
+                return { signal: nextExpected, desc: "Cầu 2-2 (chuyển nhịp)", weight: 3.5 };
+            }
+
+            // 4. Các mẫu chuyên biệt cho D/S (Biểu đồ khoảng tỷ lệ)
+            if (type === 'DS') {
+                // 1D sang S hoặc 1S sang D
+                if (last.count === 1 && prev1 && prev1.count >= 2 && prev2 && prev2.count === 1) {
+                     const nextExpected = last.val === 'D' ? 'S' : 'D';
+                     return { signal: nextExpected, desc: `Thói quen 1${last.val} sang ${nextExpected}`, weight: 2.5 };
+                }
+                // 2D sang S hoặc 2S sang D
+                if (last.count === 2 && prev1 && prev1.count >= 1 && prev2 && prev2.count === 2) {
+                     const nextExpected = last.val === 'D' ? 'S' : 'D';
+                     return { signal: nextExpected, desc: `Thói quen 2${last.val} sang ${nextExpected}`, weight: 2.5 };
+                }
+            }
+
+            return { signal: null, desc: "Cầu loạn/Không rõ ràng", weight: 0 };
+        }
+
+        function renderSGEChart(containerId, array, type) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            if (!array || array.length === 0) { 
+                container.innerHTML = '<span class="text-sm text-gray-500 italic flex items-center justify-center w-full h-full">Chưa có dữ liệu</span>'; 
+                return; 
+            }
+            
+            let html = '';
+            // Tăng số lượng kết quả hiển thị cho đẹp
+            const displayArr = array.slice(-30);
+            displayArr.forEach(val => {
+                if (type === 'PB') {
+                    const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)]';
+                    html += `<div class="w-8 h-8 md:w-9 md:h-9 rounded-full ${color} flex-shrink-0 flex items-center justify-center text-sm md:text-base text-white font-black border-2 border-white/20 transform hover:scale-110 transition-transform cursor-default" title="${val === 'P' ? 'Player' : 'Banker'}">${val}</div>`;
+                } else {
+                    const color = val === 'D' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)]';
+                    const height = val === 'D' ? 'h-full' : 'h-1/3';
+                    html += `<div class="w-3 md:w-4 rounded-[3px] ${color} ${height} flex-shrink-0 border border-white/10 hover:brightness-125 transition-all cursor-default" title="${val === 'D' ? 'Đúng (D)' : 'Sai (S)'}"></div>`;
+                }
+            });
+            container.innerHTML = html;
+            container.scrollLeft = container.scrollWidth;
+        }
+
+        function calculateSGE() {
+            const session = masterState.sessions[masterState.currentSessionId];
+            if (!session) return;
+
+            // --- LẤY DATA 3 TRẠNG THÁI ---
+            // TT1: Big Road
+            const arrBR = session.history || [];
+            
+            // TT2: BĐKTL HT1
+            const ht1Details = masterState.systemDetails.ht1;
+            const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
+            const ht1BaseVerdictRaw = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
+            let ht1BaseSignal = null;
+            if (ht1BaseVerdictRaw.includes('P')) ht1BaseSignal = 'P'; else if (ht1BaseVerdictRaw.includes('B')) ht1BaseSignal = 'B';
+            const ht1IsReverse = ht1BaseVerdictRaw.includes('NGƯỢC');
+
+            // TT3: GE History (Đã lọc bỏ các ván không dự đoán để đồng bộ với biểu đồ gốc)
+            const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
+            const geBaseSignal = masterState.currentGePrediction; // P hoặc B
+
+            // --- PHÂN TÍCH ---
+            const resBR = analyzeSGETrend(arrBR, 'PB');
+            const resHT1 = analyzeSGETrend(arrHT1, 'DS');
+            const resGE = analyzeSGETrend(arrGE, 'DS');
+
+            // --- DỊCH MÃ TT2 & TT3 (D/S) SANG P/B ---
+            let finalSignalHT1 = null;
+            if (resHT1.signal && ht1BaseSignal) {
+                if (!ht1IsReverse) {
+                    finalSignalHT1 = resHT1.signal === 'D' ? ht1BaseSignal : (ht1BaseSignal === 'P' ? 'B' : 'P');
+                } else {
+                    finalSignalHT1 = resHT1.signal === 'S' ? ht1BaseSignal : (ht1BaseSignal === 'P' ? 'B' : 'P');
+                }
+            }
+
+            let finalSignalGE = null;
+            if (resGE.signal && geBaseSignal) {
+                finalSignalGE = resGE.signal === 'D' ? geBaseSignal : (geBaseSignal === 'P' ? 'B' : 'P');
+            }
+
+            // --- TỔNG HỢP TRỌNG SỐ ---
+            let scoreP = 0; let scoreB = 0;
+            let reasonsList = [];
+
+            // BR
+            if (resBR.signal === 'P') { scoreP += resBR.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL1 (BIGROAD) -> P:</span> ${resBR.desc}.</li>`); }
+            else if (resBR.signal === 'B') { scoreB += resBR.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL1 (BIGROAD) -> B:</span> ${resBR.desc}.</li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL1 (BIGROAD) BỎ QUA:</span> ${resBR.desc}.</li>`); }
+
+            // HT1
+            if (finalSignalHT1 === 'P') { scoreP += resHT1.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL2 (BĐKTL) -> P:</span> ${resHT1.desc}.</li>`); }
+            else if (finalSignalHT1 === 'B') { scoreB += resHT1.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL2 (BĐKTL) -> B:</span> ${resHT1.desc}.</li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL2 (BĐKTL) BỎ QUA:</span> ${resHT1.desc} hoặc thiếu tín hiệu HT1.</li>`); }
+
+            // GE
+            if (finalSignalGE === 'P') { scoreP += resGE.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL3 (GE Chart) -> P:</span> ${resGE.desc}.</li>`); }
+            else if (finalSignalGE === 'B') { scoreB += resGE.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL3 (GE Chart) -> B:</span> ${resGE.desc}.</li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL3 (GE Chart) BỎ QUA:</span> ${resGE.desc} hoặc thiếu tín hiệu GE.</li>`); }
+
+            // --- PHÁN QUYẾT CUỐI CÙNG ---
+            let sgeDecisionText = 'BỎ QUA VÁN NÀY';
+            let sgeDecisionClass = 'text-gray-500';
+            
+            const diff = Math.abs(scoreP - scoreB);
+            
+            if (scoreP === 0 && scoreB === 0) {
+                sgeDecisionText = 'BỎ QUA DO CẦU LOẠN';
+                reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: Cả 3 biểu đồ đều không có dạng cầu đẹp. Khuyên nghỉ.</li>`);
+            } else if (scoreP > scoreB) {
+                const agreeP = (resBR.signal === 'P' && finalSignalHT1 === 'P' && finalSignalGE === 'P');
+                const strongTrendP = (scoreP >= 5 && diff >= 3.5); 
+
+                if (agreeP || strongTrendP) {
+                    sgeDecisionText = '👤 PLAYER ĐÁNH MẠNH TAY'; 
+                    sgeDecisionClass = 'text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]';
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu cực đẹp (Đồng thuận 3 hệ thống hoặc xu hướng dài). ĐÁNH MẠNH TAY! (P: ${scoreP} > B: ${scoreB}).</li>`);
+                } else {
+                    sgeDecisionText = '👤 CHỐT PLAYER (Đánh nhẹ tay)'; 
+                    sgeDecisionClass = 'text-blue-400';
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về P nhưng chưa đủ mạnh. ĐÁNH NHẸ TAY (P: ${scoreP} > B: ${scoreB}).</li>`);
+                }
+            } else if (scoreB > scoreP) {
+                const agreeB = (resBR.signal === 'B' && finalSignalHT1 === 'B' && finalSignalGE === 'B');
+                const strongTrendB = (scoreB >= 5 && diff >= 3.5);
+
+                if (agreeB || strongTrendB) {
+                    sgeDecisionText = '🏦 BANKER ĐÁNH MẠNH TAY'; 
+                    sgeDecisionClass = 'text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]';
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu cực đẹp (Đồng thuận 3 hệ thống hoặc xu hướng dài). ĐÁNH MẠNH TAY! (B: ${scoreB} > P: ${scoreP}).</li>`);
+                } else {
+                    sgeDecisionText = '🏦 CHỐT BANKER (Đánh nhẹ tay)'; 
+                    sgeDecisionClass = 'text-red-400';
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về B nhưng chưa đủ mạnh. ĐÁNH NHẸ TAY (B: ${scoreB} > P: ${scoreP}).</li>`);
+                }
+            } else {
+                sgeDecisionText = 'BỎ QUA - XUNG ĐỘT TÍN HIỆU';
+                reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-red-400 font-bold">=> TỔNG HỢP: Tín hiệu đang đánh nhau (Điểm P: ${scoreP} = Điểm B: ${scoreB}). Tỷ lệ rủi ro cao!</li>`);
+            }
+
+            // --- LƯU TRẠNG THÁI SGE CHỜ KẾT QUẢ ---
+            let finalSgeSignal = null;
+            if (sgeDecisionText.includes('PLAYER')) finalSgeSignal = 'P';
+            else if (sgeDecisionText.includes('BANKER')) finalSgeSignal = 'B';
+            
+            masterState.currentSgePending = {
+                prediction: finalSgeSignal,
+                kl1: resBR.signal,
+                kl2: finalSignalHT1,
+                kl3: finalSignalGE
+            };
+
+            // --- RENDER GIAO DIỆN SGE ---
+            const decEl = document.getElementById('sge-final-decision');
+            const listEl = document.getElementById('sge-reasoning-list');
+            if (decEl) { decEl.textContent = sgeDecisionText; decEl.className = `text-4xl md:text-5xl font-black transition-all duration-300 ${sgeDecisionClass}`; }
+            if (listEl) { listEl.innerHTML = reasonsList.join(''); }
+
+            // Render Mini Charts & Status
+            renderSGEChart('sge-chart-br', arrBR, 'PB');
+            renderSGEChart('sge-chart-ht1', arrHT1, 'DS');
+            renderSGEChart('sge-chart-ge', arrGE, 'DS');
+
+            const setProp = (id, res, finSignal, typeStr) => {
+                const el = document.getElementById(id);
+                if(el) {
+                    if(!res.signal) { el.textContent = 'Bỏ qua'; el.className = 'font-bold text-gray-500 text-lg'; }
+                    else if(typeStr === 'PB') {
+                        el.textContent = res.signal === 'P' ? 'PLAYER' : 'BANKER';
+                        el.className = `font-bold text-lg ${res.signal === 'P' ? 'text-blue-400' : 'text-red-400'}`;
+                    } else { // DS -> Final P/B
+                        if (finSignal) {
+                            el.textContent = finSignal === 'P' ? 'PLAYER' : 'BANKER';
+                            el.className = `font-bold text-lg ${finSignal === 'P' ? 'text-blue-400' : 'text-red-400'}`;
+                        } else {
+                            el.textContent = 'Chờ lệnh'; el.className = 'font-bold text-gray-500 text-lg';
+                        }
+                    }
+                }
+            }
+
+            setProp('sge-prop-br', resBR, null, 'PB');
+            setProp('sge-prop-ht1', resHT1, finalSignalHT1, 'DS');
+            setProp('sge-prop-ge', resGE, finalSignalGE, 'DS');
+
+            const elDescBr = document.getElementById('sge-desc-br'); if(elDescBr) elDescBr.textContent = resBR.desc;
+            const elDescHt1 = document.getElementById('sge-desc-ht1'); if(elDescHt1) elDescHt1.textContent = resHT1.desc;
+            const elDescGe = document.getElementById('sge-desc-ge'); if(elDescGe) elDescGe.textContent = resGE.desc;
+        }
 
         /* =========================================================================
            6. LIÊN KẾT IFRAME VÀ UI CÁC HỆ THỐNG CON
@@ -1444,6 +1747,9 @@
                         calculateFinalDecision();
                         // GỌI HÀM GOD EYE SAU KHI HT1 UPDATE
                         calculateGodEye();       
+                        
+                        // MỞ KHÓA NGAY LẬP TỨC SAU KHI TOÀN BỘ AI TÍNH TOÁN XONG
+                        isProcessingInput = false;
                     }
                     break;
                 case 'export_data':
@@ -1526,7 +1832,20 @@
            7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION
            ========================================================================= */
         function addResultToAll(result) {
-            if (!masterState.currentSessionId) { showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning'); return; }
+            // 1. CHẶN NẾU HỆ THỐNG ĐANG XỬ LÝ CHƯA XONG
+            if (isProcessingInput) {
+                showToast('Hệ thống đang tính toán, vui lòng không bấm quá nhanh!', 'warning');
+                return;
+            }
+            
+            if (!masterState.currentSessionId) { 
+                showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning'); 
+                return; 
+            }
+
+            // Khóa nhập liệu
+            isProcessingInput = true;
+            
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session.history) session.history = [];
             session.history.push(result);
@@ -1545,6 +1864,29 @@
                 // GỌI HÀM VẼ LẠI BIỂU ĐỒ GE TỨC THÌ
                 updateGeHistoryChart(session.geHistory);
             }
+
+            // ---> LƯU LỊCH SỬ SGE (SUPPORT GOD EYE)
+            if (masterState.currentSgePending && masterState.currentSgePending.prediction) {
+                if (!session.sgeHistory) session.sgeHistory = [];
+                const p = masterState.currentSgePending;
+                
+                let agreeCount = 0;
+                let agreedKLs = [];
+                if (p.prediction === p.kl1) { agreeCount++; agreedKLs.push(1); }
+                if (p.prediction === p.kl2) { agreeCount++; agreedKLs.push(2); }
+                if (p.prediction === p.kl3) { agreeCount++; agreedKLs.push(3); }
+                
+                session.sgeHistory.push({
+                    gameNum: session.history.length,
+                    predicted: p.prediction,
+                    actual: result,
+                    correct: p.prediction === result,
+                    kl1: p.kl1, kl2: p.kl2, kl3: p.kl3,
+                    agreeCount: agreeCount,
+                    agreedKLs: agreedKLs
+                });
+                updateSGEStatsUI(session.sgeHistory);
+            }
             
             saveMasterSessions();
             updateCurrentSessionInfo();
@@ -1559,20 +1901,37 @@
             }, 150);
             
             showToast(`Đã lưu kết quả: ${result === 'P' ? 'PLAYER' : 'BANKER'}`, 'success');
+
+            // Failsafe: Tự động mở khóa sau 1.5 giây đề phòng iframe bị lỗi không phản hồi
+            setTimeout(() => {
+                isProcessingInput = false;
+            }, 1500);
         }
 
         function undoLastAll() {
+            if (isProcessingInput) return; // Chặn bấm đúp
             if (!masterState.currentSessionId) return;
+            
+            isProcessingInput = true; // Khóa
+            
             const session = masterState.sessions[masterState.currentSessionId];
-            if (session.history.length === 0) return;
+            if (session.history.length === 0) {
+                isProcessingInput = false;
+                return;
+            }
             
             session.history.pop();
             
             // Xoá cả lịch sử GE của ván vừa rồi
             if (session.geHistory && session.geHistory.length > 0) {
                 session.geHistory.pop();
-                // Cập nhật lại biểu đồ GE sau khi hoàn tác
                 updateGeHistoryChart(session.geHistory);
+            }
+
+            // Xoá cả lịch sử SGE
+            if (session.sgeHistory && session.sgeHistory.length > 0) {
+                session.sgeHistory.pop();
+                updateSGEStatsUI(session.sgeHistory);
             }
 
             saveMasterSessions();
@@ -1588,6 +1947,9 @@
             }, 150);
             
             showToast('Đã hoàn tác 1 kết quả', 'info');
+
+            // Failsafe mở khóa sau khi hoàn tác
+            setTimeout(() => { isProcessingInput = false; }, 800);
         }
 
         function clearHistoryAll() {
@@ -1596,6 +1958,8 @@
                 const session = masterState.sessions[masterState.currentSessionId];
                 session.history = [];
                 session.geHistory = []; // Reset GE
+                session.sgeHistory = []; 
+                updateSGEStatsUI([]);
                 
                 saveMasterSessions(); updateCurrentSessionInfo();
                 broadcastToAll('clear_history');
@@ -1607,6 +1971,15 @@
                 initializeOriginalPatternDB();
                 calculateFinalDecision(); 
                 renderGodEyeUI("Chưa rõ - Chưa rõ", null, "Đã xoá lịch sử phiên.", "-", []);
+                // Xóa UI SGE
+                const decEl = document.getElementById('sge-final-decision');
+                const listEl = document.getElementById('sge-reasoning-list');
+                if(decEl) decEl.textContent = 'ĐANG TÍNH TOÁN...';
+                if(listEl) listEl.innerHTML = '<li class="italic text-gray-500">Chờ dữ liệu từ các hệ thống...</li>';
+                renderSGEChart('sge-chart-br', [], 'PB');
+                renderSGEChart('sge-chart-ht1', [], 'DS');
+                renderSGEChart('sge-chart-ge', [], 'DS');
+
                 showToast('Lịch sử đã được xoá trắng', 'info');
             }
         }
@@ -1753,6 +2126,84 @@
             }
         }
 
+        /* =========================================================================
+           THỐNG KÊ CHI TIẾT SGE (TỔNG HỢP & BIỂU ĐỒ D/S)
+           ========================================================================= */
+        function toggleSGEStats() {
+            const container = document.getElementById('sge-stats-container');
+            const icon = document.getElementById('sge-stats-icon');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                container.classList.add('flex');
+                icon.classList.add('rotate-180');
+                const session = masterState.sessions[masterState.currentSessionId];
+                if(session && session.sgeHistory) updateSGEStatsUI(session.sgeHistory);
+            } else {
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        function createSGEStatCard(title, historyArray, icon) {
+            const total = historyArray.length;
+            const correct = historyArray.filter(h => h.correct).length;
+            const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
+            const rateColor = rate >= 60 ? 'text-green-400' : (rate >= 40 ? 'text-yellow-400' : 'text-red-400');
+            
+            let chartHtml = '<div class="flex items-end justify-start h-8 gap-[2px] mt-2 overflow-x-auto custom-scrollbar pb-1">';
+            if (total === 0) {
+                chartHtml += '<span class="text-xs text-gray-600 italic mt-2">Chưa có dữ liệu cho kịch bản này</span>';
+            } else {
+                historyArray.forEach(item => {
+                    const bg = item.correct ? 'bg-green-500 shadow-[0_0_3px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_3px_rgba(239,68,68,0.6)]';
+                    const h = item.correct ? 'h-full' : 'h-1/3';
+                    chartHtml += `<div class="w-2 flex-shrink-0 rounded-[1px] ${bg} ${h}" title="Ván ${item.gameNum}: Đoán ${item.predicted} - Thực tế ${item.actual}"></div>`;
+                });
+            }
+            chartHtml += '</div>';
+
+            return `
+                <div class="bg-gray-800/80 p-3 rounded-lg border border-gray-700 hover:border-gray-500 transition-colors">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs md:text-sm text-gray-300 font-bold flex items-center gap-1">${icon} ${title}</span>
+                        <span class="font-black ${rateColor} text-sm md:text-base">${total > 0 ? rate + '%' : '-'} <span class="text-xs font-normal text-gray-500">(${correct}/${total})</span></span>
+                    </div>
+                    ${chartHtml}
+                </div>
+            `;
+        }
+
+        function updateSGEStatsUI(sgeHistory) {
+            const container = document.getElementById('sge-stats-container');
+            if (!container) return;
+            
+            if (!sgeHistory || sgeHistory.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 italic text-sm py-4">Chưa có dữ liệu chốt lệnh từ SGE trong phiên này.</div>';
+                return;
+            }
+
+            // Lọc các kịch bản
+            const all = sgeHistory;
+            const agree3 = sgeHistory.filter(h => h.agreeCount === 3);
+            const agree2 = sgeHistory.filter(h => h.agreeCount === 2);
+            const followKL1 = sgeHistory.filter(h => h.agreedKLs.includes(1));
+            const followKL2 = sgeHistory.filter(h => h.agreedKLs.includes(2));
+            const followKL3 = sgeHistory.filter(h => h.agreedKLs.includes(3));
+
+            // Render lưới giao diện
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    ${createSGEStatCard('Tỉ lệ đúng TỔNG SGE', all, '🎯')}
+                    ${createSGEStatCard('Khi 3 KL đồng thuận (Cực mạnh)', agree3, '🔥')}
+                    ${createSGEStatCard('Khi 2 KL đồng thuận', agree2, '⚡')}
+                    ${createSGEStatCard('Khi SGE ưu tiên KL1 (Big Road)', followKL1, '🔵')}
+                    ${createSGEStatCard('Khi SGE ưu tiên KL2 (HT1)', followKL2, '🟢')}
+                    ${createSGEStatCard('Khi SGE ưu tiên KL3 (God Eye)', followKL3, '🟣')}
+                </div>
+            `;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             loadMasterSessions();
             
@@ -1776,28 +2227,6 @@
             }, 500);
         });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </script>
 </body>
-        </html>
+    </html>
