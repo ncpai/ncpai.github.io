@@ -78,6 +78,15 @@
             from { opacity: 1; transform: translateY(0); }
             to { opacity: 0; transform: translateY(-20px); }
         }
+        @keyframes superBounce {
+            0% { transform: translate(-50%, -10px) scale(1); }
+            100% { transform: translate(-50%, 5px) scale(1.05); }
+        }
+        @keyframes spinPulse {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(18deg); }
+            100% { transform: scale(1) rotate(-18deg); }
+        }
         .system-frame {
             border: 2px solid #374151;
             border-radius: 0.75rem;
@@ -614,10 +623,10 @@
 
             <div id="sge-panel" class="mt-8 bg-gradient-to-br from-black via-gray-900 to-black p-6 rounded-2xl border-4 border-yellow-500 shadow-[0_0_40px_rgba(234,179,8,0.3)] relative transition-all duration-500">
                 
-                <div id="sge-super-warning" class="hidden absolute -top-6 left-1/2 transform -translate-x-1/2 w-[95%] md:w-auto bg-gradient-to-r from-red-600 via-yellow-500 to-red-600 text-white font-black px-6 py-2 md:py-3 rounded-xl shadow-[0_0_30px_rgba(239,68,68,1)] text-lg md:text-xl flex flex-col md:flex-row items-center justify-center gap-2 border-2 border-white z-50 animate-pulse text-center">
-                    <span class="text-2xl animate-bounce">🔥</span> 
-                    <span>CƠ HỘI CỰC MẠNH: 3 HỆ THỐNG ĐỒNG THUẬN!</span>
-                    <span class="text-2xl animate-bounce">🔥</span>
+                <div id="sge-super-warning" class="hidden absolute -top-8 left-1/2 transform -translate-x-1/2 w-[98%] md:w-auto bg-gradient-to-r from-red-600 via-yellow-400 to-red-600 text-black font-black px-8 py-3 md:py-4 rounded-xl shadow-[0_0_50px_rgba(239,68,68,1),0_0_20px_rgba(234,179,8,1)] text-xl md:text-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-4 border-white z-[100] text-center" style="animation: superBounce 1s infinite alternate;">
+                    <span class="text-3xl" style="animation: spinPulse 2s linear infinite;">🔥</span> 
+                    <span class="drop-shadow-md">SIÊU CƠ HỘI: 3 KẾT LUẬN ĐỒNG THUẬN!</span>
+                    <span class="text-3xl" style="animation: spinPulse 2s linear infinite;">🔥</span>
                 </div>
 
                 <div id="sge-title-badge" class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-black px-8 py-2 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.8)] text-xl flex items-center gap-2 border-2 border-black whitespace-nowrap z-10 transition-all">
@@ -1495,6 +1504,11 @@
             const prev2 = streaks.length > 2 ? streaks[streaks.length-3] : null;
             const prev3 = streaks.length > 3 ? streaks[streaks.length-4] : null;
 
+            const getOpposite = (val) => {
+                if (type === 'PB') return val === 'P' ? 'B' : 'P';
+                return val === 'D' ? 'S' : 'D';
+            };
+
             // 1. Check BỆT (Từ 3 trở lên)
             if (last.count >= 3) {
                 return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: last.count };
@@ -1502,8 +1516,7 @@
 
             // 2. Check Cầu 1-1 (Ping Pong) - Tối thiểu 3 nhịp
             if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
-                const nextExpected = last.val === (type === 'PB' ? 'P' : 'S') ? (type === 'PB' ? 'B' : 'D') : (type === 'PB' ? 'P' : 'S');
-                return { signal: nextExpected, desc: "Cầu 1-1 rõ ràng", weight: 3 };
+                return { signal: getOpposite(last.val), desc: "Cầu 1-1 rõ ràng", weight: 3 };
             }
 
             // 3. Check Cầu 2-2 
@@ -1513,22 +1526,17 @@
             }
             // Nếu đang là 2,2,2 -> Đánh ngược last để gãy sang màu kia
             if (last.count === 2 && prev1 && prev1.count === 2 && prev2 && prev2.count >= 1) {
-                const nextExpected = last.val === (type === 'PB' ? 'P' : 'S') ? (type === 'PB' ? 'B' : 'D') : (type === 'PB' ? 'P' : 'S');
-                return { signal: nextExpected, desc: "Cầu 2-2 (chuyển nhịp)", weight: 3.5 };
+                return { signal: getOpposite(last.val), desc: "Cầu 2-2 (chuyển nhịp)", weight: 3.5 };
             }
 
-            // 4. Các mẫu chuyên biệt cho D/S (Biểu đồ khoảng tỷ lệ)
-            if (type === 'DS') {
-                // 1D sang S hoặc 1S sang D
-                if (last.count === 1 && prev1 && prev1.count >= 2 && prev2 && prev2.count === 1) {
-                     const nextExpected = last.val === 'D' ? 'S' : 'D';
-                     return { signal: nextExpected, desc: `Thói quen 1${last.val} sang ${nextExpected}`, weight: 2.5 };
-                }
-                // 2D sang S hoặc 2S sang D
-                if (last.count === 2 && prev1 && prev1.count >= 1 && prev2 && prev2.count === 2) {
-                     const nextExpected = last.val === 'D' ? 'S' : 'D';
-                     return { signal: nextExpected, desc: `Thói quen 2${last.val} sang ${nextExpected}`, weight: 2.5 };
-                }
+            // 4. Các mẫu Quy luật Thói Quen Chuyển Đổi (Áp dụng chung cả PB và DS)
+            // Thói quen 1 tay chuyển (VD: 1P -> sang B)
+            if (last.count === 1 && prev1 && prev1.count >= 2 && prev2 && prev2.count === 1) {
+                 return { signal: getOpposite(last.val), desc: `Thói quen 1${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
+            }
+            // Thói quen 2 tay chuyển (VD: 2P -> sang B)
+            if (last.count === 2 && prev1 && prev1.count >= 1 && prev2 && prev2.count === 2) {
+                 return { signal: getOpposite(last.val), desc: `Thói quen 2${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
 
             return { signal: null, desc: "Cầu loạn/Không rõ ràng", weight: 0 };
@@ -1635,6 +1643,7 @@
             let isSuperWarning = false;
             
             const diff = Math.abs(scoreP - scoreB);
+            const isBigRoadBet = resBR.desc && resBR.desc.includes('Đang Bệt');
             
             if (scoreP === 0 && scoreB === 0) {
                 sgeDecisionText = 'BỎ QUA DO CẦU LOẠN';
@@ -1647,17 +1656,20 @@
                 if (finalSignalGE === 'P') winningKLs.push('KL3');
 
                 const agreeP = (resBR.signal === 'P' && finalSignalHT1 === 'P' && finalSignalGE === 'P');
-                const strongTrendP = (scoreP >= 5 && diff >= 3.5); 
                 isSuperWarning = agreeP;
 
-                if (agreeP || strongTrendP) {
+                if (agreeP && isBigRoadBet) {
                     sgeDecisionText = '👤 PLAYER (MẠNH TAY)'; 
+                    sgeDecisionClass = 'text-blue-400 drop-shadow-[0_0_30px_rgba(59,130,246,1)]';
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN + BIGROAD ĐANG BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (P: ${scoreP} > B: ${scoreB}).</li>`);
+                } else if (agreeP || (scoreP >= 5 && diff >= 3.5)) {
+                    sgeDecisionText = '👤 CHỐT PLAYER (TỰ TIN)'; 
                     sgeDecisionClass = 'text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu cực đẹp (Đồng thuận 3 hệ thống hoặc xu hướng dài). ĐÁNH MẠNH TAY! (P: ${scoreP} > B: ${scoreB}).</li>`);
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu đẹp (Đồng thuận hoặc xu hướng dài). VÀO LỆNH TỰ TIN (P: ${scoreP} > B: ${scoreB}).</li>`);
                 } else {
                     sgeDecisionText = '👤 CHỐT PLAYER'; 
                     sgeDecisionClass = 'text-blue-400';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về P nhưng chưa đủ mạnh. ĐÁNH NHẸ TAY (P: ${scoreP} > B: ${scoreB}).</li>`);
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về P nhưng chưa đạt điều kiện mạnh. ĐÁNH NHẸ TAY (P: ${scoreP} > B: ${scoreB}).</li>`);
                 }
 
                 let primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL3') ? 'KL3' : 'KL1');
@@ -1677,17 +1689,20 @@
                 if (finalSignalGE === 'B') winningKLs.push('KL3');
 
                 const agreeB = (resBR.signal === 'B' && finalSignalHT1 === 'B' && finalSignalGE === 'B');
-                const strongTrendB = (scoreB >= 5 && diff >= 3.5);
                 isSuperWarning = agreeB;
 
-                if (agreeB || strongTrendB) {
+                if (agreeB && isBigRoadBet) {
                     sgeDecisionText = '🏦 BANKER (MẠNH TAY)'; 
+                    sgeDecisionClass = 'text-red-400 drop-shadow-[0_0_30px_rgba(239,68,68,1)]';
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN + BIGROAD ĐANG BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (B: ${scoreB} > P: ${scoreP}).</li>`);
+                } else if (agreeB || (scoreB >= 5 && diff >= 3.5)) {
+                    sgeDecisionText = '🏦 CHỐT BANKER (TỰ TIN)'; 
                     sgeDecisionClass = 'text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu cực đẹp (Đồng thuận 3 hệ thống hoặc xu hướng dài). ĐÁNH MẠNH TAY! (B: ${scoreB} > P: ${scoreP}).</li>`);
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu đẹp (Đồng thuận hoặc xu hướng dài). VÀO LỆNH TỰ TIN (B: ${scoreB} > P: ${scoreP}).</li>`);
                 } else {
                     sgeDecisionText = '🏦 CHỐT BANKER'; 
                     sgeDecisionClass = 'text-red-400';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về B nhưng chưa đủ mạnh. ĐÁNH NHẸ TAY (B: ${scoreB} > P: ${scoreP}).</li>`);
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về B nhưng chưa đạt điều kiện mạnh. ĐÁNH NHẸ TAY (B: ${scoreB} > P: ${scoreP}).</li>`);
                 }
 
                 let primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL3') ? 'KL3' : 'KL1');
@@ -1725,22 +1740,27 @@
             const warnEl = document.getElementById('sge-super-warning');
             const glowEl = document.getElementById('sge-bg-glow');
             const titleBadge = document.getElementById('sge-title-badge');
+            const sgePanel = document.getElementById('sge-panel');
 
             if (decEl) { decEl.textContent = sgeDecisionText; decEl.className = `text-4xl md:text-5xl font-black transition-all duration-300 ${sgeDecisionClass} relative z-10`; }
             if (reasonEl) { reasonEl.innerHTML = sgeSubText; }
             if (listEl) { listEl.innerHTML = reasonsList.join(''); }
             
-            if (warnEl && glowEl && titleBadge) {
+            if (warnEl && glowEl && titleBadge && sgePanel) {
                 if (isSuperWarning) {
                     warnEl.classList.remove('hidden');
                     warnEl.classList.add('flex');
                     titleBadge.classList.add('hidden'); 
-                    glowEl.classList.add('bg-red-500/20', 'animate-pulse'); 
+                    glowEl.classList.add('bg-gradient-to-t', 'from-red-600/30', 'to-yellow-500/10', 'animate-pulse'); 
+                    sgePanel.classList.add('border-red-500', 'shadow-[0_0_50px_rgba(239,68,68,0.6)]');
+                    sgePanel.classList.remove('border-yellow-500', 'shadow-[0_0_40px_rgba(234,179,8,0.3)]');
                 } else {
                     warnEl.classList.add('hidden');
                     warnEl.classList.remove('flex');
                     titleBadge.classList.remove('hidden');
-                    glowEl.classList.remove('bg-red-500/20', 'animate-pulse');
+                    glowEl.classList.remove('bg-gradient-to-t', 'from-red-600/30', 'to-yellow-500/10', 'animate-pulse');
+                    sgePanel.classList.remove('border-red-500', 'shadow-[0_0_50px_rgba(239,68,68,0.6)]');
+                    sgePanel.classList.add('border-yellow-500', 'shadow-[0_0_40px_rgba(234,179,8,0.3)]');
                 }
             }
 
@@ -2097,15 +2117,18 @@
                 const warnEl = document.getElementById('sge-super-warning');
                 const glowEl = document.getElementById('sge-bg-glow');
                 const titleBadge = document.getElementById('sge-title-badge');
+                const sgePanel = document.getElementById('sge-panel');
 
                 if(decEl) { decEl.textContent = 'ĐANG TÍNH TOÁN...'; decEl.className = 'text-5xl md:text-6xl font-black text-gray-500 drop-shadow-xl transition-all duration-300 relative z-10'; }
                 if(reasonEl) reasonEl.innerHTML = '';
                 if(listEl) listEl.innerHTML = '<li class="italic text-gray-500">Chờ dữ liệu từ các hệ thống...</li>';
                 
-                if(warnEl && glowEl && titleBadge) {
+                if(warnEl && glowEl && titleBadge && sgePanel) {
                     warnEl.classList.add('hidden'); warnEl.classList.remove('flex');
                     titleBadge.classList.remove('hidden');
-                    glowEl.classList.remove('bg-red-500/20', 'animate-pulse');
+                    glowEl.classList.remove('bg-gradient-to-t', 'from-red-600/30', 'to-yellow-500/10', 'animate-pulse');
+                    sgePanel.classList.remove('border-red-500', 'shadow-[0_0_50px_rgba(239,68,68,0.6)]');
+                    sgePanel.classList.add('border-yellow-500', 'shadow-[0_0_40px_rgba(234,179,8,0.3)]');
                 }
 
                 renderSGEChart('sge-chart-br', [], 'PB');
@@ -2361,4 +2384,4 @@
 
     </script>
 </body>
-    </html>
+</html>
