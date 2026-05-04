@@ -506,8 +506,9 @@
                             <span class="text-gray-400">Đề xuất:</span>
                             <span id="sge-prop-br" class="font-bold text-gray-500 text-lg">-</span>
                         </div>
-                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50">
+                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 relative">
                             <div class="text-[10px] text-gray-500 font-bold uppercase mb-1 text-center">Lịch sử Đề xuất (Đúng/Sai)</div>
+                            <div id="sge-ds-percent-br" class="absolute top-1 right-2 text-[10px] font-black text-gray-500">0%</div>
                             <div id="sge-ds-chart-br" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar"></div>
                         </div>
                         <div id="sge-desc-br" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
@@ -520,8 +521,9 @@
                             <span class="text-gray-400">Đề xuất:</span>
                             <span id="sge-prop-ht1" class="font-bold text-gray-500 text-lg">-</span>
                         </div>
-                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50">
+                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 relative">
                             <div class="text-[10px] text-gray-500 font-bold uppercase mb-1 text-center">Lịch sử Đề xuất (Đúng/Sai)</div>
+                            <div id="sge-ds-percent-ht1" class="absolute top-1 right-2 text-[10px] font-black text-gray-500">0%</div>
                             <div id="sge-ds-chart-ht1" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar"></div>
                         </div>
                         <div id="sge-desc-ht1" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
@@ -534,8 +536,9 @@
                             <span class="text-gray-400">Đề xuất:</span>
                             <span id="sge-prop-ge" class="font-bold text-gray-500 text-lg">-</span>
                         </div>
-                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50">
+                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 relative">
                             <div class="text-[10px] text-gray-500 font-bold uppercase mb-1 text-center">Lịch sử Đề xuất (Đúng/Sai)</div>
+                            <div id="sge-ds-percent-ge" class="absolute top-1 right-2 text-[10px] font-black text-gray-500">0%</div>
                             <div id="sge-ds-chart-ge" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar"></div>
                         </div>
                         <div id="sge-desc-ge" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
@@ -1439,12 +1442,28 @@
             container.scrollLeft = container.scrollWidth;
         }
 
-        function renderSGE_DS_Chart(containerId, dsArray) {
+        // Cập nhật hàm Render biểu đồ Lịch sử Đúng/Sai có truyền PercentId
+        function renderSGE_DS_Chart(containerId, dsArray, percentId) {
             const container = document.getElementById(containerId);
+            const pctEl = document.getElementById(percentId);
             if (!container) return;
+            
             if (!dsArray || dsArray.length === 0) {
                 container.innerHTML = '<span class="text-[10px] text-gray-600 italic flex items-center justify-center w-full h-full">Chưa có kết quả</span>';
+                if (pctEl) {
+                    pctEl.textContent = '0%';
+                    pctEl.className = 'absolute top-1 right-2 text-[10px] font-black text-gray-500';
+                }
                 return;
+            }
+            
+            // Tính toán % tổng trên toàn bộ mảng dsArray (lịch sử)
+            let totalCorrect = dsArray.filter(v => v === 'D').length;
+            let percent = Math.round((totalCorrect / dsArray.length) * 100);
+            
+            if (pctEl) {
+                pctEl.textContent = percent + '%';
+                pctEl.className = `absolute top-1 right-2 text-[10px] font-black ${percent >= 50 ? 'text-green-400' : 'text-red-400'}`;
             }
             
             let html = '';
@@ -1533,9 +1552,9 @@
             const arrDS_KL3 = sgeHistory.filter(h => h.kl3).map(h => h.kl3 === h.actual ? 'D' : 'S');
 
             // GỌI HÀM VẼ BIỂU ĐỒ RA UI
-            renderSGE_DS_Chart('sge-ds-chart-br', arrDS_KL1);
-            renderSGE_DS_Chart('sge-ds-chart-ht1', arrDS_KL2);
-            renderSGE_DS_Chart('sge-ds-chart-ge', arrDS_KL3);
+            renderSGE_DS_Chart('sge-ds-chart-br', arrDS_KL1, 'sge-ds-percent-br');
+            renderSGE_DS_Chart('sge-ds-chart-ht1', arrDS_KL2, 'sge-ds-percent-ht1');
+            renderSGE_DS_Chart('sge-ds-chart-ge', arrDS_KL3, 'sge-ds-percent-ge');
 
             // --- TỔNG HỢP TRỌNG SỐ & ĐÁNH GIÁ META-ANALYSIS ---
             let scoreP = 0; let scoreB = 0;
@@ -2003,20 +2022,23 @@
             isProcessingInput = true; 
             
             const session = masterState.sessions[masterState.currentSessionId];
-            if (session.history.length === 0) {
+            if (!session || !session.history || session.history.length === 0) {
                 isProcessingInput = false;
                 return;
             }
             
             session.history.pop();
+            const currentLen = session.history.length;
             
+            // Xoá an toàn lịch sử GE dựa theo mốc gameNum
             if (session.geHistory && session.geHistory.length > 0) {
-                session.geHistory.pop();
+                session.geHistory = session.geHistory.filter(h => h.gameNum <= currentLen);
                 updateGeHistoryChart(session.geHistory);
             }
 
+            // Xoá an toàn lịch sử SGE dựa theo mốc gameNum
             if (session.sgeHistory && session.sgeHistory.length > 0) {
-                session.sgeHistory.pop();
+                session.sgeHistory = session.sgeHistory.filter(h => h.gameNum <= currentLen);
                 updateSGEStatsUI(session.sgeHistory);
             }
 
@@ -2085,9 +2107,9 @@
                 renderSGEChart('sge-chart-ht1', [], 'DS');
                 renderSGEChart('sge-chart-ge', [], 'DS');
 
-                renderSGE_DS_Chart('sge-ds-chart-br', []);
-                renderSGE_DS_Chart('sge-ds-chart-ht1', []);
-                renderSGE_DS_Chart('sge-ds-chart-ge', []);
+                renderSGE_DS_Chart('sge-ds-chart-br', [], 'sge-ds-percent-br');
+                renderSGE_DS_Chart('sge-ds-chart-ht1', [], 'sge-ds-percent-ht1');
+                renderSGE_DS_Chart('sge-ds-chart-ge', [], 'sge-ds-percent-ge');
 
                 showToast('Lịch sử đã được xoá trắng', 'info');
             }
