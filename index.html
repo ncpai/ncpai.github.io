@@ -8,204 +8,51 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827;
-            color: #F9FAFB;
-        }
-        .btn {
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .btn:active {
-            transform: translateY(1px);
-        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #F9FAFB; }
+        .btn { transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .btn:active { transform: translateY(1px); }
         .card-glow-total { box-shadow: 0 0 25px rgba(168, 85, 247, 0.7); }
-        .modal-backdrop {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.7);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 50; animation: fadeIn 0.3s ease;
-        }
-        .modal-content {
-            background-color: #1f2937;
-            padding: 1.5rem; border-radius: 1rem;
-            width: 90%; max-width: 500px;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid #374151;
-        }
-        .toast-notification {
-            position: fixed; top: 20px; right: 20px;
-            background-color: #1f2937; color: white;
-            padding: 1rem 1.5rem; border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-            z-index: 100; animation: slideDown 0.5s ease;
-            border-left: 4px solid;
-        }
-        .warning-alert {
-            position: fixed; top: 20px; left: 50%;
-            transform: translateX(-50%);
-            background-color: #f59e0b; color: white;
-            padding: 1rem 2rem; border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-            z-index: 100; animation: slideDown 0.5s ease;
-            border-left: 4px solid #d97706;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-100%); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
-        }
-        @keyframes superBounce {
-            0% { transform: translate(-50%, -10px) scale(1); }
-            100% { transform: translate(-50%, 5px) scale(1.05); }
-        }
-        @keyframes spinPulse {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.3) rotate(18deg); }
-            100% { transform: scale(1) rotate(-18deg); }
-        }
-        .system-frame {
-            border: 2px solid #374151;
-            border-radius: 0.75rem;
-            background: #1f2937;
-            transition: all 0.3s ease;
-        }
-        .system-frame.active {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
-        }
-        .history-chart {
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-start;
-            gap: 2px;
-            height: 60px;
-            padding: 5px 0 8px 0;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scroll-behavior: smooth;
-        }
-        .history-bar {
-            flex-shrink: 0;
-            width: 4px;
-            border-radius: 1px;
-        }
-        .history-bar-correct {
-            background-color: #3b82f6;
-            height: 100%;
-        }
-        .history-bar-incorrect {
-            background-color: #ef4444;
-            height: 40%;
-        }
-        .accuracy-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fadeIn 0.3s ease; }
+        .modal-content { background-color: #1f2937; padding: 1.5rem; border-radius: 1rem; width: 90%; max-width: 500px; animation: slideIn 0.3s ease-out; border: 1px solid #374151; }
+        .toast-notification { position: fixed; top: 20px; right: 20px; background-color: #1f2937; color: white; padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 100; animation: slideDown 0.5s ease; border-left: 4px solid; }
+        .warning-alert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #f59e0b; color: white; padding: 1rem 2rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 100; animation: slideDown 0.5s ease; border-left: 4px solid #d97706; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+        @keyframes superBounce { 0% { transform: translate(-50%, -10px) scale(1); } 100% { transform: translate(-50%, 5px) scale(1.05); } }
+        @keyframes spinPulse { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.3) rotate(18deg); } 100% { transform: scale(1) rotate(-18deg); } }
+        .system-frame { border: 2px solid #374151; border-radius: 0.75rem; background: #1f2937; transition: all 0.3s ease; }
+        .system-frame.active { border-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+        .history-chart { display: flex; align-items: flex-end; justify-content: flex-start; gap: 2px; height: 60px; padding: 5px 0 8px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; }
+        .history-bar { flex-shrink: 0; width: 4px; border-radius: 1px; }
+        .history-bar-correct { background-color: #3b82f6; height: 100%; }
+        .history-bar-incorrect { background-color: #ef4444; height: 40%; }
+        .accuracy-badge { padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
         .accuracy-high { background-color: #10b981; color: white; }
         .accuracy-medium { background-color: #f59e0b; color: white; }
         .accuracy-low { background-color: #ef4444; color: white; }
-        .system-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        @media (min-width: 1024px) {
-            .system-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        .game-bar-chart {
-            height: 300px;
-            margin-top: 1rem;
-        }
-        .confidence-interval-chart {
-            height: 200px;
-            margin-top: 1rem;
-        }
-        .game-result-chip {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin: 1px;
-        }
+        .system-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        @media (min-width: 1024px) { .system-grid { grid-template-columns: repeat(2, 1fr); } }
+        .game-bar-chart { height: 300px; margin-top: 1rem; }
+        .confidence-interval-chart { height: 200px; margin-top: 1rem; }
+        .game-result-chip { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin: 1px; }
         .game-correct { background-color: #10b981; color: white; }
         .game-incorrect { background-color: #ef4444; color: white; }
         .game-neutral { background-color: #6b7280; color: white; }
-        .final-decision-bar {
-            flex-shrink: 0;
-            width: 8px;
-            border-radius: 2px;
-            margin: 0 1px;
-        }
-        .final-decision-correct {
-            background-color: #3b82f6;
-            height: 100%;
-        }
-        .final-decision-incorrect {
-            background-color: #ef4444;
-            height: 40%;
-        }
-        input[type=range] {
-            -webkit-appearance: none;
-            background: #374151;
-            height: 4px;
-            border-radius: 2px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #8b5cf6;
-            cursor: pointer;
-        }
+        .final-decision-bar { flex-shrink: 0; width: 8px; border-radius: 2px; margin: 0 1px; }
+        .final-decision-correct { background-color: #3b82f6; height: 100%; }
+        .final-decision-incorrect { background-color: #ef4444; height: 40%; }
+        input[type=range] { -webkit-appearance: none; background: #374151; height: 4px; border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #8b5cf6; cursor: pointer; }
         .custom-scrollbar::-webkit-scrollbar, .history-chart::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track, .history-chart::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb, .history-chart::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover, .history-chart::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-
-        .section-content {
-            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out;
-            max-height: 2000px;
-            opacity: 1;
-            overflow: hidden;
-        }
-        .section-content.collapsed {
-            max-height: 0;
-            opacity: 0;
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-        }
+        .section-content { transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out; max-height: 2000px; opacity: 1; overflow: hidden; }
+        .section-content.collapsed { max-height: 0; opacity: 0; margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; }
     </style>
 </head>
 <body class="p-4 md:p-8 relative">
@@ -659,6 +506,10 @@
                             <span class="text-gray-400">Đề xuất:</span>
                             <span id="sge-prop-br" class="font-bold text-gray-500 text-lg">-</span>
                         </div>
+                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50">
+                            <div class="text-[10px] text-gray-500 font-bold uppercase mb-1 text-center">Lịch sử Đề xuất (Đúng/Sai)</div>
+                            <div id="sge-ds-chart-br" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar"></div>
+                        </div>
                         <div id="sge-desc-br" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
                     </div>
 
@@ -669,6 +520,10 @@
                             <span class="text-gray-400">Đề xuất:</span>
                             <span id="sge-prop-ht1" class="font-bold text-gray-500 text-lg">-</span>
                         </div>
+                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50">
+                            <div class="text-[10px] text-gray-500 font-bold uppercase mb-1 text-center">Lịch sử Đề xuất (Đúng/Sai)</div>
+                            <div id="sge-ds-chart-ht1" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar"></div>
+                        </div>
                         <div id="sge-desc-ht1" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
                     </div>
 
@@ -678,6 +533,10 @@
                         <div class="flex justify-between items-center text-sm bg-gray-900 p-3 rounded-lg border border-gray-700">
                             <span class="text-gray-400">Đề xuất:</span>
                             <span id="sge-prop-ge" class="font-bold text-gray-500 text-lg">-</span>
+                        </div>
+                        <div class="mt-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50">
+                            <div class="text-[10px] text-gray-500 font-bold uppercase mb-1 text-center">Lịch sử Đề xuất (Đúng/Sai)</div>
+                            <div id="sge-ds-chart-ge" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar"></div>
                         </div>
                         <div id="sge-desc-ge" class="text-sm text-gray-400 mt-3 text-center h-10 flex items-center justify-center">-</div>
                     </div>
@@ -1490,7 +1349,7 @@
             // type: 'PB' (BigRoad) hoặc 'DS' (HT1/GE)
             if (!array || array.length < 3) return { signal: null, desc: "Cầu quá ngắn", weight: 0 };
 
-            // Phân tích thành các chuỗi (streaks)
+            // 1. Phân tích thành các chuỗi (streaks)
             let streaks = [];
             let currentStr = array[0]; let count = 1;
             for(let i=1; i<array.length; i++) {
@@ -1502,39 +1361,53 @@
             const last = streaks[streaks.length-1];
             const prev1 = streaks.length > 1 ? streaks[streaks.length-2] : null;
             const prev2 = streaks.length > 2 ? streaks[streaks.length-3] : null;
-            const prev3 = streaks.length > 3 ? streaks[streaks.length-4] : null;
+
+            // --- PHÂN TÍCH VĨ MÔ (TÌM ĐIỂM GÃY LỊCH SỬ) ---
+            let maxHistoricalStreak = 0;
+            let breakAt3Count = 0;
+            let breakAt4Count = 0;
+            
+            const recentStreaks = streaks.slice(Math.max(0, streaks.length - 16), streaks.length - 1);
+            recentStreaks.forEach(s => {
+                if (s.count > maxHistoricalStreak) maxHistoricalStreak = s.count;
+                if (s.count === 3) breakAt3Count++;
+                if (s.count === 4) breakAt4Count++;
+            });
 
             const getOpposite = (val) => {
                 if (type === 'PB') return val === 'P' ? 'B' : 'P';
                 return val === 'D' ? 'S' : 'D';
             };
 
-            // 1. Check BỆT (Từ 3 trở lên)
+            // 2. Logic Bệt Nâng Cấp
             if (last.count >= 3) {
-                return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: last.count };
+                if (last.count === maxHistoricalStreak && maxHistoricalStreak <= 4 && recentStreaks.length > 0) {
+                     return { signal: getOpposite(last.val), desc: `Chạm ngưỡng gãy lịch sử (${maxHistoricalStreak} tay)`, weight: 3 }; 
+                }
+                if (last.count === 3 && breakAt3Count > 1 && maxHistoricalStreak < 5) {
+                     return { signal: getOpposite(last.val), desc: `Cảnh báo: Lịch sử hay gãy ở tay 3`, weight: 2.5 }; 
+                }
+                
+                return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: Math.min(last.count, 5) }; 
             }
 
-            // 2. Check Cầu 1-1 (Ping Pong) - Tối thiểu 3 nhịp
+            // 3. Check Cầu 1-1 (Ping Pong)
             if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
                 return { signal: getOpposite(last.val), desc: "Cầu 1-1 rõ ràng", weight: 3 };
             }
 
-            // 3. Check Cầu 2-2 
-            // Nếu đang là 2,2,1 -> Đánh giống last để đủ 2
+            // 4. Check Cầu 2-2 
             if (last.count === 1 && prev1 && prev1.count === 2 && prev2 && prev2.count === 2) {
                 return { signal: last.val, desc: "Đang cầu 2-2 (nhịp 1 sang 2)", weight: 3.5 };
             }
-            // Nếu đang là 2,2,2 -> Đánh ngược last để gãy sang màu kia
             if (last.count === 2 && prev1 && prev1.count === 2 && prev2 && prev2.count >= 1) {
                 return { signal: getOpposite(last.val), desc: "Cầu 2-2 (chuyển nhịp)", weight: 3.5 };
             }
 
-            // 4. Các mẫu Quy luật Thói Quen Chuyển Đổi (Áp dụng chung cả PB và DS)
-            // Thói quen 1 tay chuyển (VD: 1P -> sang B)
+            // 5. Thói quen chuyển đổi
             if (last.count === 1 && prev1 && prev1.count >= 2 && prev2 && prev2.count === 1) {
                  return { signal: getOpposite(last.val), desc: `Thói quen 1${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
-            // Thói quen 2 tay chuyển (VD: 2P -> sang B)
             if (last.count === 2 && prev1 && prev1.count >= 1 && prev2 && prev2.count === 2) {
                  return { signal: getOpposite(last.val), desc: `Thói quen 2${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
@@ -1551,7 +1424,6 @@
             }
             
             let html = '';
-            // Tăng số lượng kết quả hiển thị cho đẹp
             const displayArr = array.slice(-30);
             displayArr.forEach(val => {
                 if (type === 'PB') {
@@ -1565,6 +1437,53 @@
             });
             container.innerHTML = html;
             container.scrollLeft = container.scrollWidth;
+        }
+
+        function renderSGE_DS_Chart(containerId, dsArray) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            if (!dsArray || dsArray.length === 0) {
+                container.innerHTML = '<span class="text-[10px] text-gray-600 italic flex items-center justify-center w-full h-full">Chưa có kết quả</span>';
+                return;
+            }
+            
+            let html = '';
+            const displayArr = dsArray.slice(-20); 
+            displayArr.forEach(val => {
+                const color = val === 'D' ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
+                const height = val === 'D' ? 'h-full' : 'h-1/3';
+                html += `<div class="w-2 rounded-[1px] flex-shrink-0 ${color} ${height}" title="${val === 'D' ? 'Đề xuất ĐÚNG' : 'Đề xuất SAI'}"></div>`;
+            });
+            
+            container.innerHTML = html;
+            container.scrollLeft = container.scrollWidth;
+        }
+
+        function evaluateTrustScore(dsArray, systemName) {
+            if (!dsArray || dsArray.length < 3) return { modifier: 0, reason: "Dữ liệu quá ngắn" };
+            
+            const recent = dsArray.slice(-6).join(''); 
+            
+            // 1. NHÓM UY TÍN (Cộng điểm)
+            if (recent.endsWith('DDDD')) return { modifier: +3, reason: `${systemName} đang RẤT CHUẨN (Thông 4)` };
+            if (recent.endsWith('DDD')) return { modifier: +2, reason: `${systemName} đang VÀO FORM (Thông 3)` };
+            if (recent.endsWith('DD')) return { modifier: +1, reason: `${systemName} có đà thắng (Thông 2)` };
+            
+            // 2. NHÓM XUI XẺO / MẤT FORM (Trừ điểm nặng)
+            if (recent.endsWith('SSS')) return { modifier: -4, reason: `${systemName} đang GÃY LIÊN TỤC (Gãy 3)` };
+            if (recent.endsWith('SS')) return { modifier: -2, reason: `${systemName} đang MẤT FORM (Gãy 2)` };
+            
+            // 3. NHÓM DÍNH QUY LUẬT XẤU (Trừ điểm)
+            if (recent.endsWith('SD') && dsArray.length >= 4) {
+                const prev = dsArray.slice(-4, -2).join('');
+                if (prev === 'SD' || prev === 'SS') return { modifier: -2.5, reason: `${systemName} dính dớp "Cứ đúng 1 tay là gãy"` };
+            }
+            if (recent.endsWith('SDD') && dsArray.length >= 6) {
+                const prev = dsArray.slice(-6, -3).join('');
+                if (prev === 'SDD') return { modifier: -2.5, reason: `${systemName} dính dớp "Cứ đúng 2 tay là gãy"` };
+            }
+
+            return { modifier: 0, reason: "Phong độ trung bình" };
         }
 
         function calculateSGE() {
@@ -1583,9 +1502,9 @@
             if (ht1BaseVerdictRaw.includes('P')) ht1BaseSignal = 'P'; else if (ht1BaseVerdictRaw.includes('B')) ht1BaseSignal = 'B';
             const ht1IsReverse = ht1BaseVerdictRaw.includes('NGƯỢC');
 
-            // TT3: GE History (Đã lọc bỏ các ván không dự đoán để đồng bộ với biểu đồ gốc)
+            // TT3: GE History
             const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
-            const geBaseSignal = masterState.currentGePrediction; // P hoặc B
+            const geBaseSignal = masterState.currentGePrediction;
 
             // --- PHÂN TÍCH ---
             const resBR = analyzeSGETrend(arrBR, 'PB');
@@ -1607,24 +1526,43 @@
                 finalSignalGE = resGE.signal === 'D' ? geBaseSignal : (geBaseSignal === 'P' ? 'B' : 'P');
             }
 
-            // --- TỔNG HỢP TRỌNG SỐ ---
+            // TRÍCH XUẤT LỊCH SỬ ĐÚNG/SAI CỦA TỪNG ĐỀ XUẤT TRONG QUÁ KHỨ
+            const sgeHistory = session.sgeHistory || [];
+            const arrDS_KL1 = sgeHistory.filter(h => h.kl1).map(h => h.kl1 === h.actual ? 'D' : 'S');
+            const arrDS_KL2 = sgeHistory.filter(h => h.kl2).map(h => h.kl2 === h.actual ? 'D' : 'S');
+            const arrDS_KL3 = sgeHistory.filter(h => h.kl3).map(h => h.kl3 === h.actual ? 'D' : 'S');
+
+            // GỌI HÀM VẼ BIỂU ĐỒ RA UI
+            renderSGE_DS_Chart('sge-ds-chart-br', arrDS_KL1);
+            renderSGE_DS_Chart('sge-ds-chart-ht1', arrDS_KL2);
+            renderSGE_DS_Chart('sge-ds-chart-ge', arrDS_KL3);
+
+            // --- TỔNG HỢP TRỌNG SỐ & ĐÁNH GIÁ META-ANALYSIS ---
             let scoreP = 0; let scoreB = 0;
             let reasonsList = [];
 
-            // BR
-            if (resBR.signal === 'P') { scoreP += resBR.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL1 (BIGROAD) -> P:</span> ${resBR.desc}.</li>`); }
-            else if (resBR.signal === 'B') { scoreB += resBR.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL1 (BIGROAD) -> B:</span> ${resBR.desc}.</li>`); }
-            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL1 (BIGROAD) BỎ QUA:</span> ${resBR.desc}.</li>`); }
+            // Tính điểm tin cậy của từng hệ thống
+            const trustKL1 = evaluateTrustScore(arrDS_KL1, "BIG ROAD");
+            const trustKL2 = evaluateTrustScore(arrDS_KL2, "BĐKTL (HT1)");
+            const trustKL3 = evaluateTrustScore(arrDS_KL3, "GE");
 
-            // HT1
-            if (finalSignalHT1 === 'P') { scoreP += resHT1.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL2 (BĐKTL) -> P:</span> ${resHT1.desc}.</li>`); }
-            else if (finalSignalHT1 === 'B') { scoreB += resHT1.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL2 (BĐKTL) -> B:</span> ${resHT1.desc}.</li>`); }
-            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL2 (BĐKTL) BỎ QUA:</span> ${resHT1.desc} hoặc thiếu tín hiệu HT1.</li>`); }
+            // BR (KL1)
+            let weightKL1 = Math.max(0, resBR.weight + trustKL1.modifier); 
+            if (resBR.signal === 'P') { scoreP += weightKL1; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL1 (BR) -> P:</span> ${resBR.desc}. <span class="text-yellow-300 italic">(${trustKL1.reason})</span></li>`); }
+            else if (resBR.signal === 'B') { scoreB += weightKL1; reasonsList.push(`<li><span class="text-red-400 font-bold">KL1 (BR) -> B:</span> ${resBR.desc}. <span class="text-yellow-300 italic">(${trustKL1.reason})</span></li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL1 (BR) BỎ QUA:</span> ${resBR.desc}.</li>`); }
 
-            // GE
-            if (finalSignalGE === 'P') { scoreP += resGE.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL3 (GE Chart) -> P:</span> ${resGE.desc}.</li>`); }
-            else if (finalSignalGE === 'B') { scoreB += resGE.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL3 (GE Chart) -> B:</span> ${resGE.desc}.</li>`); }
-            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL3 (GE Chart) BỎ QUA:</span> ${resGE.desc} hoặc thiếu tín hiệu GE.</li>`); }
+            // HT1 (KL2)
+            let weightKL2 = Math.max(0, resHT1.weight + trustKL2.modifier);
+            if (finalSignalHT1 === 'P') { scoreP += weightKL2; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL2 (HT1) -> P:</span> ${resHT1.desc}. <span class="text-yellow-300 italic">(${trustKL2.reason})</span></li>`); }
+            else if (finalSignalHT1 === 'B') { scoreB += weightKL2; reasonsList.push(`<li><span class="text-red-400 font-bold">KL2 (HT1) -> B:</span> ${resHT1.desc}. <span class="text-yellow-300 italic">(${trustKL2.reason})</span></li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL2 (HT1) BỎ QUA:</span> ${resHT1.desc} hoặc thiếu tín hiệu.</li>`); }
+
+            // GE (KL3)
+            let weightKL3 = Math.max(0, resGE.weight + trustKL3.modifier);
+            if (finalSignalGE === 'P') { scoreP += weightKL3; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL3 (GE) -> P:</span> ${resGE.desc}. <span class="text-yellow-300 italic">(${trustKL3.reason})</span></li>`); }
+            else if (finalSignalGE === 'B') { scoreB += weightKL3; reasonsList.push(`<li><span class="text-red-400 font-bold">KL3 (GE) -> B:</span> ${resGE.desc}. <span class="text-yellow-300 italic">(${trustKL3.reason})</span></li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL3 (GE) BỎ QUA:</span> ${resGE.desc} hoặc thiếu tín hiệu.</li>`); }
 
             // TÍNH TOÁN STATS HIỂN THỊ
             const getRate = (arr) => arr.length > 0 ? Math.round(arr.filter(x=>x==='D').length/arr.length*100) + '%' : '0%';
@@ -1647,8 +1585,8 @@
             
             if (scoreP === 0 && scoreB === 0) {
                 sgeDecisionText = 'BỎ QUA DO CẦU LOẠN';
-                sgeSubText = '<span class="text-gray-400">Không có hệ thống nào đề xuất cầu rõ ràng.</span>';
-                reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: Cả 3 biểu đồ đều không có dạng cầu đẹp. Khuyên nghỉ.</li>`);
+                sgeSubText = '<span class="text-gray-400">Không có hệ thống nào đề xuất cầu rõ ràng hoặc đủ tin cậy.</span>';
+                reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: Các biểu đồ đều nhiễu. Khuyên nghỉ.</li>`);
             } else if (scoreP > scoreB) {
                 let winningKLs = [];
                 if (resBR.signal === 'P') winningKLs.push('KL1');
@@ -1851,7 +1789,6 @@
                     updateSystemAccuracy(system, data.accuracy);
                     break;
                 case 'chot_history_update':
-                    // Giữ lại hàm cũ nhưng không vẽ biểu đồ nữa.
                     break;
                 case 'session_update':
                     break;
@@ -1869,10 +1806,8 @@
                         } 
                         
                         calculateFinalDecision();
-                        // GỌI HÀM GOD EYE SAU KHI HT1 UPDATE
                         calculateGodEye();       
                         
-                        // MỞ KHÓA KHI HT1 GỬI DATA VỀ CHO HÀNG ĐỢI XỬ LÝ TIẾP
                         isProcessingInput = false;
                     }
                     break;
@@ -2035,7 +1970,6 @@
 
                 showToast(`Đang xử lý: ${currentResult === 'P' ? 'PLAYER' : 'BANKER'} (Còn ${inputQueue.length} ván trong hàng chờ)`, 'info');
 
-                // Đợi Iframe trả lời (hoặc đợi timeout failsafe 1.5s) trước khi xử lý phần tử tiếp theo
                 await new Promise(resolve => {
                     let checkInterval = setInterval(() => {
                         if (!isProcessingInput) { 
@@ -2058,16 +1992,15 @@
         }
 
         function undoLastAll() {
-            // Chặn nếu hàng đợi đang chạy
             if (isQueueRunning) { 
                 showToast('Đang xử lý hàng chờ, không thể hoàn tác lúc này!', 'warning'); 
                 return; 
             }
             
-            if (isProcessingInput) return; // Chặn bấm đúp
+            if (isProcessingInput) return;
             if (!masterState.currentSessionId) return;
             
-            isProcessingInput = true; // Khóa
+            isProcessingInput = true; 
             
             const session = masterState.sessions[masterState.currentSessionId];
             if (session.history.length === 0) {
@@ -2077,13 +2010,11 @@
             
             session.history.pop();
             
-            // Xoá cả lịch sử GE của ván vừa rồi
             if (session.geHistory && session.geHistory.length > 0) {
                 session.geHistory.pop();
                 updateGeHistoryChart(session.geHistory);
             }
 
-            // Xoá cả lịch sử SGE
             if (session.sgeHistory && session.sgeHistory.length > 0) {
                 session.sgeHistory.pop();
                 updateSGEStatsUI(session.sgeHistory);
@@ -2103,21 +2034,19 @@
             
             showToast('Đã hoàn tác 1 kết quả', 'info');
 
-            // Failsafe mở khóa sau khi hoàn tác
             setTimeout(() => { isProcessingInput = false; }, 800);
         }
 
         function clearHistoryAll() {
             if (!masterState.currentSessionId) return;
             if (confirm('Xóa sạch lịch sử của phiên hiện tại?')) {
-                // Xoá hàng chờ nếu có
                 inputQueue = [];
                 isQueueRunning = false;
                 isProcessingInput = false;
 
                 const session = masterState.sessions[masterState.currentSessionId];
                 session.history = [];
-                session.geHistory = []; // Reset GE
+                session.geHistory = []; 
                 session.sgeHistory = []; 
                 updateSGEStatsUI([]);
                 
@@ -2132,7 +2061,6 @@
                 calculateFinalDecision(); 
                 renderGodEyeUI("Chưa rõ - Chưa rõ", null, "Đã xoá lịch sử phiên.", "-", []);
                 
-                // Xóa UI SGE
                 const decEl = document.getElementById('sge-final-decision');
                 const reasonEl = document.getElementById('sge-final-reason');
                 const listEl = document.getElementById('sge-reasoning-list');
@@ -2156,6 +2084,10 @@
                 renderSGEChart('sge-chart-br', [], 'PB');
                 renderSGEChart('sge-chart-ht1', [], 'DS');
                 renderSGEChart('sge-chart-ge', [], 'DS');
+
+                renderSGE_DS_Chart('sge-ds-chart-br', []);
+                renderSGE_DS_Chart('sge-ds-chart-ht1', []);
+                renderSGE_DS_Chart('sge-ds-chart-ge', []);
 
                 showToast('Lịch sử đã được xoá trắng', 'info');
             }
@@ -2360,7 +2292,6 @@
                 return;
             }
 
-            // Lọc các kịch bản
             const all = sgeHistory;
             const agree3 = sgeHistory.filter(h => h.agreeCount === 3);
             const agree2 = sgeHistory.filter(h => h.agreeCount === 2);
@@ -2368,7 +2299,6 @@
             const followKL2 = sgeHistory.filter(h => h.agreedKLs.includes(2));
             const followKL3 = sgeHistory.filter(h => h.agreedKLs.includes(3));
 
-            // Render lưới giao diện
             container.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     ${createSGEStatCard('Tỉ lệ đúng TỔNG SGE', all, '🎯')}
