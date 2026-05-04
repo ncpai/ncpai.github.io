@@ -1656,31 +1656,42 @@
                 if (finalSignalGE === 'P') winningKLs.push('KL3');
 
                 const agreeP = (resBR.signal === 'P' && finalSignalHT1 === 'P' && finalSignalGE === 'P');
-                isSuperWarning = agreeP;
+                isSuperWarning = false;
 
-                if (agreeP && isBigRoadBet) {
-                    sgeDecisionText = '👤 PLAYER (MẠNH TAY)'; 
-                    sgeDecisionClass = 'text-blue-400 drop-shadow-[0_0_30px_rgba(59,130,246,1)]';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN + BIGROAD ĐANG BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (P: ${scoreP} > B: ${scoreB}).</li>`);
-                } else if (agreeP || (scoreP >= 5 && diff >= 3.5)) {
+                let primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL3') ? 'KL3' : 'KL1');
+                let detailStr = primaryKL === 'KL1' ? '' : `${stats[primaryKL].seq} ${stats[primaryKL].rate}`;
+
+                if (agreeP) {
+                    if (isBigRoadBet) {
+                        sgeDecisionText = '👤 PLAYER (MẠNH TAY)'; 
+                        sgeDecisionClass = 'text-blue-400 drop-shadow-[0_0_30px_rgba(59,130,246,1)]';
+                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN + BIGROAD ĐANG BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (P: ${scoreP} > B: ${scoreB}).</li>`);
+                        sgeSubText = `Vì 3 KL đồng thuận và Cầu Bệt<br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                        isSuperWarning = true;
+                    } else {
+                        sgeDecisionText = 'BỎ QUA - THIẾU BỆT'; 
+                        sgeDecisionClass = 'text-gray-500 drop-shadow-md';
+                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN nhưng Big Road không Bệt. Khuyên BỎ QUA để đảm bảo an toàn tuyệt đối.</li>`);
+                        sgeSubText = '<span class="text-yellow-400 text-base">Đợi đúng form 3 KL Đồng Thuận + Big Road Bệt.</span>';
+                    }
+                } else if (scoreP >= 5 && diff >= 3.5) {
                     sgeDecisionText = '👤 CHỐT PLAYER (TỰ TIN)'; 
                     sgeDecisionClass = 'text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]';
                     reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu đẹp (Đồng thuận hoặc xu hướng dài). VÀO LỆNH TỰ TIN (P: ${scoreP} > B: ${scoreB}).</li>`);
+                    if (winningKLs.length === 2) {
+                         sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    } else {
+                         sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    }
                 } else {
                     sgeDecisionText = '👤 CHỐT PLAYER'; 
                     sgeDecisionClass = 'text-blue-400';
                     reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về P nhưng chưa đạt điều kiện mạnh. ĐÁNH NHẸ TAY (P: ${scoreP} > B: ${scoreB}).</li>`);
-                }
-
-                let primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL3') ? 'KL3' : 'KL1');
-                if (isSuperWarning) {
-                    sgeSubText = `Vì 3 KL đồng thuận<br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
-                } else if (winningKLs.length === 2) {
-                    let detailStr = primaryKL === 'KL1' ? '' : `${stats[primaryKL].seq} ${stats[primaryKL].rate}`;
-                    sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
-                } else {
-                    let detailStr = primaryKL === 'KL1' ? '' : `${stats[primaryKL].seq} ${stats[primaryKL].rate}`;
-                    sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    if (winningKLs.length === 2) {
+                         sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    } else {
+                         sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    }
                 }
             } else if (scoreB > scoreP) {
                 let winningKLs = [];
@@ -1689,31 +1700,42 @@
                 if (finalSignalGE === 'B') winningKLs.push('KL3');
 
                 const agreeB = (resBR.signal === 'B' && finalSignalHT1 === 'B' && finalSignalGE === 'B');
-                isSuperWarning = agreeB;
+                isSuperWarning = false;
 
-                if (agreeB && isBigRoadBet) {
-                    sgeDecisionText = '🏦 BANKER (MẠNH TAY)'; 
-                    sgeDecisionClass = 'text-red-400 drop-shadow-[0_0_30px_rgba(239,68,68,1)]';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN + BIGROAD ĐANG BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (B: ${scoreB} > P: ${scoreP}).</li>`);
-                } else if (agreeB || (scoreB >= 5 && diff >= 3.5)) {
+                let primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL3') ? 'KL3' : 'KL1');
+                let detailStr = primaryKL === 'KL1' ? '' : `${stats[primaryKL].seq} ${stats[primaryKL].rate}`;
+
+                if (agreeB) {
+                    if (isBigRoadBet) {
+                        sgeDecisionText = '🏦 BANKER (MẠNH TAY)'; 
+                        sgeDecisionClass = 'text-red-400 drop-shadow-[0_0_30px_rgba(239,68,68,1)]';
+                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN + BIGROAD ĐANG BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (B: ${scoreB} > P: ${scoreP}).</li>`);
+                        sgeSubText = `Vì 3 KL đồng thuận và Cầu Bệt<br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                        isSuperWarning = true;
+                    } else {
+                        sgeDecisionText = 'BỎ QUA - THIẾU BỆT'; 
+                        sgeDecisionClass = 'text-gray-500 drop-shadow-md';
+                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN nhưng Big Road không Bệt. Khuyên BỎ QUA để đảm bảo an toàn tuyệt đối.</li>`);
+                        sgeSubText = '<span class="text-yellow-400 text-base">Đợi đúng form 3 KL Đồng Thuận + Big Road Bệt.</span>';
+                    }
+                } else if (scoreB >= 5 && diff >= 3.5) {
                     sgeDecisionText = '🏦 CHỐT BANKER (TỰ TIN)'; 
                     sgeDecisionClass = 'text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]';
                     reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu đẹp (Đồng thuận hoặc xu hướng dài). VÀO LỆNH TỰ TIN (B: ${scoreB} > P: ${scoreP}).</li>`);
+                    if (winningKLs.length === 2) {
+                         sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    } else {
+                         sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    }
                 } else {
                     sgeDecisionText = '🏦 CHỐT BANKER'; 
                     sgeDecisionClass = 'text-red-400';
                     reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về B nhưng chưa đạt điều kiện mạnh. ĐÁNH NHẸ TAY (B: ${scoreB} > P: ${scoreP}).</li>`);
-                }
-
-                let primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL3') ? 'KL3' : 'KL1');
-                if (isSuperWarning) {
-                    sgeSubText = `Vì 3 KL đồng thuận<br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
-                } else if (winningKLs.length === 2) {
-                    let detailStr = primaryKL === 'KL1' ? '' : `${stats[primaryKL].seq} ${stats[primaryKL].rate}`;
-                    sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
-                } else {
-                    let detailStr = primaryKL === 'KL1' ? '' : `${stats[primaryKL].seq} ${stats[primaryKL].rate}`;
-                    sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    if (winningKLs.length === 2) {
+                         sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    } else {
+                         sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    }
                 }
             } else {
                 sgeDecisionText = 'BỎ QUA - XUNG ĐỘT';
