@@ -578,7 +578,7 @@
         </div>
 
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 6.0 (Fractal & Limit Break SGE)</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 và 3 biểu đồ khác để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
@@ -1345,11 +1345,11 @@
         /* =========================================================================
            5.5 THUẬT TOÁN SUPPORT GE (SGE) - PHÁN QUYẾT TỐI CAO TỪ 3 TRẠNG THÁI
            ========================================================================= */
-           
-        // --- 1. PHÂN TÍCH TREND CHUNG ---
         function analyzeSGETrend(array, type) {
+            // type: 'PB' (BigRoad) hoặc 'DS' (HT1/GE)
             if (!array || array.length < 3) return { signal: null, desc: "Cầu quá ngắn", weight: 0 };
 
+            // 1. Phân tích thành các chuỗi (streaks)
             let streaks = [];
             let currentStr = array[0]; let count = 1;
             for(let i=1; i<array.length; i++) {
@@ -1362,19 +1362,41 @@
             const prev1 = streaks.length > 1 ? streaks[streaks.length-2] : null;
             const prev2 = streaks.length > 2 ? streaks[streaks.length-3] : null;
 
+            // --- PHÂN TÍCH VĨ MÔ (TÌM ĐIỂM GÃY LỊCH SỬ) ---
+            let maxHistoricalStreak = 0;
+            let breakAt3Count = 0;
+            let breakAt4Count = 0;
+            
+            const recentStreaks = streaks.slice(Math.max(0, streaks.length - 16), streaks.length - 1);
+            recentStreaks.forEach(s => {
+                if (s.count > maxHistoricalStreak) maxHistoricalStreak = s.count;
+                if (s.count === 3) breakAt3Count++;
+                if (s.count === 4) breakAt4Count++;
+            });
+
             const getOpposite = (val) => {
                 if (type === 'PB') return val === 'P' ? 'B' : 'P';
                 return val === 'D' ? 'S' : 'D';
             };
 
+            // 2. Logic Bệt Nâng Cấp
             if (last.count >= 3) {
+                if (last.count === maxHistoricalStreak && maxHistoricalStreak <= 4 && recentStreaks.length > 0) {
+                     return { signal: getOpposite(last.val), desc: `Chạm ngưỡng gãy lịch sử (${maxHistoricalStreak} tay)`, weight: 3 }; 
+                }
+                if (last.count === 3 && breakAt3Count > 1 && maxHistoricalStreak < 5) {
+                     return { signal: getOpposite(last.val), desc: `Cảnh báo: Lịch sử hay gãy ở tay 3`, weight: 2.5 }; 
+                }
+                
                 return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: Math.min(last.count, 5) }; 
             }
 
+            // 3. Check Cầu 1-1 (Ping Pong)
             if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
                 return { signal: getOpposite(last.val), desc: "Cầu 1-1 rõ ràng", weight: 3 };
             }
 
+            // 4. Check Cầu 2-2 
             if (last.count === 1 && prev1 && prev1.count === 2 && prev2 && prev2.count === 2) {
                 return { signal: last.val, desc: "Đang cầu 2-2 (nhịp 1 sang 2)", weight: 3.5 };
             }
@@ -1382,6 +1404,7 @@
                 return { signal: getOpposite(last.val), desc: "Cầu 2-2 (chuyển nhịp)", weight: 3.5 };
             }
 
+            // 5. Thói quen chuyển đổi
             if (last.count === 1 && prev1 && prev1.count >= 2 && prev2 && prev2.count === 1) {
                  return { signal: getOpposite(last.val), desc: `Thói quen 1${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
@@ -1392,150 +1415,6 @@
             return { signal: null, desc: "Cầu loạn/Không rõ ràng", weight: 0 };
         }
 
-        // --- 2. PHÂN TÍCH FRACTAL CHU KỲ DÀI ---
-        function analyzeFractalTrend(historyArray, lookbackLength, type) {
-            if (!historyArray || historyArray.length <= lookbackLength * 2) {
-                return { signal: null, confidence: 0, reason: "Dữ liệu quá ngắn để quét chu kỳ" };
-            }
-
-            const currentCluster = historyArray.slice(-lookbackLength).join('');
-            const pastHistoryStr = historyArray.slice(0, -1).join('');
-
-            let matchIndices = [];
-            let searchPos = pastHistoryStr.indexOf(currentCluster);
-
-            while (searchPos !== -1) {
-                if (searchPos + lookbackLength < historyArray.length - 1) {
-                     matchIndices.push(searchPos);
-                }
-                searchPos = pastHistoryStr.indexOf(currentCluster, searchPos + 1);
-            }
-
-            if (matchIndices.length === 0) {
-                return { signal: null, confidence: 0, reason: "Không tìm thấy chu kỳ lặp" };
-            }
-
-            let nextP = 0, nextB = 0, nextD = 0, nextS = 0;
-
-            matchIndices.forEach(index => {
-                const nextChar = historyArray[index + lookbackLength];
-                if (type === 'PB') {
-                    if (nextChar === 'P' || nextChar === 'B') {
-                        if (nextChar === 'P') nextP++; else nextB++;
-                    }
-                } else {
-                    if (nextChar === 'D' || nextChar === 'S') {
-                        if (nextChar === 'D') nextD++; else nextS++;
-                    }
-                }
-            });
-
-            const totalMatches = type === 'PB' ? (nextP + nextB) : (nextD + nextS);
-            const maxCount = type === 'PB' ? Math.max(nextP, nextB) : Math.max(nextD, nextS);
-            const winRate = totalMatches > 0 ? (maxCount / totalMatches) * 100 : 0;
-
-            if (winRate >= 80 && totalMatches >= 1) { 
-                let predictedSignal;
-                if (type === 'PB') predictedSignal = nextP > nextB ? 'P' : 'B';
-                else predictedSignal = nextD > nextS ? 'D' : 'S';
-                
-                return {
-                    signal: predictedSignal,
-                    confidence: winRate,
-                    reason: `Bắt được Chu kỳ cấu trúc [${currentCluster}] lặp lại (${maxCount}/${totalMatches} lần)`
-                };
-            }
-
-            return { signal: null, confidence: winRate, reason: "Chu kỳ lặp không ổn định" };
-        }
-
-        // --- 3. ĐÁNH GIÁ ĐỘ TIN CẬY VÀ TÌM ĐIỂM GÃY TỰ ĐỘNG (TRUST SCORE NÂNG CẤP) ---
-        function evaluateTrustScore(dsArray, systemName) {
-            if (!dsArray || dsArray.length < 3) return { action: 'NORMAL', modifier: 0, reason: "Dữ liệu quá ngắn" };
-
-            let dStreaks = [];
-            let sStreaks = [];
-            let currentStr = dsArray[0];
-            let count = 1;
-            
-            for (let i = 1; i < dsArray.length; i++) {
-                if (dsArray[i] === currentStr) {
-                    count++;
-                } else {
-                    if (currentStr === 'D') dStreaks.push(count);
-                    else sStreaks.push(count);
-                    currentStr = dsArray[i];
-                    count = 1;
-                }
-            }
-            
-            const ongoingVal = currentStr;
-            const ongoingCount = count;
-
-            let maxHistoricalD = dStreaks.length > 0 ? Math.max(...dStreaks) : 0;
-            let maxHistoricalS = sStreaks.length > 0 ? Math.max(...sStreaks) : 0;
-            
-            let breakAtD = {}; 
-            dStreaks.forEach(len => { breakAtD[len] = (breakAtD[len] || 0) + 1; });
-            let breakAtS = {};
-            sStreaks.forEach(len => { breakAtS[len] = (breakAtS[len] || 0) + 1; });
-
-            const recent = dsArray.slice(-6).join('');
-
-            // 1. Phân tích điểm tới hạn (Điểm gãy lịch sử)
-            if (ongoingVal === 'D') {
-                if (maxHistoricalD >= 2 && ongoingCount >= maxHistoricalD) {
-                    return { 
-                        action: 'INVERT', 
-                        modifier: 3, 
-                        reason: `Chạm ngưỡng gãy ĐÚNG lịch sử (${ongoingCount} tay). BẺ NGƯỢC tín hiệu!` 
-                    };
-                }
-                if (ongoingCount >= 2 && breakAtD[ongoingCount] >= 2 && ongoingCount !== maxHistoricalD) {
-                     return { 
-                        action: 'REDUCE', 
-                        modifier: -2.5, 
-                        reason: `Thường gãy ĐÚNG ở tay thứ ${ongoingCount} (${breakAtD[ongoingCount]} lần). Rủi ro cao!` 
-                    };
-                }
-                
-                if (ongoingCount >= 3) return { action: 'NORMAL', modifier: +2, reason: `Đang VÀO FORM (Thông ${ongoingCount})` };
-                if (ongoingCount === 2) return { action: 'NORMAL', modifier: +1, reason: `Có đà thắng (Thông 2)` };
-            } 
-            else if (ongoingVal === 'S') {
-                if (maxHistoricalS >= 2 && ongoingCount >= maxHistoricalS) {
-                    return { 
-                        action: 'NORMAL', 
-                        modifier: 3, 
-                        reason: `Chạm đáy gãy SAI lịch sử (${ongoingCount} tay). Tín hiệu sắp HỒI LẠI!` 
-                    };
-                }
-                if (ongoingCount >= 2 && breakAtS[ongoingCount] >= 2 && ongoingCount !== maxHistoricalS) {
-                     return { 
-                        action: 'NORMAL', 
-                        modifier: 1.5, 
-                        reason: `Thường kết thúc nhịp SAI ở tay thứ ${ongoingCount}. Khả năng Win tay này!` 
-                    };
-                }
-                
-                if (ongoingCount >= 3) return { action: 'REDUCE', modifier: -4, reason: `Đang GÃY LIÊN TỤC (Gãy ${ongoingCount})` };
-                if (ongoingCount === 2) return { action: 'REDUCE', modifier: -2, reason: `Đang MẤT FORM (Gãy 2)` };
-            }
-
-            // 2. Các quy luật xấu ngắn hạn
-            if (recent.endsWith('SD') && dsArray.length >= 4) {
-                const prev = dsArray.slice(-4, -2).join('');
-                if (prev === 'SD' || prev === 'SS') return { action: 'REDUCE', modifier: -2.5, reason: `Dính dớp "Cứ đúng 1 tay là gãy"` };
-            }
-            if (recent.endsWith('SDD') && dsArray.length >= 6) {
-                const prev = dsArray.slice(-6, -3).join('');
-                if (prev === 'SDD') return { action: 'REDUCE', modifier: -2.5, reason: `Dính dớp "Cứ đúng 2 tay là gãy"` };
-            }
-
-            return { action: 'NORMAL', modifier: 0, reason: "Phong độ trung bình" };
-        }
-
-        // HÀM VẼ BIỂU ĐỒ SGE
         function renderSGEChart(containerId, array, type) {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -1580,14 +1459,42 @@
             container.scrollLeft = container.scrollWidth;
         }
 
-        // TỔNG HỢP VÀ TÍNH TOÁN SGE
+        function evaluateTrustScore(dsArray, systemName) {
+            if (!dsArray || dsArray.length < 3) return { modifier: 0, reason: "Dữ liệu quá ngắn" };
+            
+            const recent = dsArray.slice(-6).join(''); 
+            
+            // 1. NHÓM UY TÍN (Cộng điểm)
+            if (recent.endsWith('DDDD')) return { modifier: +3, reason: `${systemName} đang RẤT CHUẨN (Thông 4)` };
+            if (recent.endsWith('DDD')) return { modifier: +2, reason: `${systemName} đang VÀO FORM (Thông 3)` };
+            if (recent.endsWith('DD')) return { modifier: +1, reason: `${systemName} có đà thắng (Thông 2)` };
+            
+            // 2. NHÓM XUI XẺO / MẤT FORM (Trừ điểm nặng)
+            if (recent.endsWith('SSS')) return { modifier: -4, reason: `${systemName} đang GÃY LIÊN TỤC (Gãy 3)` };
+            if (recent.endsWith('SS')) return { modifier: -2, reason: `${systemName} đang MẤT FORM (Gãy 2)` };
+            
+            // 3. NHÓM DÍNH QUY LUẬT XẤU (Trừ điểm)
+            if (recent.endsWith('SD') && dsArray.length >= 4) {
+                const prev = dsArray.slice(-4, -2).join('');
+                if (prev === 'SD' || prev === 'SS') return { modifier: -2.5, reason: `${systemName} dính dớp "Cứ đúng 1 tay là gãy"` };
+            }
+            if (recent.endsWith('SDD') && dsArray.length >= 6) {
+                const prev = dsArray.slice(-6, -3).join('');
+                if (prev === 'SDD') return { modifier: -2.5, reason: `${systemName} dính dớp "Cứ đúng 2 tay là gãy"` };
+            }
+
+            return { modifier: 0, reason: "Phong độ trung bình" };
+        }
+
         function calculateSGE() {
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
 
             // --- LẤY DATA 3 TRẠNG THÁI ---
+            // TT1: Big Road
             const arrBR = session.history || [];
             
+            // TT2: BĐKTL HT1
             const ht1Details = masterState.systemDetails.ht1;
             const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht1BaseVerdictRaw = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
@@ -1595,42 +1502,31 @@
             if (ht1BaseVerdictRaw.includes('P')) ht1BaseSignal = 'P'; else if (ht1BaseVerdictRaw.includes('B')) ht1BaseSignal = 'B';
             const ht1IsReverse = ht1BaseVerdictRaw.includes('NGƯỢC');
 
+            // TT3: GE History
             const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
             const geBaseSignal = masterState.currentGePrediction;
 
-            // --- PHÂN TÍCH TREND HIỆN TẠI ---
+            // --- PHÂN TÍCH ---
             const resBR = analyzeSGETrend(arrBR, 'PB');
             const resHT1 = analyzeSGETrend(arrHT1, 'DS');
             const resGE = analyzeSGETrend(arrGE, 'DS');
 
-            // --- PHÂN TÍCH FRACTAL CHU KỲ LẶP LẠI (SÂU) ---
-            const fractalBR = analyzeFractalTrend(arrBR, 6, 'PB');
-            const fractalHT1 = analyzeFractalTrend(arrHT1, 6, 'DS');
-            const fractalGE = analyzeFractalTrend(arrGE, 6, 'DS');
-
-            // Dịch mã TT2 & TT3 (D/S) sang P/B
+            // --- DỊCH MÃ TT2 & TT3 (D/S) SANG P/B ---
             let finalSignalHT1 = null;
             if (resHT1.signal && ht1BaseSignal) {
-                if (!ht1IsReverse) finalSignalHT1 = resHT1.signal === 'D' ? ht1BaseSignal : (ht1BaseSignal === 'P' ? 'B' : 'P');
-                else finalSignalHT1 = resHT1.signal === 'S' ? ht1BaseSignal : (ht1BaseSignal === 'P' ? 'B' : 'P');
+                if (!ht1IsReverse) {
+                    finalSignalHT1 = resHT1.signal === 'D' ? ht1BaseSignal : (ht1BaseSignal === 'P' ? 'B' : 'P');
+                } else {
+                    finalSignalHT1 = resHT1.signal === 'S' ? ht1BaseSignal : (ht1BaseSignal === 'P' ? 'B' : 'P');
+                }
             }
+
             let finalSignalGE = null;
             if (resGE.signal && geBaseSignal) {
                 finalSignalGE = resGE.signal === 'D' ? geBaseSignal : (geBaseSignal === 'P' ? 'B' : 'P');
             }
 
-            // Dịch mã Fractal DS sang P/B
-            let fractalSignalHT1 = null;
-            if (fractalHT1.signal && ht1BaseSignal) {
-                if (!ht1IsReverse) fractalSignalHT1 = fractalHT1.signal === 'D' ? ht1BaseSignal : (ht1BaseSignal === 'P' ? 'B' : 'P');
-                else fractalSignalHT1 = fractalHT1.signal === 'S' ? ht1BaseSignal : (ht1BaseSignal === 'P' ? 'B' : 'P');
-            }
-            let fractalSignalGE = null;
-            if (fractalGE.signal && geBaseSignal) {
-                fractalSignalGE = fractalGE.signal === 'D' ? geBaseSignal : (geBaseSignal === 'P' ? 'B' : 'P');
-            }
-
-            // TRÍCH XUẤT LỊCH SỬ ĐÚNG/SAI CỦA SGE ĐỂ ĐÁNH GIÁ TIN CẬY
+            // TRÍCH XUẤT LỊCH SỬ ĐÚNG/SAI CỦA TỪNG ĐỀ XUẤT TRONG QUÁ KHỨ
             const sgeHistory = session.sgeHistory || [];
             const arrDS_KL1 = sgeHistory.filter(h => h.kl1).map(h => h.kl1 === h.actual ? 'D' : 'S');
             const arrDS_KL2 = sgeHistory.filter(h => h.kl2).map(h => h.kl2 === h.actual ? 'D' : 'S');
@@ -1641,106 +1537,34 @@
             renderSGE_DS_Chart('sge-ds-chart-ht1', arrDS_KL2);
             renderSGE_DS_Chart('sge-ds-chart-ge', arrDS_KL3);
 
-            // --- TỔNG HỢP TRỌNG SỐ TÍCH HỢP QUÉT ĐIỂM GÃY ---
+            // --- TỔNG HỢP TRỌNG SỐ & ĐÁNH GIÁ META-ANALYSIS ---
             let scoreP = 0; let scoreB = 0;
             let reasonsList = [];
 
-            // 1. XỬ LÝ BR (KL1)
-            let actSignal1 = resBR.signal;
-            let weightKL1 = resBR.weight;
-            if (actSignal1) {
-                const trustKL1 = evaluateTrustScore(arrDS_KL1, "BIG ROAD");
-                if (trustKL1.action === 'INVERT') {
-                    actSignal1 = (actSignal1 === 'P') ? 'B' : 'P';
-                    weightKL1 = 3 + trustKL1.modifier; 
-                    reasonsList.push(`<li><span class="text-pink-400 font-bold">KL1 (BR) BẺ NGƯỢC -> ${actSignal1}:</span> ${trustKL1.reason}</li>`);
-                } else if (trustKL1.action === 'REDUCE') {
-                    weightKL1 = Math.max(0, weightKL1 + trustKL1.modifier);
-                    reasonsList.push(`<li><span class="text-gray-400 font-bold">KL1 (BR) -> ${actSignal1}:</span> Đã giảm điểm vì rủi ro. <span class="italic">(${trustKL1.reason})</span></li>`);
-                } else {
-                    weightKL1 = Math.max(0, weightKL1 + trustKL1.modifier);
-                    let color = actSignal1 === 'P' ? 'text-blue-400' : 'text-red-400';
-                    reasonsList.push(`<li><span class="${color} font-bold">KL1 (BR) -> ${actSignal1}:</span> ${resBR.desc}. <span class="text-yellow-300 italic">(${trustKL1.reason})</span></li>`);
-                }
+            // Tính điểm tin cậy của từng hệ thống
+            const trustKL1 = evaluateTrustScore(arrDS_KL1, "BIG ROAD");
+            const trustKL2 = evaluateTrustScore(arrDS_KL2, "BĐKTL (HT1)");
+            const trustKL3 = evaluateTrustScore(arrDS_KL3, "GE");
 
-                if (weightKL1 > 0) {
-                    if (actSignal1 === 'P') scoreP += weightKL1; else scoreB += weightKL1;
-                } else {
-                    reasonsList.push(`<li><span class="text-gray-500 font-bold">KL1 BỊ LOẠI:</span> Tín nhiệm quá thấp.</li>`);
-                }
-            } else {
-                reasonsList.push(`<li><span class="text-gray-500 font-bold">KL1 BỊ LOẠI:</span> Cầu chưa rõ ràng.</li>`);
-            }
+            // BR (KL1)
+            let weightKL1 = Math.max(0, resBR.weight + trustKL1.modifier); 
+            if (resBR.signal === 'P') { scoreP += weightKL1; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL1 (BR) -> P:</span> ${resBR.desc}. <span class="text-yellow-300 italic">(${trustKL1.reason})</span></li>`); }
+            else if (resBR.signal === 'B') { scoreB += weightKL1; reasonsList.push(`<li><span class="text-red-400 font-bold">KL1 (BR) -> B:</span> ${resBR.desc}. <span class="text-yellow-300 italic">(${trustKL1.reason})</span></li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL1 (BR) BỎ QUA:</span> ${resBR.desc}.</li>`); }
 
-            // 2. XỬ LÝ HT1 (KL2)
-            let actSignal2 = finalSignalHT1;
-            let weightKL2 = resHT1.weight;
-            if (actSignal2) {
-                const trustKL2 = evaluateTrustScore(arrDS_KL2, "BĐKTL (HT1)");
-                if (trustKL2.action === 'INVERT') {
-                    actSignal2 = (actSignal2 === 'P') ? 'B' : 'P';
-                    weightKL2 = 3 + trustKL2.modifier; 
-                    reasonsList.push(`<li><span class="text-pink-400 font-bold">KL2 (HT1) BẺ NGƯỢC -> ${actSignal2}:</span> ${trustKL2.reason}</li>`);
-                } else if (trustKL2.action === 'REDUCE') {
-                    weightKL2 = Math.max(0, weightKL2 + trustKL2.modifier);
-                    reasonsList.push(`<li><span class="text-gray-400 font-bold">KL2 (HT1) -> ${actSignal2}:</span> Đã giảm điểm vì rủi ro. <span class="italic">(${trustKL2.reason})</span></li>`);
-                } else {
-                    weightKL2 = Math.max(0, weightKL2 + trustKL2.modifier);
-                    let color = actSignal2 === 'P' ? 'text-blue-400' : 'text-red-400';
-                    reasonsList.push(`<li><span class="${color} font-bold">KL2 (HT1) -> ${actSignal2}:</span> ${resHT1.desc}. <span class="text-yellow-300 italic">(${trustKL2.reason})</span></li>`);
-                }
+            // HT1 (KL2)
+            let weightKL2 = Math.max(0, resHT1.weight + trustKL2.modifier);
+            if (finalSignalHT1 === 'P') { scoreP += weightKL2; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL2 (HT1) -> P:</span> ${resHT1.desc}. <span class="text-yellow-300 italic">(${trustKL2.reason})</span></li>`); }
+            else if (finalSignalHT1 === 'B') { scoreB += weightKL2; reasonsList.push(`<li><span class="text-red-400 font-bold">KL2 (HT1) -> B:</span> ${resHT1.desc}. <span class="text-yellow-300 italic">(${trustKL2.reason})</span></li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL2 (HT1) BỎ QUA:</span> ${resHT1.desc} hoặc thiếu tín hiệu.</li>`); }
 
-                if (weightKL2 > 0) {
-                    if (actSignal2 === 'P') scoreP += weightKL2; else scoreB += weightKL2;
-                } else {
-                    reasonsList.push(`<li><span class="text-gray-500 font-bold">KL2 BỊ LOẠI:</span> Tín nhiệm quá thấp.</li>`);
-                }
-            } else {
-                reasonsList.push(`<li><span class="text-gray-500 font-bold">KL2 BỊ LOẠI:</span> Cầu chưa rõ ràng hoặc thiếu tín hiệu.</li>`);
-            }
+            // GE (KL3)
+            let weightKL3 = Math.max(0, resGE.weight + trustKL3.modifier);
+            if (finalSignalGE === 'P') { scoreP += weightKL3; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL3 (GE) -> P:</span> ${resGE.desc}. <span class="text-yellow-300 italic">(${trustKL3.reason})</span></li>`); }
+            else if (finalSignalGE === 'B') { scoreB += weightKL3; reasonsList.push(`<li><span class="text-red-400 font-bold">KL3 (GE) -> B:</span> ${resGE.desc}. <span class="text-yellow-300 italic">(${trustKL3.reason})</span></li>`); }
+            else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL3 (GE) BỎ QUA:</span> ${resGE.desc} hoặc thiếu tín hiệu.</li>`); }
 
-            // 3. XỬ LÝ GE (KL3)
-            let actSignal3 = finalSignalGE;
-            let weightKL3 = resGE.weight;
-            if (actSignal3) {
-                const trustKL3 = evaluateTrustScore(arrDS_KL3, "GE");
-                if (trustKL3.action === 'INVERT') {
-                    actSignal3 = (actSignal3 === 'P') ? 'B' : 'P';
-                    weightKL3 = 3 + trustKL3.modifier; 
-                    reasonsList.push(`<li><span class="text-pink-400 font-bold">KL3 (GE) BẺ NGƯỢC -> ${actSignal3}:</span> ${trustKL3.reason}</li>`);
-                } else if (trustKL3.action === 'REDUCE') {
-                    weightKL3 = Math.max(0, weightKL3 + trustKL3.modifier);
-                    reasonsList.push(`<li><span class="text-gray-400 font-bold">KL3 (GE) -> ${actSignal3}:</span> Đã giảm điểm vì rủi ro. <span class="italic">(${trustKL3.reason})</span></li>`);
-                } else {
-                    weightKL3 = Math.max(0, weightKL3 + trustKL3.modifier);
-                    let color = actSignal3 === 'P' ? 'text-blue-400' : 'text-red-400';
-                    reasonsList.push(`<li><span class="${color} font-bold">KL3 (GE) -> ${actSignal3}:</span> ${resGE.desc}. <span class="text-yellow-300 italic">(${trustKL3.reason})</span></li>`);
-                }
-
-                if (weightKL3 > 0) {
-                    if (actSignal3 === 'P') scoreP += weightKL3; else scoreB += weightKL3;
-                } else {
-                    reasonsList.push(`<li><span class="text-gray-500 font-bold">KL3 BỊ LOẠI:</span> Tín nhiệm quá thấp.</li>`);
-                }
-            } else {
-                reasonsList.push(`<li><span class="text-gray-500 font-bold">KL3 BỊ LOẠI:</span> Cầu chưa rõ ràng hoặc thiếu tín hiệu.</li>`);
-            }
-
-            // --- BỔ SUNG ĐIỂM FRACTAL TỪ LỊCH SỬ CHU KỲ (NẾU CÓ) ---
-            if (fractalBR.signal) {
-                if (fractalBR.signal === 'P') { scoreP += 3.5; reasonsList.push(`<li><span class="text-purple-400 font-bold">💎 FRACTAL (BR) -> P:</span> ${fractalBR.reason}</li>`); }
-                else if (fractalBR.signal === 'B') { scoreB += 3.5; reasonsList.push(`<li><span class="text-purple-400 font-bold">💎 FRACTAL (BR) -> B:</span> ${fractalBR.reason}</li>`); }
-            }
-            if (fractalSignalHT1) {
-                if (fractalSignalHT1 === 'P') { scoreP += 3.5; reasonsList.push(`<li><span class="text-purple-400 font-bold">💎 FRACTAL (HT1) -> P:</span> ${fractalHT1.reason}</li>`); }
-                else if (fractalSignalHT1 === 'B') { scoreB += 3.5; reasonsList.push(`<li><span class="text-purple-400 font-bold">💎 FRACTAL (HT1) -> B:</span> ${fractalHT1.reason}</li>`); }
-            }
-            if (fractalSignalGE) {
-                if (fractalSignalGE === 'P') { scoreP += 3.5; reasonsList.push(`<li><span class="text-purple-400 font-bold">💎 FRACTAL (GE) -> P:</span> ${fractalGE.reason}</li>`); }
-                else if (fractalSignalGE === 'B') { scoreB += 3.5; reasonsList.push(`<li><span class="text-purple-400 font-bold">💎 FRACTAL (GE) -> B:</span> ${fractalGE.reason}</li>`); }
-            }
-
-            // TÍNH TOÁN STATS HIỂN THỊ UI
+            // TÍNH TOÁN STATS HIỂN THỊ
             const getRate = (arr) => arr.length > 0 ? Math.round(arr.filter(x=>x==='D').length/arr.length*100) + '%' : '0%';
             const getSeq = (arr) => arr.slice(-10).join('');
             
@@ -1765,11 +1589,11 @@
                 reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: Các biểu đồ đều nhiễu. Khuyên nghỉ.</li>`);
             } else if (scoreP > scoreB) {
                 let winningKLs = [];
-                if (actSignal1 === 'P') winningKLs.push('KL1');
-                if (actSignal2 === 'P') winningKLs.push('KL2');
-                if (actSignal3 === 'P') winningKLs.push('KL3');
+                if (resBR.signal === 'P') winningKLs.push('KL1');
+                if (finalSignalHT1 === 'P') winningKLs.push('KL2');
+                if (finalSignalGE === 'P') winningKLs.push('KL3');
 
-                const agreeP = (actSignal1 === 'P' && actSignal2 === 'P' && actSignal3 === 'P');
+                const agreeP = (resBR.signal === 'P' && finalSignalHT1 === 'P' && finalSignalGE === 'P');
                 isSuperWarning = false;
 
                 let primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL3') ? 'KL3' : 'KL1');
@@ -1779,33 +1603,41 @@
                     if (isBigRoadBet) {
                         sgeDecisionText = '👤 PLAYER (MẠNH TAY)'; 
                         sgeDecisionClass = 'text-blue-400 drop-shadow-[0_0_30px_rgba(59,130,246,1)]';
-                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN SAU LỌC + BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (P: ${scoreP.toFixed(1)} > B: ${scoreB.toFixed(1)}).</li>`);
+                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN + BIGROAD ĐANG BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (P: ${scoreP} > B: ${scoreB}).</li>`);
                         sgeSubText = `Vì 3 KL đồng thuận và Cầu Bệt<br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
                         isSuperWarning = true;
                     } else {
                         sgeDecisionText = 'BỎ QUA - THIẾU BỆT'; 
                         sgeDecisionClass = 'text-gray-500 drop-shadow-md';
-                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN nhưng Big Road không Bệt. Khuyên BỎ QUA để đảm bảo an toàn.</li>`);
+                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN nhưng Big Road không Bệt. Khuyên BỎ QUA để đảm bảo an toàn tuyệt đối.</li>`);
                         sgeSubText = '<span class="text-yellow-400 text-base">Đợi đúng form 3 KL Đồng Thuận + Big Road Bệt.</span>';
                     }
                 } else if (scoreP >= 5 && diff >= 3.5) {
                     sgeDecisionText = '👤 CHỐT PLAYER (TỰ TIN)'; 
                     sgeDecisionClass = 'text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Điểm P áp đảo. VÀO LỆNH TỰ TIN (P: ${scoreP.toFixed(1)} > B: ${scoreB.toFixed(1)}).</li>`);
-                    sgeSubText = `Vì SGE ưu tiên Tín hiệu P <br/><span class="text-white text-lg">➜ Phân tích chi tiết ở dưới</span>`;
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu đẹp (Đồng thuận hoặc xu hướng dài). VÀO LỆNH TỰ TIN (P: ${scoreP} > B: ${scoreB}).</li>`);
+                    if (winningKLs.length === 2) {
+                         sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    } else {
+                         sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    }
                 } else {
                     sgeDecisionText = '👤 CHỐT PLAYER'; 
                     sgeDecisionClass = 'text-blue-400';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về P nhưng chưa đạt điều kiện mạnh. ĐÁNH NHẸ TAY (P: ${scoreP.toFixed(1)} > B: ${scoreB.toFixed(1)}).</li>`);
-                    sgeSubText = `Vì SGE ưu tiên Tín hiệu P <br/><span class="text-white text-lg">➜ Phân tích chi tiết ở dưới</span>`;
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về P nhưng chưa đạt điều kiện mạnh. ĐÁNH NHẸ TAY (P: ${scoreP} > B: ${scoreB}).</li>`);
+                    if (winningKLs.length === 2) {
+                         sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    } else {
+                         sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    }
                 }
             } else if (scoreB > scoreP) {
                 let winningKLs = [];
-                if (actSignal1 === 'B') winningKLs.push('KL1');
-                if (actSignal2 === 'B') winningKLs.push('KL2');
-                if (actSignal3 === 'B') winningKLs.push('KL3');
+                if (resBR.signal === 'B') winningKLs.push('KL1');
+                if (finalSignalHT1 === 'B') winningKLs.push('KL2');
+                if (finalSignalGE === 'B') winningKLs.push('KL3');
 
-                const agreeB = (actSignal1 === 'B' && actSignal2 === 'B' && actSignal3 === 'B');
+                const agreeB = (resBR.signal === 'B' && finalSignalHT1 === 'B' && finalSignalGE === 'B');
                 isSuperWarning = false;
 
                 let primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL3') ? 'KL3' : 'KL1');
@@ -1815,30 +1647,38 @@
                     if (isBigRoadBet) {
                         sgeDecisionText = '🏦 BANKER (MẠNH TAY)'; 
                         sgeDecisionClass = 'text-red-400 drop-shadow-[0_0_30px_rgba(239,68,68,1)]';
-                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN SAU LỌC + BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (B: ${scoreB.toFixed(1)} > P: ${scoreP.toFixed(1)}).</li>`);
+                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-black text-lg animate-pulse">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN + BIGROAD ĐANG BỆT. SIÊU CƠ HỘI ĐÁNH MẠNH TAY! (B: ${scoreB} > P: ${scoreP}).</li>`);
                         sgeSubText = `Vì 3 KL đồng thuận và Cầu Bệt<br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
                         isSuperWarning = true;
                     } else {
                         sgeDecisionText = 'BỎ QUA - THIẾU BỆT'; 
                         sgeDecisionClass = 'text-gray-500 drop-shadow-md';
-                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN nhưng Big Road không Bệt. Khuyên BỎ QUA để đảm bảo an toàn.</li>`);
+                        reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-yellow-400 font-bold">=> TỔNG HỢP: 3 KL ĐỒNG THUẬN nhưng Big Road không Bệt. Khuyên BỎ QUA để đảm bảo an toàn tuyệt đối.</li>`);
                         sgeSubText = '<span class="text-yellow-400 text-base">Đợi đúng form 3 KL Đồng Thuận + Big Road Bệt.</span>';
                     }
                 } else if (scoreB >= 5 && diff >= 3.5) {
                     sgeDecisionText = '🏦 CHỐT BANKER (TỰ TIN)'; 
                     sgeDecisionClass = 'text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Điểm B áp đảo. VÀO LỆNH TỰ TIN (B: ${scoreB.toFixed(1)} > P: ${scoreP.toFixed(1)}).</li>`);
-                    sgeSubText = `Vì SGE ưu tiên Tín hiệu B <br/><span class="text-white text-lg">➜ Phân tích chi tiết ở dưới</span>`;
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Cầu đẹp (Đồng thuận hoặc xu hướng dài). VÀO LỆNH TỰ TIN (B: ${scoreB} > P: ${scoreP}).</li>`);
+                    if (winningKLs.length === 2) {
+                         sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    } else {
+                         sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    }
                 } else {
                     sgeDecisionText = '🏦 CHỐT BANKER'; 
                     sgeDecisionClass = 'text-red-400';
-                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về B nhưng chưa đạt điều kiện mạnh. ĐÁNH NHẸ TAY (B: ${scoreB.toFixed(1)} > P: ${scoreP.toFixed(1)}).</li>`);
-                    sgeSubText = `Vì SGE ưu tiên Tín hiệu B <br/><span class="text-white text-lg">➜ Phân tích chi tiết ở dưới</span>`;
+                    reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-green-400 font-bold">=> TỔNG HỢP: Nghiêng về B nhưng chưa đạt điều kiện mạnh. ĐÁNH NHẸ TAY (B: ${scoreB} > P: ${scoreP}).</li>`);
+                    if (winningKLs.length === 2) {
+                         sgeSubText = `Vì 2 KL đồng thuận <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    } else {
+                         sgeSubText = `Vì SGE ưu tiên ${primaryKL} <span class="text-gray-400 text-base">(${detailStr})</span><br/><span class="text-white text-lg">➜ ${stats[primaryKL].desc}</span>`;
+                    }
                 }
             } else {
                 sgeDecisionText = 'BỎ QUA - XUNG ĐỘT';
                 sgeSubText = '<span class="text-red-400">Tín hiệu đang đánh nhau. Tỷ lệ rủi ro cao!</span>';
-                reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-red-400 font-bold">=> TỔNG HỢP: Tín hiệu đang đánh nhau (Điểm P: ${scoreP.toFixed(1)} = Điểm B: ${scoreB.toFixed(1)}). Tỷ lệ rủi ro cao!</li>`);
+                reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-red-400 font-bold">=> TỔNG HỢP: Tín hiệu đang đánh nhau (Điểm P: ${scoreP} = Điểm B: ${scoreB}). Tỷ lệ rủi ro cao!</li>`);
             }
 
             // --- LƯU TRẠNG THÁI SGE CHỜ KẾT QUẢ ---
@@ -1848,9 +1688,9 @@
             
             masterState.currentSgePending = {
                 prediction: finalSgeSignal,
-                kl1: actSignal1,
-                kl2: actSignal2,
-                kl3: actSignal3
+                kl1: resBR.signal,
+                kl2: finalSignalHT1,
+                kl3: finalSignalGE
             };
 
             // --- RENDER GIAO DIỆN SGE ---
@@ -1892,10 +1732,10 @@
             const setProp = (id, res, finSignal, typeStr) => {
                 const el = document.getElementById(id);
                 if(el) {
-                    if(!res) { el.textContent = 'Bỏ qua'; el.className = 'font-bold text-gray-500 text-lg'; }
+                    if(!res.signal) { el.textContent = 'Bỏ qua'; el.className = 'font-bold text-gray-500 text-lg'; }
                     else if(typeStr === 'PB') {
-                        el.textContent = res === 'P' ? 'PLAYER' : 'BANKER';
-                        el.className = `font-bold text-lg ${res === 'P' ? 'text-blue-400' : 'text-red-400'}`;
+                        el.textContent = res.signal === 'P' ? 'PLAYER' : 'BANKER';
+                        el.className = `font-bold text-lg ${res.signal === 'P' ? 'text-blue-400' : 'text-red-400'}`;
                     } else { // DS -> Final P/B
                         if (finSignal) {
                             el.textContent = finSignal === 'P' ? 'PLAYER' : 'BANKER';
@@ -1907,9 +1747,9 @@
                 }
             }
 
-            setProp('sge-prop-br', actSignal1, null, 'PB');
-            setProp('sge-prop-ht1', null, actSignal2, 'DS');
-            setProp('sge-prop-ge', null, actSignal3, 'DS');
+            setProp('sge-prop-br', resBR, null, 'PB');
+            setProp('sge-prop-ht1', resHT1, finalSignalHT1, 'DS');
+            setProp('sge-prop-ge', resGE, finalSignalGE, 'DS');
 
             const elDescBr = document.getElementById('sge-desc-br'); if(elDescBr) elDescBr.textContent = resBR.desc;
             const elDescHt1 = document.getElementById('sge-desc-ht1'); if(elDescHt1) elDescHt1.textContent = resHT1.desc;
@@ -2329,7 +2169,7 @@
            8. XUẤT NHẬP DỮ LIỆU & TIỆN ÍCH KHÁC
            ========================================================================= */
         function exportMasterData() {
-            const exportData = { type: 'vanSuNhuY_export', version: '6.0', timestamp: new Date().toISOString(), sessions: masterState.sessions, system_sessions: {} };
+            const exportData = { type: 'vanSuNhuY_export', version: '5.0', timestamp: new Date().toISOString(), sessions: masterState.sessions, system_sessions: {} };
             let systemsCollected = 0;
             const handler = (e) => {
                 if (e.data.source && e.data.type === 'export_data') {
