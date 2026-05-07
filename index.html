@@ -215,6 +215,7 @@
 
     <div class="fixed bottom-6 right-6 z-[200] flex flex-col items-center gap-4">
         <div id="fab-menu" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom">
+            <a href="#mge-section" class="w-[60px] h-[60px] bg-pink-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(219,39,119,0.5)] hover:bg-pink-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới Master God Eye (MGE)">MGE</a>
             <a href="#ge-section" class="w-[60px] h-[60px] bg-purple-700 rounded-full text-white font-black shadow-[0_0_15px_rgba(126,34,206,0.5)] hover:bg-purple-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới thuật toán God Eye (GE)">GE</a>
             <a href="#ht1-chart-section" class="w-[60px] h-[60px] bg-indigo-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới biểu đồ HT1">HT1</a>
             <a href="#input-section" class="w-[60px] h-[60px] bg-gray-700 rounded-full text-white font-bold shadow-[0_0_15px_rgba(55,65,81,0.5)] hover:bg-gray-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Lên chỗ Nhập">⬆️</a>
@@ -415,153 +416,6 @@
             </div>
         </div>
 
-        <div class="mt-8 bg-gradient-to-r from-purple-900 to-blue-900 p-6 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-semibold mb-6 text-center text-yellow-300">📊 ĐỘ CHÍNH XÁC HỆ THỐNG ĐỀ XUẤT HIỆN TẠI (4 HỆ THỐNG)</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div id="ht1-chart-section" class="bg-gray-800 bg-opacity-70 p-4 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)] scroll-mt-8">
-                    <h3 class="text-lg font-bold mb-3 text-center text-blue-300">🔷 HT1 - Pattern Matching</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🧠 Phán Quyết:</span>
-                            <span id="ht1-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
-                            <span id="ht1-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Khoảng tỷ lệ:</span>
-                            <span id="ht1-confidence-range" class="font-bold text-cyan-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
-                            <span id="ht1-range-accuracy" class="font-bold text-green-400">-</span>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4 border border-yellow-500/30 relative">
-                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">NGUỒN DỮ AI</div>
-                            <h4 class="text-center text-sm text-yellow-300 mb-2 font-bold">Biểu đồ khoảng tỷ lệ (90-100%)</h4>
-                            <div id="ht1-interval-chart" class="history-chart"></div>
-                            <div id="ht1-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
-                            <div id="ht1-combined-chart" class="history-chart">
-                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
-                    <h3 class="text-lg font-semibold mb-3 text-center text-green-300">🔶 HT2 - Fixed & Optimized</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🧠 Phán Quyết:</span>
-                            <span id="ht2-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
-                            <span id="ht2-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Khoảng tỷ lệ:</span>
-                            <span id="ht2-confidence-range" class="font-bold text-cyan-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
-                            <span id="ht2-range-accuracy" class="font-bold text-green-400">-</span>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
-                            <div id="ht2-interval-chart" class="history-chart"></div>
-                            <div id="ht2-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
-                            <div id="ht2-combined-chart" class="history-chart">
-                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
-                    <h3 class="text-lg font-semibold mb-3 text-center text-orange-300">🔸 HT3 - Standard System</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🧠 Phán Quyết:</span>
-                            <span id="ht3-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
-                            <span id="ht3-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Khoảng tỷ lệ:</span>
-                            <span id="ht3-confidence-range" class="font-bold text-cyan-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
-                            <span id="ht3-range-accuracy" class="font-bold text-green-400">-</span>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
-                            <div id="ht3-interval-chart" class="history-chart"></div>
-                            <div id="ht3-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
-                            <div id="ht3-combined-chart" class="history-chart">
-                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
-                    <h3 class="text-lg font-semibold mb-3 text-center text-pink-300">🔹 HT4 - Advanced System</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🧠 Phán Quyết:</span>
-                            <span id="ht4-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
-                            <span id="ht4-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Khoảng tỷ lệ:</span>
-                            <span id="ht4-confidence-range" class="font-bold text-cyan-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
-                            <span id="ht4-range-accuracy" class="font-bold text-green-400">-</span>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
-                            <div id="ht4-interval-chart" class="history-chart"></div>
-                            <div id="ht4-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
-                            <div id="ht4-combined-chart" class="history-chart">
-                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div id="ge-section" class="mt-8 bg-gradient-to-br from-indigo-900 via-gray-900 to-purple-900 p-6 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.4)] border-2 border-purple-500 relative scroll-mt-8">
             <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white font-black px-6 py-2 rounded-full shadow-lg text-lg flex items-center gap-2">
                 👁️ THUẬT TOÁN GOD EYE (GE)
@@ -649,44 +503,6 @@
                             <li class="italic text-gray-500">Chờ dữ liệu từ các hệ thống...</li>
                         </ul>
                     </div>
-
-                    <div id="mge-panel" class="w-full mt-4 text-left bg-gradient-to-br from-indigo-900/40 to-purple-900/40 p-5 rounded-lg border-2 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.2)] relative z-10 hidden transition-all duration-500">
-                        <div class="absolute -top-3 left-4 bg-purple-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_10px_rgba(147,51,234,0.8)] tracking-widest border border-purple-400">👁️ MGE METRIC ANALYSIS & DECISION</div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 mb-3">
-                            <div class="bg-black/40 p-3 rounded border border-gray-700">
-                                <div class="text-xs text-gray-400 mb-1 font-bold">🎯 Cấu trúc TỔNG SGE:</div>
-                                <div id="mge-global-status" class="text-sm font-bold text-gray-200">-</div>
-                            </div>
-                            <div class="bg-black/40 p-3 rounded border border-gray-700">
-                                <div id="mge-local-title" class="text-xs text-yellow-400 mb-1 font-bold">✨ Cấu trúc KỊCH BẢN CHỌN:</div>
-                                <div id="mge-local-status" class="text-sm font-bold text-gray-200">-</div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-black/60 p-4 rounded-lg border border-purple-500/30 flex flex-col md:flex-row items-center md:items-start gap-4 mb-3">
-                            <div class="flex-shrink-0 flex flex-col items-center justify-center text-center w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-700 pb-3 md:pb-0 md:pr-4">
-                                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Quyết định MGE</span>
-                                <div id="mge-final-decision" class="text-2xl md:text-3xl font-black drop-shadow-md transition-all">-</div>
-                            </div>
-                            <div class="w-full md:w-2/3">
-                                <h4 class="text-white font-black text-sm uppercase tracking-wide mb-1 flex items-center gap-2">
-                                    <span id="mge-icon" class="text-xl">🤖</span> LÍ DO & ĐI TIỀN:
-                                </h4>
-                                <div id="mge-advice" class="text-sm font-medium text-gray-300 leading-relaxed">-</div>
-                            </div>
-                        </div>
-
-                        <div class="bg-black/40 p-3 rounded border border-gray-700">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">Biểu đồ Lịch sử MGE</span>
-                                <span id="mge-winrate" class="text-sm font-black text-purple-400 bg-purple-900/50 px-2 py-0.5 rounded border border-purple-500/50">0%</span>
-                            </div>
-                            <div id="mge-history-chart" class="flex items-end justify-start overflow-x-auto h-10 gap-1 custom-scrollbar px-1 py-1 bg-gray-900/50 rounded-lg w-full scroll-smooth">
-                                <span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -738,10 +554,50 @@
                     </button>
                     
                     <div id="sge-stats-container" class="w-full mt-4 hidden flex-col gap-3 bg-gray-900/90 p-5 rounded-xl border border-yellow-500/30 shadow-inner">
-                        </div>
+                    </div>
                 </div>
-            </div>
-            </div>
+            </div> <div id="mge-section" class="mt-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-black p-6 rounded-2xl border-4 border-purple-500 shadow-[0_0_40px_rgba(168,85,247,0.4)] relative transition-all duration-500 scroll-mt-8 block">
+                <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-black px-8 py-2 rounded-full shadow-[0_0_15px_rgba(192,38,211,0.8)] text-xl flex items-center gap-2 border-2 border-white whitespace-nowrap z-10 transition-all">
+                    👁️ MASTER GOD EYE (MGE) 👁️
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="bg-black/40 p-4 rounded-xl border border-gray-600 shadow-inner">
+                        <div class="text-xs text-gray-400 mb-1 font-bold uppercase tracking-widest">🎯 Cấu trúc TỔNG SGE:</div>
+                        <div id="mge-global-status" class="text-base font-bold text-gray-200">Chờ dữ liệu...</div>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded-xl border border-gray-600 shadow-inner">
+                        <div id="mge-local-title" class="text-xs text-yellow-400 mb-1 font-bold uppercase tracking-widest">✨ Cấu trúc KỊCH BẢN CHỌN:</div>
+                        <div id="mge-local-status" class="text-base font-bold text-gray-200">Chờ dữ liệu...</div>
+                    </div>
+                </div>
+                
+                <div class="bg-black/60 p-6 rounded-xl border border-purple-500/50 flex flex-col md:flex-row items-center md:items-start gap-6 mb-4 relative overflow-hidden">
+                    <div class="flex-shrink-0 flex flex-col items-center justify-center text-center w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-700 pb-4 md:pb-0 md:pr-6 relative z-10">
+                        <span class="text-sm text-gray-400 font-bold uppercase tracking-widest mb-2">Quyết định MGE</span>
+                        <div id="mge-final-decision" class="text-4xl md:text-5xl font-black text-gray-500 drop-shadow-md transition-all">-</div>
+                    </div>
+                    <div class="w-full md:w-2/3 relative z-10">
+                        <h4 class="text-white font-black text-base uppercase tracking-wide mb-2 flex items-center gap-2">
+                            <span id="mge-icon" class="text-2xl">🤖</span> LÍ DO & CHIẾN LƯỢC ĐI TIỀN:
+                        </h4>
+                        <div id="mge-advice" class="text-base font-medium text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded-lg border border-gray-700">Chưa có đủ dữ liệu để phân tích kịch bản.</div>
+                    </div>
+                </div>
+
+                <div class="bg-black/40 p-4 rounded-xl border border-gray-700 shadow-inner">
+                    <div class="flex justify-between items-center mb-3 border-b border-gray-700 pb-2">
+                        <span class="text-sm text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Biểu đồ Lịch sử MGE
+                        </span>
+                        <span id="mge-winrate" class="text-base font-black text-gray-500 bg-gray-900 px-3 py-1 rounded-lg border border-gray-700 shadow-md">0%</span>
+                    </div>
+                    <div id="mge-history-chart" class="flex items-end justify-start overflow-x-auto h-16 gap-1 custom-scrollbar px-2 py-2 bg-gray-900/80 rounded-lg w-full scroll-smooth">
+                        <span class="text-sm text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt lệnh</span>
+                    </div>
+                </div>
+            </div> </div>
 
         <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="text-center p-3 bg-gray-800 rounded-lg border border-gray-700/50">
@@ -1611,7 +1467,7 @@
                     const color = val === 'D' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)]';
                     const height = val === 'D' ? 'h-full' : 'h-1/3';
                     html += `<div class="w-3 md:w-4 rounded-[3px] ${color} ${height} flex-shrink-0 border border-white/10 hover:brightness-125 transition-all cursor-default" title="${val === 'D' ? 'Đúng (D)' : 'Sai (S)'}"></div>`;
-                }
+                });
             });
             container.innerHTML = html;
             container.scrollLeft = container.scrollWidth;
@@ -1671,7 +1527,6 @@
                 if (!ht4IsReverse) {
                     finalSignalHT4 = resHT4.signal === 'D' ? ht4BaseSignal : (ht4BaseSignal === 'P' ? 'B' : 'P');
                 } else {
-                    // Căn cứ theo logic user cung cấp: "Không phải đâu cứ ngược là S". Nếu baseSignal là Ngược thì S đại diện cho việc đi theo Lệnh.
                     finalSignalHT4 = resHT4.signal === 'S' ? ht4BaseSignal : (ht4BaseSignal === 'P' ? 'B' : 'P');
                 }
             }
@@ -1700,9 +1555,8 @@
             else if (finalSignalHT4 === 'B') { scoreB += resHT4.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL4 (BĐKTL HT4) -> B:</span> ${resHT4.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL4 (BĐKTL HT4) BỎ QUA:</span> ${resHT4.desc} hoặc thiếu tín hiệu HT4.</li>`); }
 
-
             // ====================================================================
-            // --- LOGIC: ƯU TIÊN CẦU BỆT VÀ BỆT 1-1 CỦA KL ĐÃ ĐÚNG VÁN TRƯỚC (CODE 2)
+            // --- LOGIC: ƯU TIÊN CẦU BỆT VÀ BỆT 1-1 CỦA KL ĐÃ ĐÚNG VÁN TRƯỚC ---
             // ====================================================================
             let prevCorrectKLs = [];
             if (session.sgeHistory && session.sgeHistory.length > 0 && session.history && session.history.length > 0) {
@@ -1857,7 +1711,7 @@
             }
 
             // =========================================================================
-            // GỌI MASTER GOD EYE (MGE) TRÍCH XUẤT DỮ LIỆU (TỪ CODE 1)
+            // GỌI MASTER GOD EYE (MGE) TRÍCH XUẤT DỮ LIỆU
             // =========================================================================
             let activeLocalType = '';
             let localTitle = '';
@@ -1952,7 +1806,7 @@
                     else if(typeStr === 'PB') {
                         el.textContent = res.signal === 'P' ? 'PLAYER' : 'BANKER';
                         el.className = `font-bold text-lg ${res.signal === 'P' ? 'text-blue-400' : 'text-red-400'}`;
-                    } else { // DS -> Final P/B
+                    } else { 
                         if (finSignal) {
                             el.textContent = finSignal === 'P' ? 'PLAYER' : 'BANKER';
                             el.className = `font-bold text-lg ${finSignal === 'P' ? 'text-blue-400' : 'text-red-400'}`;
@@ -2007,7 +1861,6 @@
                     updateSystemAccuracy(system, data.accuracy);
                     break;
                 case 'chot_history_update':
-                    // Không vẽ biểu đồ cũ
                     break;
                 case 'session_update':
                     break;
@@ -2160,10 +2013,8 @@
                     updateSGEStatsUI(session.sgeHistory);
                 }
 
-                // THÊM ĐOẠN NÀY ĐỂ LƯU LỊCH SỬ MGE CHỐT
                 if (masterState.currentMgePrediction !== undefined) {
                     if (!session.mgeHistory) session.mgeHistory = [];
-                    // Chỉ lưu lại ván có chốt (Không lưu những ván MGE báo Bỏ qua/null)
                     if (masterState.currentMgePrediction !== null) {
                         session.mgeHistory.push({
                             gameNum: session.history.length,
@@ -2237,7 +2088,6 @@
                 updateSGEStatsUI(session.sgeHistory);
             }
 
-            // Đồng bộ Hoàn tác cho MGE
             if (session.mgeHistory) {
                  session.mgeHistory = session.mgeHistory.filter(h => h.gameNum <= session.history.length);
                  updateMgeChart(session.mgeHistory);
@@ -2273,7 +2123,6 @@
                 session.sgeHistory = []; 
                 updateSGEStatsUI([]);
                 
-                // MGE clear
                 session.mgeHistory = []; 
                 updateMgeChart([]);
                 masterState.currentMgePrediction = null;
@@ -2296,12 +2145,21 @@
                 const glowEl = document.getElementById('sge-bg-glow');
                 const titleBadge = document.getElementById('sge-title-badge');
                 const sgePanel = document.getElementById('sge-panel');
-                const mgePanel = document.getElementById('mge-panel');
+                
+                // MGE UI Reset
+                const mgeDecEl = document.getElementById('mge-final-decision');
+                const mgeAdviceEl = document.getElementById('mge-advice');
+                const mgeGlobalStatusEl = document.getElementById('mge-global-status');
+                const mgeLocalStatusEl = document.getElementById('mge-local-status');
 
                 if(decEl) { decEl.textContent = 'ĐANG TÍNH TOÁN...'; decEl.className = 'text-5xl md:text-6xl font-black text-gray-500 drop-shadow-xl transition-all duration-300 relative z-10'; }
                 if(reasonEl) reasonEl.innerHTML = '';
                 if(listEl) listEl.innerHTML = '<li class="italic text-gray-500">Chờ dữ liệu từ các hệ thống...</li>';
-                if(mgePanel) mgePanel.classList.add('hidden');
+                
+                if(mgeDecEl) { mgeDecEl.textContent = '-'; mgeDecEl.className = 'text-4xl md:text-5xl font-black text-gray-500 drop-shadow-md transition-all'; }
+                if(mgeAdviceEl) mgeAdviceEl.innerHTML = 'Chưa có đủ dữ liệu để phân tích kịch bản.';
+                if(mgeGlobalStatusEl) mgeGlobalStatusEl.textContent = 'Chờ dữ liệu...';
+                if(mgeLocalStatusEl) mgeLocalStatusEl.textContent = 'Chờ dữ liệu...';
                 
                 if(warnEl && glowEl && titleBadge && sgePanel) {
                     warnEl.classList.add('hidden'); warnEl.classList.remove('flex');
@@ -2579,63 +2437,69 @@
         }
 
         function runMGE(globalArr, localArr, localTitle, sgeDecisionText, finalSgeSignal) {
-            const mgePanel = document.getElementById('mge-panel');
-            // Nếu SGE bỏ qua hoặc không có tín hiệu, MGE cũng bỏ qua
-            if (sgeDecisionText.includes('BỎ QUA') || !sgeDecisionText || !finalSgeSignal) {
-                mgePanel.classList.add('hidden');
-                masterState.currentMgePrediction = null;
-                return;
-            }
-            mgePanel.classList.remove('hidden');
-
             const g = evaluateMGEStructure(globalArr);
             const l = evaluateMGEStructure(localArr);
 
-            document.getElementById('mge-global-status').innerHTML = `<span class="${g.status === 'GOOD' ? 'text-green-400' : (g.status === 'BAD' ? 'text-red-400' : 'text-yellow-400')}">${g.desc}</span>`;
-            document.getElementById('mge-local-title').innerHTML = `✨ Cấu trúc [${localTitle}]:`;
-            document.getElementById('mge-local-status').innerHTML = `<span class="${l.status === 'GOOD' ? 'text-green-400' : (l.status === 'BAD' ? 'text-red-400' : 'text-yellow-400')}">${l.desc}</span>`;
+            const globalStatusEl = document.getElementById('mge-global-status');
+            const localTitleEl = document.getElementById('mge-local-title');
+            const localStatusEl = document.getElementById('mge-local-status');
+
+            if(globalStatusEl) globalStatusEl.innerHTML = `<span class="${g.status === 'GOOD' ? 'text-green-400' : (g.status === 'BAD' ? 'text-red-400' : 'text-yellow-400')}">${g.desc}</span>`;
+            if(localTitleEl) localTitleEl.innerHTML = `✨ Cấu trúc [${localTitle || 'Chưa rõ'}]:`;
+            if(localStatusEl) localStatusEl.innerHTML = `<span class="${l.status === 'GOOD' ? 'text-green-400' : (l.status === 'BAD' ? 'text-red-400' : 'text-yellow-400')}">${l.desc}</span>`;
 
             let icon = '🤖';
             let advice = '';
             let mgeDecision = null;
             let getOpposite = (val) => val === 'P' ? 'B' : 'P';
 
-            if (g.score >= 1 && l.score >= 1) {
-                icon = '🔥';
-                mgeDecision = finalSgeSignal; // Đồng thuận SGE
-                advice = `<span class="text-green-400 font-bold">KỊCH BẢN 1 (SIÊU ĐỒNG THUẬN):</span> SGE và Kịch bản cục bộ đều đang ăn thông.<br/>➜ <b>LÍ DO:</b> Lịch sử bắt nhịp đang cực chuẩn. <b>MGE KHUYÊN: Theo SGE, đánh mạnh tay (Paroli).</b>`;
-            } else if (g.score < 0 && l.score >= 1) {
-                icon = '🛡️';
-                mgeDecision = finalSgeSignal; // Theo cục bộ (gánh team)
-                advice = `<span class="text-blue-400 font-bold">KỊCH BẢN 2 (CỤC BỘ GÁNH TEAM):</span> Tổng SGE đang nhiễu, nhưng kịch bản này lại đang ăn.<br/>➜ <b>LÍ DO:</b> Dòng tiền đang tin vào kịch bản này. <b>MGE KHUYÊN: Đánh theo SGE nhưng đi vốn đều.</b>`;
-            } else if (g.score < 0 && l.score < 0) {
-                icon = '🛑';
-                mgeDecision = getOpposite(finalSgeSignal); // BẺ KÈO TRÁI SGE
-                advice = `<span class="text-red-400 font-bold">KỊCH BẢN 3 (BẪY KÉP - BẺ KÈO):</span> Cảnh báo đỏ! Cả Tổng và Cục bộ đều đang Bệt Sai (bắt bài sai bét).<br/>➜ <b>LÍ DO:</b> Lịch sử chỉ ra hễ SGE ra lệnh là gãy. <b>MGE KHUYÊN: Đánh ngược lệnh SGE (Trái kèo).</b>`;
-            } else if (g.score >= 1 && l.score < 0) {
-                icon = '👁️';
+            if (sgeDecisionText.includes('BỎ QUA') || !sgeDecisionText || !finalSgeSignal) {
+                icon = '⏸️';
                 mgeDecision = null; // Bỏ qua
-                advice = `<span class="text-yellow-400 font-bold">KỊCH BẢN 4 (XUNG ĐỘT CẤU TRÚC):</span> Tổng đang tốt nhưng Kịch bản cục bộ lại báo sai.<br/>➜ <b>LÍ DO:</b> Đang ở giai đoạn bẻ gãy xu hướng. <b>MGE KHUYÊN: Bỏ qua ván này, đợi test nhịp xong.</b>`;
+                advice = `<span class="text-gray-400 font-bold">SGE BỎ QUA:</span> Không có tín hiệu từ SGE để MGE phân tích.<br/>➜ <b>MGE KHUYÊN: Theo SGE, nghỉ ván này.</b>`;
             } else {
-                icon = '⚖️';
-                mgeDecision = null; // Chờ
-                advice = `<span class="text-gray-300 font-bold">KỊCH BẢN CHỜ (RĂNG CƯA):</span> Nhịp D/S đang là răng cưa ngắn hạn, chưa rõ.<br/>➜ <b>LÍ DO:</b> Tỷ lệ ăn thua 50/50. <b>MGE KHUYÊN: Bỏ qua hoặc đánh nhỏ nhất có thể.</b>`;
+                if (g.score >= 1 && l.score >= 1) {
+                    icon = '🔥';
+                    mgeDecision = finalSgeSignal; // Đồng thuận SGE
+                    advice = `<span class="text-green-400 font-bold">KỊCH BẢN 1 (SIÊU ĐỒNG THUẬN):</span> SGE và Kịch bản cục bộ đều đang ăn thông.<br/>➜ <b>LÍ DO:</b> Lịch sử bắt nhịp đang cực chuẩn. <b>MGE KHUYÊN: Theo SGE, đánh mạnh tay (Paroli).</b>`;
+                } else if (g.score < 0 && l.score >= 1) {
+                    icon = '🛡️';
+                    mgeDecision = finalSgeSignal; // Theo cục bộ (gánh team)
+                    advice = `<span class="text-blue-400 font-bold">KỊCH BẢN 2 (CỤC BỘ GÁNH TEAM):</span> Tổng SGE đang nhiễu, nhưng kịch bản này lại đang ăn.<br/>➜ <b>LÍ DO:</b> Dòng tiền đang tin vào kịch bản này. <b>MGE KHUYÊN: Đánh theo SGE nhưng đi vốn đều.</b>`;
+                } else if (g.score < 0 && l.score < 0) {
+                    icon = '🛑';
+                    mgeDecision = getOpposite(finalSgeSignal); // BẺ KÈO TRÁI SGE
+                    advice = `<span class="text-red-400 font-bold">KỊCH BẢN 3 (BẪY KÉP - BẺ KÈO):</span> Cảnh báo đỏ! Cả Tổng và Cục bộ đều đang Bệt Sai (bắt bài sai bét).<br/>➜ <b>LÍ DO:</b> Lịch sử chỉ ra hễ SGE ra lệnh là gãy. <b>MGE KHUYÊN: Đánh ngược lệnh SGE (Trái kèo).</b>`;
+                } else if (g.score >= 1 && l.score < 0) {
+                    icon = '👁️';
+                    mgeDecision = null; // Bỏ qua
+                    advice = `<span class="text-yellow-400 font-bold">KỊCH BẢN 4 (XUNG ĐỘT CẤU TRÚC):</span> Tổng đang tốt nhưng Kịch bản cục bộ lại báo sai.<br/>➜ <b>LÍ DO:</b> Đang ở giai đoạn bẻ gãy xu hướng. <b>MGE KHUYÊN: Bỏ qua ván này, đợi test nhịp xong.</b>`;
+                } else {
+                    icon = '⚖️';
+                    mgeDecision = null; // Chờ
+                    advice = `<span class="text-gray-300 font-bold">KỊCH BẢN CHỜ (RĂNG CƯA):</span> Nhịp D/S đang là răng cưa ngắn hạn, chưa rõ.<br/>➜ <b>LÍ DO:</b> Tỷ lệ ăn thua 50/50. <b>MGE KHUYÊN: Bỏ qua hoặc đánh nhỏ nhất có thể.</b>`;
+                }
             }
 
             masterState.currentMgePrediction = mgeDecision;
 
             // Render Quyết định MGE
             const decEl = document.getElementById('mge-final-decision');
-            if (mgeDecision === 'P') {
-                decEl.innerHTML = '👤 PLAYER'; decEl.className = 'text-2xl md:text-3xl font-black text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]';
-            } else if (mgeDecision === 'B') {
-                decEl.innerHTML = '🏦 BANKER'; decEl.className = 'text-2xl md:text-3xl font-black text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]';
-            } else {
-                decEl.innerHTML = 'BỎ QUA'; decEl.className = 'text-xl font-bold text-gray-500';
+            if (decEl) {
+                if (mgeDecision === 'P') {
+                    decEl.innerHTML = '👤 PLAYER'; decEl.className = 'text-4xl md:text-5xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] transition-all';
+                } else if (mgeDecision === 'B') {
+                    decEl.innerHTML = '🏦 BANKER'; decEl.className = 'text-4xl md:text-5xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] transition-all';
+                } else {
+                    decEl.innerHTML = 'BỎ QUA'; decEl.className = 'text-3xl md:text-4xl font-bold text-gray-500 transition-all';
+                }
             }
 
-            document.getElementById('mge-icon').textContent = icon;
-            document.getElementById('mge-advice').innerHTML = advice;
+            const iconEl = document.getElementById('mge-icon');
+            if (iconEl) iconEl.textContent = icon;
+            
+            const adviceEl = document.getElementById('mge-advice');
+            if (adviceEl) adviceEl.innerHTML = advice;
         }
 
         // HÀM VẼ BIỂU ĐỒ & TỈ LỆ THẮNG MGE
@@ -2645,8 +2509,8 @@
             if (!chartEl) return;
             
             if (!mgeHistory || mgeHistory.length === 0) {
-                chartEl.innerHTML = '<span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>';
-                if (wrEl) { wrEl.textContent = '0%'; wrEl.className = 'text-sm font-black text-gray-500 bg-gray-900 px-2 py-0.5 rounded border border-gray-700'; }
+                chartEl.innerHTML = '<span class="text-sm text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt lệnh</span>';
+                if (wrEl) { wrEl.textContent = '0%'; wrEl.className = 'text-base font-black text-gray-500 bg-gray-900 px-3 py-1 rounded-lg border border-gray-700 shadow-md'; }
                 return;
             }
 
@@ -2656,7 +2520,7 @@
                 if (item.correct) correct++;
                 const bg = item.correct ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
                 const height = item.correct ? 'h-full' : 'h-1/3';
-                html += `<div class="w-2.5 flex-shrink-0 rounded-[1px] ${bg} ${height}" title="Ván ${item.gameNum}: MGE Đoán ${item.predicted} - Thực tế ${item.actual}"></div>`;
+                html += `<div class="w-3 flex-shrink-0 rounded-[2px] ${bg} ${height} hover:brightness-125 transition-all cursor-default" title="Ván ${item.gameNum}: MGE Đoán ${item.predicted} - Thực tế ${item.actual}"></div>`;
             });
             
             chartEl.innerHTML = html;
@@ -2665,7 +2529,7 @@
             if (wrEl) {
                 const rate = Math.round((correct / mgeHistory.length) * 100);
                 wrEl.textContent = `${rate}% (${correct}/${mgeHistory.length})`;
-                wrEl.className = `text-sm font-black px-2 py-0.5 rounded border ${rate >= 50 ? 'text-green-400 bg-green-900/40 border-green-500/50' : 'text-red-400 bg-red-900/40 border-red-500/50'}`;
+                wrEl.className = `text-base font-black px-3 py-1 rounded-lg border shadow-md ${rate >= 50 ? 'text-green-400 bg-green-900/40 border-green-500/50' : 'text-red-400 bg-red-900/40 border-red-500/50'}`;
             }
         }
 
@@ -2694,4 +2558,4 @@
 
     </script>
 </body>
-                </html>
+    </html>
