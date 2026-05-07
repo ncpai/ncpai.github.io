@@ -416,6 +416,153 @@
             </div>
         </div>
 
+        <div class="mt-8 bg-gradient-to-r from-purple-900 to-blue-900 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-semibold mb-6 text-center text-yellow-300">📊 ĐỘ CHÍNH XÁC HỆ THỐNG ĐỀ XUẤT HIỆN TẠI (4 HỆ THỐNG)</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div id="ht1-chart-section" class="bg-gray-800 bg-opacity-70 p-4 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)] scroll-mt-8">
+                    <h3 class="text-lg font-bold mb-3 text-center text-blue-300">🔷 HT1 - Pattern Matching</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">🧠 Phán Quyết:</span>
+                            <span id="ht1-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
+                            <span id="ht1-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">Khoảng tỷ lệ:</span>
+                            <span id="ht1-confidence-range" class="font-bold text-cyan-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
+                            <span id="ht1-range-accuracy" class="font-bold text-green-400">-</span>
+                        </div>
+                        
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4 border border-yellow-500/30 relative">
+                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">NGUỒN DỮ AI</div>
+                            <h4 class="text-center text-sm text-yellow-300 mb-2 font-bold">Biểu đồ khoảng tỷ lệ (90-100%)</h4>
+                            <div id="ht1-interval-chart" class="history-chart"></div>
+                            <div id="ht1-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
+                        </div>
+                        
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
+                            <div id="ht1-combined-chart" class="history-chart">
+                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-3 text-center text-green-300">🔶 HT2 - Fixed & Optimized</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">🧠 Phán Quyết:</span>
+                            <span id="ht2-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
+                            <span id="ht2-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">Khoảng tỷ lệ:</span>
+                            <span id="ht2-confidence-range" class="font-bold text-cyan-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
+                            <span id="ht2-range-accuracy" class="font-bold text-green-400">-</span>
+                        </div>
+                        
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
+                            <div id="ht2-interval-chart" class="history-chart"></div>
+                            <div id="ht2-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
+                        </div>
+                        
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
+                            <div id="ht2-combined-chart" class="history-chart">
+                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-3 text-center text-orange-300">🔸 HT3 - Standard System</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">🧠 Phán Quyết:</span>
+                            <span id="ht3-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
+                            <span id="ht3-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">Khoảng tỷ lệ:</span>
+                            <span id="ht3-confidence-range" class="font-bold text-cyan-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
+                            <span id="ht3-range-accuracy" class="font-bold text-green-400">-</span>
+                        </div>
+                        
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
+                            <div id="ht3-interval-chart" class="history-chart"></div>
+                            <div id="ht3-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
+                        </div>
+                        
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
+                            <div id="ht3-combined-chart" class="history-chart">
+                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-3 text-center text-pink-300">🔹 HT4 - Advanced System</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">🧠 Phán Quyết:</span>
+                            <span id="ht4-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
+                            <span id="ht4-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">Khoảng tỷ lệ:</span>
+                            <span id="ht4-confidence-range" class="font-bold text-cyan-400">-</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
+                            <span id="ht4-range-accuracy" class="font-bold text-green-400">-</span>
+                        </div>
+                        
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
+                            <div id="ht4-interval-chart" class="history-chart"></div>
+                            <div id="ht4-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
+                        </div>
+                        
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
+                            <div id="ht4-combined-chart" class="history-chart">
+                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="ge-section" class="mt-8 bg-gradient-to-br from-indigo-900 via-gray-900 to-purple-900 p-6 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.4)] border-2 border-purple-500 relative scroll-mt-8">
             <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white font-black px-6 py-2 rounded-full shadow-lg text-lg flex items-center gap-2">
                 👁️ THUẬT TOÁN GOD EYE (GE)
@@ -657,18 +804,26 @@
             }
         }
 
+        // ĐÃ KHẮC PHỤC LỖI FAB: Sử dụng inline-style DOM thay vì phụ thuộc class của Tailwind CDN
         function toggleFAB() {
             const menu = document.getElementById('fab-menu');
             const icon = document.getElementById('fab-icon');
             if (!menu || !icon) return;
-            const isClosed = menu.classList.contains('opacity-0');
             
-            if (isClosed) {
+            if (menu.classList.contains('opacity-0')) {
                 menu.classList.remove('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
-                icon.classList.add('rotate-[135deg]'); 
+                // Ép styles hiển thị
+                menu.style.opacity = '1';
+                menu.style.transform = 'translateY(0) scale(1)';
+                menu.style.pointerEvents = 'auto';
+                icon.style.transform = 'rotate(135deg)';
             } else {
                 menu.classList.add('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
-                icon.classList.remove('rotate-[135deg]');
+                // Ép styles ẩn
+                menu.style.opacity = '0';
+                menu.style.transform = 'translateY(2rem) scale(0.75)';
+                menu.style.pointerEvents = 'none';
+                icon.style.transform = 'rotate(0deg)';
             }
         }
 
@@ -2146,7 +2301,6 @@
                 const titleBadge = document.getElementById('sge-title-badge');
                 const sgePanel = document.getElementById('sge-panel');
                 
-                // MGE UI Reset
                 const mgeDecEl = document.getElementById('mge-final-decision');
                 const mgeAdviceEl = document.getElementById('mge-advice');
                 const mgeGlobalStatusEl = document.getElementById('mge-global-status');
@@ -2453,7 +2607,8 @@
             let mgeDecision = null;
             let getOpposite = (val) => val === 'P' ? 'B' : 'P';
 
-            if (sgeDecisionText.includes('BỎ QUA') || !sgeDecisionText || !finalSgeSignal) {
+            // Bảo vệ tránh lỗi null (fail-safe)
+            if (!sgeDecisionText || sgeDecisionText.includes('BỎ QUA') || !finalSgeSignal) {
                 icon = '⏸️';
                 mgeDecision = null; // Bỏ qua
                 advice = `<span class="text-gray-400 font-bold">SGE BỎ QUA:</span> Không có tín hiệu từ SGE để MGE phân tích.<br/>➜ <b>MGE KHUYÊN: Theo SGE, nghỉ ván này.</b>`;
@@ -2558,4 +2713,4 @@
 
     </script>
 </body>
-    </html>
+</html>
