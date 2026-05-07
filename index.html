@@ -651,7 +651,7 @@
                     </div>
 
                     <div id="mge-panel" class="w-full mt-4 text-left bg-gradient-to-br from-indigo-900/40 to-purple-900/40 p-5 rounded-lg border-2 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.2)] relative z-10 hidden transition-all duration-500">
-                        <div class="absolute -top-3 left-4 bg-purple-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_10px_rgba(147,51,234,0.8)] tracking-widest border border-purple-400">👁️ MGE METRIC ANALYSIS</div>
+                        <div class="absolute -top-3 left-4 bg-purple-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_10px_rgba(147,51,234,0.8)] tracking-widest border border-purple-400">👁️ MGE METRIC ANALYSIS & DECISION</div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 mb-3">
                             <div class="bg-black/40 p-3 rounded border border-gray-700">
@@ -664,11 +664,26 @@
                             </div>
                         </div>
                         
-                        <div class="bg-black/60 p-4 rounded-lg border border-purple-500/30 flex items-start gap-3">
-                            <span id="mge-icon" class="text-3xl drop-shadow-md">🤖</span>
-                            <div>
-                                <h4 class="text-white font-black text-sm uppercase tracking-wide mb-1">MGE KHUYẾN NGHỊ VÀO TIỀN:</h4>
+                        <div class="bg-black/60 p-4 rounded-lg border border-purple-500/30 flex flex-col md:flex-row items-center md:items-start gap-4 mb-3">
+                            <div class="flex-shrink-0 flex flex-col items-center justify-center text-center w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-700 pb-3 md:pb-0 md:pr-4">
+                                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Quyết định MGE</span>
+                                <div id="mge-final-decision" class="text-2xl md:text-3xl font-black drop-shadow-md transition-all">-</div>
+                            </div>
+                            <div class="w-full md:w-2/3">
+                                <h4 class="text-white font-black text-sm uppercase tracking-wide mb-1 flex items-center gap-2">
+                                    <span id="mge-icon" class="text-xl">🤖</span> LÍ DO & ĐI TIỀN:
+                                </h4>
                                 <div id="mge-advice" class="text-sm font-medium text-gray-300 leading-relaxed">-</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/40 p-3 rounded border border-gray-700">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">Biểu đồ Lịch sử MGE</span>
+                                <span id="mge-winrate" class="text-sm font-black text-purple-400 bg-purple-900/50 px-2 py-0.5 rounded border border-purple-500/50">0%</span>
+                            </div>
+                            <div id="mge-history-chart" class="flex items-end justify-start overflow-x-auto h-10 gap-1 custom-scrollbar px-1 py-1 bg-gray-900/50 rounded-lg w-full scroll-smooth">
+                                <span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>
                             </div>
                         </div>
                     </div>
@@ -1077,7 +1092,8 @@
             
             // BIẾN CHO SGE & MGE
             currentSgePending: null,
-            currentActiveLocalType: ''
+            currentActiveLocalType: '',
+            currentMgePrediction: null
         };
 
         let gameAccuracyChart = null;
@@ -1871,15 +1887,16 @@
             else if (activeLocalType === 'followKL3') localArr = allSgeHistory.filter(h => h.agreedKLs && h.agreedKLs.includes(3)).map(h => h.correct ? 'D' : 'S');
             else if (activeLocalType === 'followKL4') localArr = allSgeHistory.filter(h => h.agreedKLs && h.agreedKLs.includes(4)).map(h => h.correct ? 'D' : 'S');
 
-            // Chạy MGE
-            runMGE(globalArr, localArr, localTitle, sgeDecisionText);
-            // =========================================================================
-
-            // --- LƯU TRẠNG THÁI SGE CHỜ KẾT QUẢ ---
+            // --- TÍNH TOÁN FINAL SGE SIGNAL ĐỂ TRUYỀN CHO MGE ---
             let finalSgeSignal = null;
             if (sgeDecisionText.includes('PLAYER')) finalSgeSignal = 'P';
             else if (sgeDecisionText.includes('BANKER')) finalSgeSignal = 'B';
-            
+
+            // Chạy MGE
+            runMGE(globalArr, localArr, localTitle, sgeDecisionText, finalSgeSignal);
+            // =========================================================================
+
+            // --- LƯU TRẠNG THÁI SGE CHỜ KẾT QUẢ ---
             masterState.currentSgePending = {
                 prediction: finalSgeSignal,
                 kl1: resBR.signal,
@@ -2142,6 +2159,21 @@
                     });
                     updateSGEStatsUI(session.sgeHistory);
                 }
+
+                // THÊM ĐOẠN NÀY ĐỂ LƯU LỊCH SỬ MGE CHỐT
+                if (masterState.currentMgePrediction !== undefined) {
+                    if (!session.mgeHistory) session.mgeHistory = [];
+                    // Chỉ lưu lại ván có chốt (Không lưu những ván MGE báo Bỏ qua/null)
+                    if (masterState.currentMgePrediction !== null) {
+                        session.mgeHistory.push({
+                            gameNum: session.history.length,
+                            predicted: masterState.currentMgePrediction,
+                            actual: currentResult,
+                            correct: masterState.currentMgePrediction === currentResult
+                        });
+                        updateMgeChart(session.mgeHistory);
+                    }
+                }
                 
                 saveMasterSessions();
                 updateCurrentSessionInfo();
@@ -2205,6 +2237,12 @@
                 updateSGEStatsUI(session.sgeHistory);
             }
 
+            // Đồng bộ Hoàn tác cho MGE
+            if (session.mgeHistory) {
+                 session.mgeHistory = session.mgeHistory.filter(h => h.gameNum <= session.history.length);
+                 updateMgeChart(session.mgeHistory);
+            }
+
             saveMasterSessions();
             updateCurrentSessionInfo();
             broadcastToAll('undo_last');
@@ -2235,6 +2273,11 @@
                 session.sgeHistory = []; 
                 updateSGEStatsUI([]);
                 
+                // MGE clear
+                session.mgeHistory = []; 
+                updateMgeChart([]);
+                masterState.currentMgePrediction = null;
+
                 saveMasterSessions(); updateCurrentSessionInfo();
                 broadcastToAll('clear_history');
                 
@@ -2509,7 +2552,7 @@
         }
 
         /* =========================================================================
-           MGE CORE ENGINE (TÌM CẤU TRÚC & MA TRẬN ĐI TIỀN)
+           MGE CORE ENGINE (TÌM CẤU TRÚC & MA TRẬN ĐI TIỀN) - ĐÃ UPDATE BẺ KÈO
            ========================================================================= */
         function evaluateMGEStructure(arr) {
             if(!arr || arr.length === 0) return { score: 0, status: 'NONE', desc: 'Chưa đủ dữ liệu để tạo nhịp' };
@@ -2535,10 +2578,12 @@
             }
         }
 
-        function runMGE(globalArr, localArr, localTitle, sgeDecisionText) {
+        function runMGE(globalArr, localArr, localTitle, sgeDecisionText, finalSgeSignal) {
             const mgePanel = document.getElementById('mge-panel');
-            if (sgeDecisionText.includes('BỎ QUA') || !sgeDecisionText) {
+            // Nếu SGE bỏ qua hoặc không có tín hiệu, MGE cũng bỏ qua
+            if (sgeDecisionText.includes('BỎ QUA') || !sgeDecisionText || !finalSgeSignal) {
                 mgePanel.classList.add('hidden');
+                masterState.currentMgePrediction = null;
                 return;
             }
             mgePanel.classList.remove('hidden');
@@ -2552,26 +2597,76 @@
 
             let icon = '🤖';
             let advice = '';
-            
+            let mgeDecision = null;
+            let getOpposite = (val) => val === 'P' ? 'B' : 'P';
+
             if (g.score >= 1 && l.score >= 1) {
                 icon = '🔥';
-                advice = `<span class="text-green-400 font-bold">KỊCH BẢN 1 (SUPER CONFLUENCE):</span> Cả Tổng hệ thống và Kịch bản cục bộ đều đang Vào Form mượt mà. <b>KHUYÊN: ĐÁNH MẠNH TAY VÀO LỆNH SGE (Áp dụng Paroli).</b>`;
+                mgeDecision = finalSgeSignal; // Đồng thuận SGE
+                advice = `<span class="text-green-400 font-bold">KỊCH BẢN 1 (SIÊU ĐỒNG THUẬN):</span> SGE và Kịch bản cục bộ đều đang ăn thông.<br/>➜ <b>LÍ DO:</b> Lịch sử bắt nhịp đang cực chuẩn. <b>MGE KHUYÊN: Theo SGE, đánh mạnh tay (Paroli).</b>`;
             } else if (g.score < 0 && l.score >= 1) {
                 icon = '🛡️';
-                advice = `<span class="text-blue-400 font-bold">KỊCH BẢN 2 (LOCAL CARRIES):</span> Tổng thể SGE đang nhiễu, nhưng Kịch bản cục bộ này lại là Cứu Tinh (đang ăn thông). <b>KHUYÊN: ĐÁNH THEO SGE NHƯNG ĐI VỐN ĐỀU (Không gấp thếp).</b>`;
+                mgeDecision = finalSgeSignal; // Theo cục bộ (gánh team)
+                advice = `<span class="text-blue-400 font-bold">KỊCH BẢN 2 (CỤC BỘ GÁNH TEAM):</span> Tổng SGE đang nhiễu, nhưng kịch bản này lại đang ăn.<br/>➜ <b>LÍ DO:</b> Dòng tiền đang tin vào kịch bản này. <b>MGE KHUYÊN: Đánh theo SGE nhưng đi vốn đều.</b>`;
             } else if (g.score < 0 && l.score < 0) {
                 icon = '🛑';
-                advice = `<span class="text-red-400 font-bold">KỊCH BẢN 3 (DOUBLE FAKE-OUT):</span> CẢNH BÁO ĐỎ! Cả Tổng và Cục bộ đều đang bị bắt bài (Bệt Sai). <b>KHUYÊN: TUYỆT ĐỐI KHÔNG ĐÁNH THEO SGE! ĐỀ XUẤT ĐÁNH TRÁI KÈO HOẶC NGHỈ!</b>`;
+                mgeDecision = getOpposite(finalSgeSignal); // BẺ KÈO TRÁI SGE
+                advice = `<span class="text-red-400 font-bold">KỊCH BẢN 3 (BẪY KÉP - BẺ KÈO):</span> Cảnh báo đỏ! Cả Tổng và Cục bộ đều đang Bệt Sai (bắt bài sai bét).<br/>➜ <b>LÍ DO:</b> Lịch sử chỉ ra hễ SGE ra lệnh là gãy. <b>MGE KHUYÊN: Đánh ngược lệnh SGE (Trái kèo).</b>`;
             } else if (g.score >= 1 && l.score < 0) {
                 icon = '👁️';
-                advice = `<span class="text-yellow-400 font-bold">KỊCH BẢN 4 (XUNG ĐỘT CẤU TRÚC):</span> Tổng đang tốt nhưng Kịch bản này vừa báo sai. Cầu đang test cấu trúc. <b>KHUYÊN: BỎ QUA VÁN NÀY, ĐỢI MGE XÁC NHẬN LẠI XU HƯỚNG!</b>`;
+                mgeDecision = null; // Bỏ qua
+                advice = `<span class="text-yellow-400 font-bold">KỊCH BẢN 4 (XUNG ĐỘT CẤU TRÚC):</span> Tổng đang tốt nhưng Kịch bản cục bộ lại báo sai.<br/>➜ <b>LÍ DO:</b> Đang ở giai đoạn bẻ gãy xu hướng. <b>MGE KHUYÊN: Bỏ qua ván này, đợi test nhịp xong.</b>`;
             } else {
                 icon = '⚖️';
-                advice = `<span class="text-gray-300 font-bold">KỊCH BẢN CHỜ:</span> Dữ liệu đang ở nhịp test ngắn hạn. <b>KHUYÊN: Đi vốn nhỏ dò đường để xem cầu Răng cưa hay Bệt.</b>`;
+                mgeDecision = null; // Chờ
+                advice = `<span class="text-gray-300 font-bold">KỊCH BẢN CHỜ (RĂNG CƯA):</span> Nhịp D/S đang là răng cưa ngắn hạn, chưa rõ.<br/>➜ <b>LÍ DO:</b> Tỷ lệ ăn thua 50/50. <b>MGE KHUYÊN: Bỏ qua hoặc đánh nhỏ nhất có thể.</b>`;
+            }
+
+            masterState.currentMgePrediction = mgeDecision;
+
+            // Render Quyết định MGE
+            const decEl = document.getElementById('mge-final-decision');
+            if (mgeDecision === 'P') {
+                decEl.innerHTML = '👤 PLAYER'; decEl.className = 'text-2xl md:text-3xl font-black text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]';
+            } else if (mgeDecision === 'B') {
+                decEl.innerHTML = '🏦 BANKER'; decEl.className = 'text-2xl md:text-3xl font-black text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]';
+            } else {
+                decEl.innerHTML = 'BỎ QUA'; decEl.className = 'text-xl font-bold text-gray-500';
             }
 
             document.getElementById('mge-icon').textContent = icon;
             document.getElementById('mge-advice').innerHTML = advice;
+        }
+
+        // HÀM VẼ BIỂU ĐỒ & TỈ LỆ THẮNG MGE
+        function updateMgeChart(mgeHistory) {
+            const chartEl = document.getElementById('mge-history-chart');
+            const wrEl = document.getElementById('mge-winrate');
+            if (!chartEl) return;
+            
+            if (!mgeHistory || mgeHistory.length === 0) {
+                chartEl.innerHTML = '<span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>';
+                if (wrEl) { wrEl.textContent = '0%'; wrEl.className = 'text-sm font-black text-gray-500 bg-gray-900 px-2 py-0.5 rounded border border-gray-700'; }
+                return;
+            }
+
+            let correct = 0;
+            let html = '';
+            mgeHistory.forEach(item => {
+                if (item.correct) correct++;
+                const bg = item.correct ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
+                const height = item.correct ? 'h-full' : 'h-1/3';
+                html += `<div class="w-2.5 flex-shrink-0 rounded-[1px] ${bg} ${height}" title="Ván ${item.gameNum}: MGE Đoán ${item.predicted} - Thực tế ${item.actual}"></div>`;
+            });
+            
+            chartEl.innerHTML = html;
+            chartEl.scrollLeft = chartEl.scrollWidth;
+
+            if (wrEl) {
+                const rate = Math.round((correct / mgeHistory.length) * 100);
+                wrEl.textContent = `${rate}% (${correct}/${mgeHistory.length})`;
+                wrEl.className = `text-sm font-black px-2 py-0.5 rounded border ${rate >= 50 ? 'text-green-400 bg-green-900/40 border-green-500/50' : 'text-red-400 bg-red-900/40 border-red-500/50'}`;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -2599,4 +2694,4 @@
 
     </script>
 </body>
-</html>
+                </html>
