@@ -1519,10 +1519,55 @@
                 return val === 'D' ? 'S' : 'D';
             };
 
-            // 1. Check BỆT (Từ 3 trở lên)
-            if (last.count >= 3) {
-                return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: last.count };
+            // =========================================================================
+            // 1. DYNAMIC STREAK & BREAK POINT (TÌM ĐIỂM BỆT & ĐIỂM BẺ ĐỘNG)
+            // =========================================================================
+            // Lấy danh sách các chuỗi đã hoàn thành (bỏ qua chuỗi cuối cùng đang chạy)
+            const completedStreaks = streaks.slice(0, -1);
+            let continueCount = 0;
+            let breakCount = 0;
+
+            completedStreaks.forEach(s => {
+                if (s.val === last.val) {
+                    if (s.count > last.count) continueCount++; // Chuỗi này từng đi dài hơn mốc hiện tại
+                    else if (s.count === last.count) breakCount++; // Chuỗi này từng gãy đúng tại mốc hiện tại
+                }
+            });
+
+            const totalHistorical = continueCount + breakCount;
+
+            // Bắt đầu xét khi chuỗi hiện tại đạt từ 2 tay trở lên
+            if (last.count >= 2) {
+                if (totalHistorical > 0) {
+                    if (breakCount > continueCount) {
+                        // Lịch sử báo đây là ĐIỂM BẺ CẦU uy tín
+                        return { 
+                            signal: getOpposite(last.val), 
+                            desc: `ĐIỂM BẺ ${last.val} tại tay ${last.count} (Lịch sử: Gãy ${breakCount} > Tiếp ${continueCount})`, 
+                            weight: last.count + 1.5 // Cộng thêm trọng số vì bắt được điểm bẻ có cơ sở
+                        };
+                    } else if (continueCount > breakCount) {
+                        // Lịch sử báo BỆT uy tín
+                        return { 
+                            signal: last.val, 
+                            desc: `Đang Bệt ${last.val} tay ${last.count} (Lịch sử: Tiếp ${continueCount} > Gãy ${breakCount})`, 
+                            weight: last.count + 1.5 
+                        };
+                    }
+                }
+
+                // NẾU TIE HOẶC CHƯA CÓ DỮ LIỆU -> AUTO STREAK >= 2
+                // (Chừa đường cho form 2-2 ở dưới nếu nó đang đúng form 2-2)
+                const isForm22 = last.count === 2 && prev1 && prev1.count === 2 && prev2 && prev2.count >= 1;
+                if (!isForm22) {
+                    return { 
+                        signal: last.val, 
+                        desc: `Đang Bệt ${last.val} (${last.count} tay - Mặc định)`, 
+                        weight: last.count 
+                    };
+                }
             }
+            // =========================================================================
 
             // 2. Check Cầu 1-1 (Ping Pong) - Tối thiểu 3 nhịp
             if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
