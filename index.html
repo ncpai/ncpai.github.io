@@ -8,210 +8,55 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827;
-            color: #F9FAFB;
-        }
-        .btn {
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .btn:active {
-            transform: translateY(1px);
-        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #F9FAFB; }
+        .btn { transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .btn:active { transform: translateY(1px); }
         .card-glow-total { box-shadow: 0 0 25px rgba(168, 85, 247, 0.7); }
-        .modal-backdrop {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.7);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 50; animation: fadeIn 0.3s ease;
-        }
-        .modal-content {
-            background-color: #1f2937;
-            padding: 1.5rem; border-radius: 1rem;
-            width: 90%; max-width: 500px;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid #374151;
-        }
-        .toast-notification {
-            position: fixed; top: 20px; right: 20px;
-            background-color: #1f2937; color: white;
-            padding: 1rem 1.5rem; border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-            z-index: 100; animation: slideDown 0.5s ease;
-            border-left: 4px solid;
-        }
-        .warning-alert {
-            position: fixed; top: 20px; left: 50%;
-            transform: translateX(-50%);
-            background-color: #f59e0b; color: white;
-            padding: 1rem 2rem; border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-            z-index: 100; animation: slideDown 0.5s ease;
-            border-left: 4px solid #d97706;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-100%); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
-        }
-        @keyframes superBounce {
-            0% { transform: translate(-50%, -10px) scale(1); }
-            100% { transform: translate(-50%, 5px) scale(1.05); }
-        }
-        @keyframes spinPulse {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.3) rotate(18deg); }
-            100% { transform: scale(1) rotate(-18deg); }
-        }
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fadeIn 0.3s ease; }
+        .modal-content { background-color: #1f2937; padding: 1.5rem; border-radius: 1rem; width: 90%; max-width: 500px; animation: slideIn 0.3s ease-out; border: 1px solid #374151; }
+        .toast-notification { position: fixed; top: 20px; right: 20px; background-color: #1f2937; color: white; padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 100; animation: slideDown 0.5s ease; border-left: 4px solid; }
+        .warning-alert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #f59e0b; color: white; padding: 1rem 2rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 100; animation: slideDown 0.5s ease; border-left: 4px solid #d97706; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+        @keyframes superBounce { 0% { transform: translate(-50%, -10px) scale(1); } 100% { transform: translate(-50%, 5px) scale(1.05); } }
+        @keyframes spinPulse { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.3) rotate(18deg); } 100% { transform: scale(1) rotate(-18deg); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .animate-slideIn { animation: slideInUp 0.3s ease-out forwards; }
         
-        .system-frame {
-            border: 2px solid #374151;
-            border-radius: 0.75rem;
-            background: #1f2937;
-            transition: all 0.3s ease;
-        }
-        .system-frame.active {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
-        }
-        .history-chart {
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-start;
-            gap: 2px;
-            height: 60px;
-            padding: 5px 0 8px 0;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scroll-behavior: smooth;
-        }
-        .history-bar {
-            flex-shrink: 0;
-            width: 4px;
-            border-radius: 1px;
-        }
-        .history-bar-correct {
-            background-color: #3b82f6;
-            height: 100%;
-        }
-        .history-bar-incorrect {
-            background-color: #ef4444;
-            height: 40%;
-        }
-        .accuracy-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
+        .system-frame { border: 2px solid #374151; border-radius: 0.75rem; background: #1f2937; transition: all 0.3s ease; }
+        .system-frame.active { border-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+        .history-chart { display: flex; align-items: flex-end; justify-content: flex-start; gap: 2px; height: 60px; padding: 5px 0 8px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; }
+        .history-bar { flex-shrink: 0; width: 4px; border-radius: 1px; }
+        .history-bar-correct { background-color: #3b82f6; height: 100%; }
+        .history-bar-incorrect { background-color: #ef4444; height: 40%; }
+        .accuracy-badge { padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
         .accuracy-high { background-color: #10b981; color: white; }
         .accuracy-medium { background-color: #f59e0b; color: white; }
         .accuracy-low { background-color: #ef4444; color: white; }
-        .system-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        @media (min-width: 1024px) {
-            .system-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        .game-bar-chart {
-            height: 300px;
-            margin-top: 1rem;
-        }
-        .confidence-interval-chart {
-            height: 200px;
-            margin-top: 1rem;
-        }
-        .game-result-chip {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin: 1px;
-        }
+        .system-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        @media (min-width: 1024px) { .system-grid { grid-template-columns: repeat(2, 1fr); } }
+        .game-bar-chart { height: 300px; margin-top: 1rem; }
+        .confidence-interval-chart { height: 200px; margin-top: 1rem; }
+        .game-result-chip { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin: 1px; }
         .game-correct { background-color: #10b981; color: white; }
         .game-incorrect { background-color: #ef4444; color: white; }
         .game-neutral { background-color: #6b7280; color: white; }
-        .final-decision-bar {
-            flex-shrink: 0;
-            width: 8px;
-            border-radius: 2px;
-            margin: 0 1px;
-        }
-        .final-decision-correct {
-            background-color: #3b82f6;
-            height: 100%;
-        }
-        .final-decision-incorrect {
-            background-color: #ef4444;
-            height: 40%;
-        }
-        input[type=range] {
-            -webkit-appearance: none;
-            background: #374151;
-            height: 4px;
-            border-radius: 2px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #8b5cf6;
-            cursor: pointer;
-        }
+        .final-decision-bar { flex-shrink: 0; width: 8px; border-radius: 2px; margin: 0 1px; }
+        .final-decision-correct { background-color: #3b82f6; height: 100%; }
+        .final-decision-incorrect { background-color: #ef4444; height: 40%; }
+        input[type=range] { -webkit-appearance: none; background: #374151; height: 4px; border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #8b5cf6; cursor: pointer; }
         .custom-scrollbar::-webkit-scrollbar, .history-chart::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track, .history-chart::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb, .history-chart::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover, .history-chart::-webkit-scrollbar-thumb:hover { background: #6b7280; }
 
-        .section-content {
-            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out;
-            max-height: 2000px;
-            opacity: 1;
-            overflow: hidden;
-        }
-        .section-content.collapsed {
-            max-height: 0;
-            opacity: 0;
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-        }
+        .section-content { transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out; max-height: 2000px; opacity: 1; overflow: hidden; }
+        .section-content.collapsed { max-height: 0; opacity: 0; margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; }
     </style>
 </head>
 <body class="p-4 md:p-8 relative">
@@ -307,7 +152,7 @@
                         <button onclick="createNewSessionAll()" class="btn bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg">➕ Tạo Mới</button>
                         <button onclick="renameMasterSession()" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg">✏️ Đổi Tên</button>
                         <button onclick="exportMasterData()" class="btn bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-lg col-span-2">📤 Xuất Tổng Thể</button>
-                        <button onclick="document.getElementById('masterFileInput').click()" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg col-span-2">📥 Nhập Dữ LUệU</button>
+                        <button onclick="document.getElementById('masterFileInput').click()" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg col-span-2">📥 Nhập Dữ LIỆU</button>
                         <input type="file" id="masterFileInput" class="hidden" accept=".json" onchange="importMasterData(event)">
                     </div>
                 </div>
@@ -735,11 +580,12 @@
         </div>
 
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + MGE</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + MGE + KLC</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 và 3 biểu đồ khác để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
 
+    <!-- SGE FLOATING CONTAINER -->
     <div id="floating-sge-container" class="fixed bottom-[110px] left-6 z-[240] flex flex-col items-start pointer-events-none">
         
         <div id="sge-floating-panel" class="hidden pointer-events-auto absolute bottom-20 left-0 w-[92vw] md:w-[450px] bg-gradient-to-br from-yellow-950 via-gray-900 to-red-950 p-5 rounded-2xl border-2 border-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.5)] backdrop-blur-md origin-bottom-left transition-all duration-300">
@@ -779,6 +625,55 @@
         </button>
     </div>
 
+    <!-- KLC FLOATING CONTAINER -->
+    <div id="floating-klc-container" class="fixed bottom-[185px] left-6 z-[260] flex flex-col items-start pointer-events-none">
+        
+        <div id="klc-floating-panel" class="hidden pointer-events-auto absolute bottom-20 left-0 w-[92vw] md:w-[450px] bg-gradient-to-br from-cyan-950 via-gray-900 to-blue-950 p-5 rounded-2xl border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)] backdrop-blur-md origin-bottom-left transition-all duration-300">
+            <button onclick="toggleKLCPanel()" class="absolute top-2 right-2 text-gray-400 hover:text-white bg-gray-800 rounded-full p-1 border border-gray-600 transition-colors z-50">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="absolute -top-3 left-4 bg-cyan-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)] tracking-widest border border-cyan-400 z-50">🎯 KẾT LUẬN CHỐT (KLC)</div>
+            
+            <!-- Bảng Toggles TH1, TH2, TH3 -->
+            <div class="grid grid-cols-3 gap-2 mt-2 mb-3">
+                <button id="klc-btn-th1" onclick="toggleKLCConfig('th1')" class="text-[10px] md:text-xs font-bold py-1.5 rounded bg-green-600 text-white shadow-[0_0_10px_rgba(34,197,94,0.5)] transition-colors border border-gray-600 uppercase">TH1: 1D->S</button>
+                <button id="klc-btn-th2" onclick="toggleKLCConfig('th2')" class="text-[10px] md:text-xs font-bold py-1.5 rounded bg-green-600 text-white shadow-[0_0_10px_rgba(34,197,94,0.5)] transition-colors border border-gray-600 uppercase">TH2: 1S->D</button>
+                <button id="klc-btn-th3" onclick="toggleKLCConfig('th3')" class="text-[10px] md:text-xs font-bold py-1.5 rounded bg-green-600 text-white shadow-[0_0_10px_rgba(34,197,94,0.5)] transition-colors border border-gray-600 uppercase">TH3: THEO BỆT</button>
+            </div>
+            
+            <div id="klc-decision-box" class="bg-black/80 p-4 rounded-xl border border-cyan-500/50 flex flex-col items-center text-center gap-2 mb-3 relative overflow-hidden">
+                <div id="klc-glow-bg" class="absolute inset-0 bg-cyan-600/10 transition-colors duration-500 pointer-events-none"></div>
+                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest relative z-10">LỆNH ĐI TIỀN KLC</span>
+                <div id="klc-final-decision" class="text-3xl font-black drop-shadow-md transition-all relative z-10">-</div>
+                <div id="klc-action-badge" class="hidden text-white font-black text-xs px-3 py-1 rounded border shadow-lg relative z-10 animate-pulse mt-1"></div>
+                <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent my-1"></div>
+                <div class="relative z-10">
+                    <div id="klc-advice" class="text-sm font-medium text-gray-300 leading-relaxed text-center">-</div>
+                </div>
+            </div>
+
+            <div class="bg-black/60 p-3 rounded-lg border border-gray-700">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">Biểu đồ Lịch sử KLC</span>
+                    <span id="klc-winrate" class="text-sm font-black text-cyan-400 bg-cyan-900/50 px-2 py-0.5 rounded border border-cyan-500/50">0%</span>
+                </div>
+                <div id="klc-history-chart" class="flex items-end justify-start overflow-x-auto h-12 gap-1 custom-scrollbar px-1 py-1 bg-gray-900/80 rounded-lg w-full scroll-smooth shadow-inner">
+                    <span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>
+                </div>
+            </div>
+        </div>
+
+        <button id="klc-toggle-btn" onclick="toggleKLCPanel()" class="pointer-events-auto w-[65px] h-[65px] bg-gradient-to-br from-cyan-500 to-blue-700 rounded-full text-white font-black shadow-[0_0_15px_rgba(6,182,212,0.7)] border-2 border-cyan-300 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative">
+            <span id="klc-btn-icon" class="text-3xl transition-transform duration-300 drop-shadow-md">🎯</span>
+            <span id="klc-notification-dot" class="absolute top-0 right-0 flex h-4 w-4 hidden">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white"></span>
+            </span>
+        </button>
+    </div>
+
+    <!-- MGE FLOATING CONTAINER -->
     <div id="floating-mge-container" class="fixed bottom-6 left-6 z-[250] flex flex-col items-start pointer-events-none">
         
         <div id="mge-floating-panel" class="hidden pointer-events-auto absolute bottom-24 left-0 w-[92vw] md:w-[450px] bg-gradient-to-br from-indigo-950 via-gray-900 to-purple-950 p-5 rounded-2xl border-2 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.5)] backdrop-blur-md origin-bottom-left transition-all duration-300">
@@ -828,6 +723,8 @@
             </span>
         </button>
     </div>
+
+    <!-- SCRIPT TỔNG -->
     <script>
         /* =========================================================================
            0. TIỆN ÍCH AN TOÀN BỘ NHỚ & TÍNH NĂNG MỚI (COLLAPSE/FAB)
@@ -841,6 +738,37 @@
                     showToast('Bộ nhớ trình duyệt đã đầy! Hãy dọn dẹp hoặc tạo phiên mới.', 'error');
                 }
             }
+        }
+
+        let klcToggles = { th1: true, th2: true, th3: true };
+        
+        // Đóng mở bảng KLC
+        function toggleKLCPanel() {
+            const panel = document.getElementById('klc-floating-panel');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                panel.classList.add('animate-slideIn'); 
+                panel.style.transform = "scale(1)";
+                panel.style.opacity = "1";
+            } else {
+                panel.classList.add('hidden');
+                panel.style.transform = "scale(0.95)";
+                panel.style.opacity = "0";
+            }
+        }
+
+        // Bật tắt config TH1, TH2, TH3
+        function toggleKLCConfig(th) {
+            klcToggles[th] = !klcToggles[th];
+            const btn = document.getElementById(`klc-btn-${th}`);
+            if(klcToggles[th]) {
+                btn.classList.remove('bg-gray-700', 'text-gray-500');
+                btn.classList.add('bg-green-600', 'text-white', 'shadow-[0_0_10px_rgba(34,197,94,0.5)]');
+            } else {
+                btn.classList.add('bg-gray-700', 'text-gray-500');
+                btn.classList.remove('bg-green-600', 'text-white', 'shadow-[0_0_10px_rgba(34,197,94,0.5)]');
+            }
+            calculateKLC(); // Gọi tính toán lại ngay khi đổi config
         }
 
         function toggleSection(contentId, iconId) {
@@ -1146,7 +1074,8 @@
             
             currentSgePending: null,
             currentActiveLocalType: '',
-            currentMgePrediction: null
+            currentMgePrediction: null,
+            currentKlcPrediction: null
         };
 
         let gameAccuracyChart = null;
@@ -1947,6 +1876,9 @@
             // Chạy MGE
             runMGE(globalArr, localArr, localTitle, sgeDecisionText, finalSgeSignal);
             // =========================================================================
+            
+            // Gọi KLC ngay sau khi SGE và MGE đã xác định xong
+            calculateKLC();
 
             // --- LƯU TRẠNG THÁI SGE CHỜ KẾT QUẢ ---
             masterState.currentSgePending = {
@@ -2254,6 +2186,19 @@
                     }
                 }
                 
+                if (masterState.currentKlcPrediction !== undefined) {
+                    if (!session.klcHistory) session.klcHistory = [];
+                    if (masterState.currentKlcPrediction !== null) {
+                        session.klcHistory.push({
+                            gameNum: session.history.length,
+                            predicted: masterState.currentKlcPrediction,
+                            actual: currentResult,
+                            correct: masterState.currentKlcPrediction === currentResult
+                        });
+                        updateKlcChart(session.klcHistory);
+                    }
+                }
+
                 saveMasterSessions();
                 updateCurrentSessionInfo();
                 
@@ -2321,6 +2266,11 @@
                  updateMgeChart(session.mgeHistory);
             }
 
+            if (session.klcHistory) {
+                session.klcHistory = session.klcHistory.filter(h => h.gameNum <= session.history.length);
+                updateKlcChart(session.klcHistory);
+            }
+
             saveMasterSessions();
             updateCurrentSessionInfo();
             broadcastToAll('undo_last');
@@ -2354,6 +2304,22 @@
                 session.mgeHistory = []; 
                 updateMgeChart([]);
                 masterState.currentMgePrediction = null;
+
+                session.klcHistory = []; 
+                updateKlcChart([]);
+                masterState.currentKlcPrediction = null;
+
+                const decElKLC = document.getElementById('klc-final-decision');
+                const reasonElKLC = document.getElementById('klc-advice');
+                const badgeElKLC = document.getElementById('klc-action-badge');
+                if(decElKLC) { decElKLC.innerHTML = '-'; decElKLC.className = 'text-3xl font-black drop-shadow-md transition-all relative z-10'; }
+                if(reasonElKLC) reasonElKLC.innerHTML = '-';
+                if(badgeElKLC) badgeElKLC.classList.add('hidden');
+                
+                const toggleBtnKLC = document.getElementById('klc-btn-icon');
+                const notifDotKLC = document.getElementById('klc-notification-dot');
+                if(toggleBtnKLC) toggleBtnKLC.textContent = "🎯";
+                if(notifDotKLC) notifDotKLC.classList.add('hidden');
 
                 saveMasterSessions(); updateCurrentSessionInfo();
                 broadcastToAll('clear_history');
@@ -2786,6 +2752,177 @@
             }
 
             return { pattern: 'NOISE', expected: null, desc: 'Cầu chưa rõ quy luật', strength: 0, isBreakPoint: false };
+        }
+
+        function evaluateKLC(sgeArray) {
+            if (!sgeArray || sgeArray.length === 0) return { th: 'NONE', signal: null, action: 'CHỜ', desc: 'Chưa đủ dữ liệu SGE' };
+
+            const lastVal = sgeArray[sgeArray.length - 1];
+
+            // Chuyển array thành các chuỗi (streaks)
+            let streaks = [];
+            let cur = sgeArray[0], count = 1;
+            for (let i = 1; i < sgeArray.length; i++) {
+                if (sgeArray[i] === cur) count++;
+                else { streaks.push({ val: cur, count: count }); cur = sgeArray[i]; count = 1; }
+            }
+            streaks.push({ val: cur, count: count });
+
+            const lastStreak = streaks[streaks.length - 1];
+
+            // TH1: TÌM BỆT D ➜ SAU ĐÓ CÁC NHỊP D ĐỀU LÀ 1D (Và hiện tại đang là 1D)
+            if (lastStreak.val === 'D' && lastStreak.count === 1) {
+                let isValidTH1 = false;
+                let count1D = 0;
+                for (let i = streaks.length - 1; i >= 0; i--) {
+                    if (streaks[i].val === 'D') {
+                        if (streaks[i].count >= 3) {
+                            isValidTH1 = true; break; // Tìm thấy gốc Bệt D
+                        } else if (streaks[i].count > 1) {
+                            break; // Bị gãy form (có D lớn hơn 1 mà chưa tới gốc Bệt)
+                        } else {
+                            count1D++; // Đếm số lần 1D
+                        }
+                    }
+                }
+                if (isValidTH1) {
+                    return { th: 'th1', signal: 'S', action: count1D <= 6 ? 'ALLIN' : 'NHẸ', desc: `Form Bệt D bị bẻ 1D->S (Lần ${count1D})` };
+                }
+            }
+
+            // TH2: TÌM BỆT S ➜ SAU ĐÓ CÁC NHỊP S ĐỀU LÀ 1S (Và hiện tại đang là 1S)
+            if (lastStreak.val === 'S' && lastStreak.count === 1) {
+                let isValidTH2 = false;
+                let count1S = 0;
+                for (let i = streaks.length - 1; i >= 0; i--) {
+                    if (streaks[i].val === 'S') {
+                        if (streaks[i].count >= 3) {
+                            isValidTH2 = true; break;
+                        } else if (streaks[i].count > 1) {
+                            break;
+                        } else {
+                            count1S++;
+                        }
+                    }
+                }
+                if (isValidTH2) {
+                    return { th: 'th2', signal: 'D', action: count1S <= 6 ? 'ALLIN' : 'NHẸ', desc: `Form Bệt S bị bẻ 1S->D (Lần ${count1S})` };
+                }
+            }
+
+            // TH3: THEO BỆT
+            return { th: 'th3', signal: lastVal, action: 'BỆT', desc: `Đánh thuận theo Bệt (${lastVal}->${lastVal})` };
+        }
+
+        function calculateKLC() {
+            const session = masterState.sessions[masterState.currentSessionId];
+            if (!session || !masterState.currentSgePending || !masterState.currentSgePending.prediction) {
+                renderKLCUI(null, "Chờ SGE ra quyết định...", null);
+                return;
+            }
+
+            // Lấy lịch sử ĐÚNG/SAI (D/S) của SGE
+            const sgeHistory = session.sgeHistory || [];
+            const arrSGE = sgeHistory.map(h => h.correct ? 'D' : 'S');
+            
+            const klcEval = evaluateKLC(arrSGE);
+            let finalPrediction = null;
+            let finalDesc = klcEval.desc;
+            let action = klcEval.action;
+
+            // Check Toggle
+            if (klcEval.th !== 'NONE' && !klcToggles[klcEval.th]) {
+                finalDesc = `Kịch bản ${klcEval.th.toUpperCase()} đã bị tắt. BỎ QUA.`;
+                action = 'BỎ QUA';
+            } 
+            else if (klcEval.signal) {
+                // Ánh xạ tín hiệu D/S của KLC sang P/B thực tế
+                // Nếu KLC signal = D (Đúng) -> Đánh giống SGE
+                // Nếu KLC signal = S (Sai) -> Đánh ngược SGE
+                const sgeBaseSignal = masterState.currentSgePending.prediction; 
+                
+                if (klcEval.signal === 'D') {
+                    finalPrediction = sgeBaseSignal;
+                } else {
+                    finalPrediction = sgeBaseSignal === 'P' ? 'B' : 'P';
+                }
+            }
+
+            masterState.currentKlcPrediction = finalPrediction;
+            renderKLCUI(finalPrediction, finalDesc, action);
+        }
+
+        function renderKLCUI(prediction, desc, action) {
+            const decEl = document.getElementById('klc-final-decision');
+            const adviceEl = document.getElementById('klc-advice');
+            const badgeEl = document.getElementById('klc-action-badge');
+            const btnIcon = document.getElementById('klc-btn-icon');
+            const notifDot = document.getElementById('klc-notification-dot');
+            const glowBg = document.getElementById('klc-glow-bg');
+
+            adviceEl.innerHTML = `<span class="text-cyan-300 font-bold">${desc}</span>`;
+
+            if (!prediction || action === 'BỎ QUA') {
+                decEl.innerHTML = 'BỎ QUA'; decEl.className = 'text-2xl font-bold text-gray-500 relative z-10';
+                badgeEl.classList.add('hidden');
+                btnIcon.textContent = "💤"; notifDot.classList.add('hidden');
+                if(glowBg) glowBg.className = "absolute inset-0 bg-gray-600/10 transition-colors duration-500 pointer-events-none";
+                return;
+            }
+
+            // P or B
+            if (prediction === 'P') {
+                decEl.innerHTML = '👤 VÀO PLAYER'; decEl.className = 'text-3xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] relative z-10';
+                if(glowBg) glowBg.className = "absolute inset-0 bg-blue-600/20 transition-colors duration-500 pointer-events-none";
+            } else {
+                decEl.innerHTML = '🏦 VÀO BANKER'; decEl.className = 'text-3xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] relative z-10';
+                if(glowBg) glowBg.className = "absolute inset-0 bg-red-600/20 transition-colors duration-500 pointer-events-none";
+            }
+
+            // Badge ALLIN / NHẸ
+            badgeEl.classList.remove('hidden');
+            if (action === 'ALLIN') {
+                badgeEl.textContent = "🔥 ĐÁNH ALL-IN MẠNH TAY";
+                badgeEl.className = "text-white font-black text-xs px-3 py-1 rounded border shadow-[0_0_15px_rgba(239,68,68,0.8)] relative z-10 animate-pulse mt-1 bg-red-600 border-red-400";
+                btnIcon.textContent = "🔥"; notifDot.classList.remove('hidden');
+            } else if (action === 'NHẸ') {
+                badgeEl.textContent = "⚠️ ĐÃ QUA 6 TAY - ĐÁNH NHẸ LẠI";
+                badgeEl.className = "text-black font-black text-xs px-3 py-1 rounded border shadow-lg relative z-10 mt-1 bg-yellow-400 border-yellow-200";
+                btnIcon.textContent = "⚠️"; notifDot.classList.remove('hidden');
+            } else {
+                badgeEl.textContent = "✅ ĐÁNH ĐỀU TAY";
+                badgeEl.className = "text-white font-black text-xs px-3 py-1 rounded border shadow-lg relative z-10 mt-1 bg-green-600 border-green-400";
+                btnIcon.textContent = "🎯"; notifDot.classList.remove('hidden');
+            }
+        }
+
+        function updateKlcChart(klcHistory) {
+            const chartEl = document.getElementById('klc-history-chart');
+            const wrEl = document.getElementById('klc-winrate');
+            if (!chartEl) return;
+            
+            if (!klcHistory || klcHistory.length === 0) {
+                chartEl.innerHTML = '<span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>';
+                if (wrEl) { wrEl.textContent = '0%'; wrEl.className = 'text-sm font-black text-gray-500 bg-gray-900 px-2 py-0.5 rounded border border-gray-700'; }
+                return;
+            }
+
+            let correct = 0; let html = '';
+            klcHistory.forEach(item => {
+                if (item.correct) correct++;
+                const bg = item.correct ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
+                const height = item.correct ? 'h-full' : 'h-1/3';
+                html += `<div class="w-2.5 flex-shrink-0 rounded-[1px] ${bg} ${height}" title="Ván ${item.gameNum}: KLC Đoán ${item.predicted} - KQ ${item.actual}"></div>`;
+            });
+            
+            chartEl.innerHTML = html;
+            chartEl.scrollLeft = chartEl.scrollWidth;
+
+            if (wrEl) {
+                const rate = Math.round((correct / klcHistory.length) * 100);
+                wrEl.textContent = `${rate}% (${correct}/${klcHistory.length})`;
+                wrEl.className = `text-sm font-black px-2 py-0.5 rounded border ${rate >= 50 ? 'text-green-400 bg-green-900/40 border-green-500/50' : 'text-red-400 bg-red-900/40 border-red-500/50'}`;
+            }
         }
 
         function runMGE(globalArr, localArr, localTitle, sgeDecisionText, finalSgeSignal) {
