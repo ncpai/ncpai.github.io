@@ -425,143 +425,88 @@
             <h2 class="text-2xl font-semibold mb-6 text-center text-yellow-300">📊 ĐỘ CHÍNH XÁC HỆ THỐNG ĐỀ XUẤT HIỆN TẠI (4 HỆ THỐNG)</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- HT1 CLEANED -->
                 <div id="ht1-chart-section" class="bg-gray-800 bg-opacity-70 p-4 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)] scroll-mt-8">
-                    <h3 class="text-lg font-bold mb-3 text-center text-blue-300">🔷 HT1 - Pattern Matching</h3>
+                    <h3 class="text-lg font-bold mb-3 text-center text-blue-300">🔷 HT1 - Lõi AI Pattern</h3>
                     <div class="space-y-3">
                         <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🧠 Phán Quyết:</span>
+                            <span class="text-gray-300">🧠 Định hướng:</span>
                             <span id="ht1-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
-                            <span id="ht1-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
                         </div>
                         <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
                             <span class="text-gray-300">Khoảng tỷ lệ:</span>
                             <span id="ht1-confidence-range" class="font-bold text-cyan-400">-</span>
                         </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
-                            <span id="ht1-range-accuracy" class="font-bold text-green-400">-</span>
-                        </div>
                         
                         <div class="bg-gray-900 p-3 rounded-lg mt-4 border border-yellow-500/30 relative">
-                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">NGUỒN DỮ AI</div>
-                            <h4 class="text-center text-sm text-yellow-300 mb-2 font-bold">Biểu đồ khoảng tỷ lệ (90-100%)</h4>
+                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">NGUỒN D/S CHO KLC</div>
+                            <h4 class="text-center text-sm text-yellow-300 mb-2 font-bold">Biểu đồ tỷ lệ (90-100%)</h4>
                             <div id="ht1-interval-chart" class="history-chart"></div>
                             <div id="ht1-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
-                            <div id="ht1-combined-chart" class="history-chart">
-                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
-                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- HT2 CLEANED -->
                 <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
                     <h3 class="text-lg font-semibold mb-3 text-center text-green-300">🔶 HT2 - Fixed & Optimized</h3>
                     <div class="space-y-3">
                         <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🧠 Phán Quyết:</span>
+                            <span class="text-gray-300">🧠 Định hướng:</span>
                             <span id="ht2-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
-                            <span id="ht2-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
                         </div>
                         <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
                             <span class="text-gray-300">Khoảng tỷ lệ:</span>
                             <span id="ht2-confidence-range" class="font-bold text-cyan-400">-</span>
                         </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
-                            <span id="ht2-range-accuracy" class="font-bold text-green-400">-</span>
-                        </div>
                         
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ tỷ lệ</h4>
                             <div id="ht2-interval-chart" class="history-chart"></div>
                             <div id="ht2-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
-                            <div id="ht2-combined-chart" class="history-chart">
-                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
-                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- HT3 CLEANED -->
                 <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
-                    <h3 class="text-lg font-semibold mb-3 text-center text-orange-300">🔸 HT3 - Standard System</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-center text-orange-300">🔸 HT3 - Standard</h3>
                     <div class="space-y-3">
                         <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🧠 Phán Quyết:</span>
+                            <span class="text-gray-300">🧠 Định hướng:</span>
                             <span id="ht3-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
-                            <span id="ht3-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
                         </div>
                         <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
                             <span class="text-gray-300">Khoảng tỷ lệ:</span>
                             <span id="ht3-confidence-range" class="font-bold text-cyan-400">-</span>
                         </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
-                            <span id="ht3-range-accuracy" class="font-bold text-green-400">-</span>
-                        </div>
                         
                         <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
+                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ tỷ lệ</h4>
                             <div id="ht3-interval-chart" class="history-chart"></div>
                             <div id="ht3-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
-                            <div id="ht3-combined-chart" class="history-chart">
-                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
-                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- HT4 CLEANED -->
                 <div class="bg-gray-800 bg-opacity-70 p-4 rounded-xl">
-                    <h3 class="text-lg font-semibold mb-3 text-center text-pink-300">🔹 HT4 - Advanced System</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-center text-pink-300">🔹 HT4 - Advanced</h3>
                     <div class="space-y-3">
                         <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🧠 Phán Quyết:</span>
+                            <span class="text-gray-300">🧠 Định hướng:</span>
                             <span id="ht4-verdict-prediction" class="font-bold text-xl text-blue-400">-</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">🔐 Chốt Phán Quyết:</span>
-                            <span id="ht4-chot-prediction" class="font-bold text-xl text-purple-400">-</span>
                         </div>
                         <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
                             <span class="text-gray-300">Khoảng tỷ lệ:</span>
                             <span id="ht4-confidence-range" class="font-bold text-cyan-400">-</span>
                         </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
-                            <span class="text-gray-300">Tỉ lệ khoảng:</span>
-                            <span id="ht4-range-accuracy" class="font-bold text-green-400">-</span>
-                        </div>
                         
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ khoảng tỷ lệ</h4>
+                        <div class="bg-gray-900 p-3 rounded-lg mt-4 border border-pink-500/30 relative">
+                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">NGUỒN D/S CHO KLC</div>
+                            <h4 class="text-center text-sm text-pink-300 mb-2 font-bold">Biểu đồ tỷ lệ</h4>
                             <div id="ht4-interval-chart" class="history-chart"></div>
                             <div id="ht4-range-games" class="mt-2 text-xs text-gray-400 text-center"></div>
-                        </div>
-                        
-                        <div class="bg-gray-900 p-3 rounded-lg mt-4">
-                            <h4 class="text-center text-sm text-gray-400 mb-2">Biểu đồ kết hợp (Chốt)</h4>
-                            <div id="ht4-combined-chart" class="history-chart">
-                                <p class="text-gray-600 text-xs text-center w-full">Đang tải...</p>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1324,7 +1269,7 @@
             if (ht1VerdictRaw.includes('NGƯỢC')) { impliedResult = 'S'; }
 
             if (!baseSignal) {
-                updateFinalDecisionDisplay(null, `ĐÃ PHÁT HIỆN MẪU (${bestMatch.confidence.toFixed(0)}%). Nhưng chưa có lệnh tại 🧠 Phán Quyết.`, "CHỜ LỆNH TỪ PHÁN QUYẾT");
+                updateFinalDecisionDisplay(null, `ĐÃ PHÁT HIỆN MẪU (${bestMatch.confidence.toFixed(0)}%). Nhưng chưa có lệnh tại 🧠 Định hướng.`, "CHỜ LỆNH TỪ ĐỊNH HƯỚNG");
                 return;
             }
 
@@ -1374,7 +1319,7 @@
                         <span class="text-yellow-400 font-black text-2xl">${bestMatch.target}</span>
                     </div>
                     <div class="mb-3 text-gray-400 border-t border-gray-700 pt-3">
-                        ➜ Xem 🧠 Phán Quyết:<br/>
+                        ➜ Xem 🧠 Định hướng:<br/>
                         <span class="text-white font-bold text-lg">${ht1VerdictRaw}</span>
                         <span class="text-gray-500">(Kỳ vọng ${impliedText}).</span>
                     </div>
@@ -2625,7 +2570,7 @@
             `;
         }
 
-/* =========================================================================
+        /* =========================================================================
            KLC CORE ENGINE (ĐÃ CẬP NHẬT LOGIC: CHO PHÉP MÀU ĐỐI NGHỊCH BỆT TỰ DO)
            ========================================================================= */
         function runKLC(sgeDecisionText, finalSgeSignal) {
@@ -2788,6 +2733,7 @@
                 if(glowBg) glowBg.className = "absolute inset-0 bg-gray-600/10 transition-colors duration-500 pointer-events-none";
             }
         }
+
         function updateKlcChart(klcHistory) {
             const chartEl = document.getElementById('klc-history-chart');
             const wrEl = document.getElementById('klc-winrate');
