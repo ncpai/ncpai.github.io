@@ -2755,103 +2755,96 @@
         }
 
         function evaluateKLC(sgeArray) {
-            if (!sgeArray || sgeArray.length === 0) return { th: 'NONE', signal: null, action: 'CHỜ', desc: 'Chưa đủ dữ liệu SGE' };
+function evaluateKLC(sgeArray) {
+    if (!sgeArray || sgeArray.length === 0) return { th: 'NONE', signal: null, action: 'CHỜ', desc: 'Chưa đủ dữ liệu SGE' };
 
-            const lastVal = sgeArray[sgeArray.length - 1];
+    const lastVal = sgeArray[sgeArray.length - 1];
 
-            // Chuyển array thành các chuỗi (streaks)
-            let streaks = [];
-            let cur = sgeArray[0], count = 1;
-            for (let i = 1; i < sgeArray.length; i++) {
-                if (sgeArray[i] === cur) count++;
-                else { streaks.push({ val: cur, count: count }); cur = sgeArray[i]; count = 1; }
-            }
-            streaks.push({ val: cur, count: count });
+    // Chuyển mảng thành các chuỗi (streaks) để dễ phân tích
+    let streaks = [];
+    let cur = sgeArray[0], count = 1;
+    for (let i = 1; i < sgeArray.length; i++) {
+        if (sgeArray[i] === cur) count++;
+        else { streaks.push({ val: cur, count: count }); cur = sgeArray[i]; count = 1; }
+    }
+    streaks.push({ val: cur, count: count });
 
-            const lastStreak = streaks[streaks.length - 1];
+    const lastStreak = streaks[streaks.length - 1];
 
-            // TH1: TÌM BỆT D ➜ SAU ĐÓ CÁC NHỊP D ĐỀU LÀ 1D (Và hiện tại đang là 1D)
-            if (lastStreak.val === 'D' && lastStreak.count === 1) {
-                let isValidTH1 = false;
-                let count1D = 0;
-                for (let i = streaks.length - 1; i >= 0; i--) {
-                    if (streaks[i].val === 'D') {
-                        if (streaks[i].count >= 3) {
-                            isValidTH1 = true; break; // Tìm thấy gốc Bệt D
-                        } else if (streaks[i].count > 1) {
-                            break; // Bị gãy form (có D lớn hơn 1 mà chưa tới gốc Bệt)
-                        } else {
-                            count1D++; // Đếm số lần 1D
-                        }
-                    }
-                }
-                if (isValidTH1) {
-                    return { th: 'th1', signal: 'S', action: count1D <= 6 ? 'ALLIN' : 'NHẸ', desc: `Form Bệt D bị bẻ 1D->S (Lần ${count1D})` };
-                }
-            }
-
-            // TH2: TÌM BỆT S ➜ SAU ĐÓ CÁC NHỊP S ĐỀU LÀ 1S (Và hiện tại đang là 1S)
-            if (lastStreak.val === 'S' && lastStreak.count === 1) {
-                let isValidTH2 = false;
-                let count1S = 0;
-                for (let i = streaks.length - 1; i >= 0; i--) {
-                    if (streaks[i].val === 'S') {
-                        if (streaks[i].count >= 3) {
-                            isValidTH2 = true; break;
-                        } else if (streaks[i].count > 1) {
-                            break;
-                        } else {
-                            count1S++;
-                        }
-                    }
-                }
-                if (isValidTH2) {
-                    return { th: 'th2', signal: 'D', action: count1S <= 6 ? 'ALLIN' : 'NHẸ', desc: `Form Bệt S bị bẻ 1S->D (Lần ${count1S})` };
-                }
-            }
-
-            // TH3: THEO BỆT
-            return { th: 'th3', signal: lastVal, action: 'BỆT', desc: `Đánh thuận theo Bệt (${lastVal}->${lastVal})` };
-        }
-
-        function calculateKLC() {
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session || !masterState.currentSgePending || !masterState.currentSgePending.prediction) {
-                renderKLCUI(null, "Chờ SGE ra quyết định...", null);
-                return;
-            }
-
-            // Lấy lịch sử ĐÚNG/SAI (D/S) của SGE
-            const sgeHistory = session.sgeHistory || [];
-            const arrSGE = sgeHistory.map(h => h.correct ? 'D' : 'S');
+    // ==========================================
+    // TH1: TÌM BỆT D ➜ BỊ BẺ BỞI 1S ➜ XUẤT HIỆN 1D
+    // ==========================================
+    if (lastStreak.val === 'D' && lastStreak.count === 1) {
+        let isTH1 = false;
+        let count1D = 1; // Tính cả tay 1D hiện tại
+        let valid = true;
+        
+        // Quét ngược về quá khứ xem có đúng form xen kẽ 1S -> 1D -> ... -> Gốc Bệt D không
+        for (let i = streaks.length - 2; i >= 0; i--) {
+            let streak = streaks[i];
+            let expectedVal = (streaks.length - 1 - i) % 2 === 1 ? 'S' : 'D';
             
-            const klcEval = evaluateKLC(arrSGE);
-            let finalPrediction = null;
-            let finalDesc = klcEval.desc;
-            let action = klcEval.action;
-
-            // Check Toggle
-            if (klcEval.th !== 'NONE' && !klcToggles[klcEval.th]) {
-                finalDesc = `Kịch bản ${klcEval.th.toUpperCase()} đã bị tắt. BỎ QUA.`;
-                action = 'BỎ QUA';
-            } 
-            else if (klcEval.signal) {
-                // Ánh xạ tín hiệu D/S của KLC sang P/B thực tế
-                // Nếu KLC signal = D (Đúng) -> Đánh giống SGE
-                // Nếu KLC signal = S (Sai) -> Đánh ngược SGE
-                const sgeBaseSignal = masterState.currentSgePending.prediction; 
-                
-                if (klcEval.signal === 'D') {
-                    finalPrediction = sgeBaseSignal;
+            if (streak.val !== expectedVal) { valid = false; break; }
+            
+            if (expectedVal === 'S') {
+                if (streak.count !== 1) { valid = false; break; } // Bắt buộc S chỉ được 1 tay (DDDDSS -> Vỡ)
+            } else if (expectedVal === 'D') {
+                if (streak.count >= 3) {
+                    isTH1 = true; // Tìm thấy gốc Bệt D -> Form chuẩn!
+                    break;
+                } else if (streak.count === 1) {
+                    count1D++; // Đếm số lần 1D
                 } else {
-                    finalPrediction = sgeBaseSignal === 'P' ? 'B' : 'P';
+                    valid = false; break; // Nếu là 2D (DDDDSDDD) -> Vỡ quy luật 1D
                 }
             }
-
-            masterState.currentKlcPrediction = finalPrediction;
-            renderKLCUI(finalPrediction, finalDesc, action);
         }
+        
+        if (isTH1 && valid) {
+            return { th: 'th1', signal: 'S', action: count1D <= 6 ? 'ALLIN' : 'NHẸ', desc: `Form Bệt D bẻ 1D->S (Nhịp ${count1D})` };
+        }
+    }
 
+    // ==========================================
+    // TH2: TÌM BỆT S ➜ BỊ BẺ BỞI 1D ➜ XUẤT HIỆN 1S
+    // ==========================================
+    if (lastStreak.val === 'S' && lastStreak.count === 1) {
+        let isTH2 = false;
+        let count1S = 1; // Tính cả tay 1S hiện tại
+        let valid = true;
+        
+        // Quét ngược về quá khứ xem có đúng form xen kẽ 1D -> 1S -> ... -> Gốc Bệt S không
+        for (let i = streaks.length - 2; i >= 0; i--) {
+            let streak = streaks[i];
+            let expectedVal = (streaks.length - 1 - i) % 2 === 1 ? 'D' : 'S';
+            
+            if (streak.val !== expectedVal) { valid = false; break; }
+            
+            if (expectedVal === 'D') {
+                if (streak.count !== 1) { valid = false; break; } // Bắt buộc D chỉ được 1 tay
+            } else if (expectedVal === 'S') {
+                if (streak.count >= 3) {
+                    isTH2 = true; // Tìm thấy gốc Bệt S -> Form chuẩn!
+                    break;
+                } else if (streak.count === 1) {
+                    count1S++;
+                } else {
+                    valid = false; break;
+                }
+            }
+        }
+        
+        if (isTH2 && valid) {
+            return { th: 'th2', signal: 'D', action: count1S <= 6 ? 'ALLIN' : 'NHẸ', desc: `Form Bệt S bẻ 1S->D (Nhịp ${count1S})` };
+        }
+    }
+
+    // ==========================================
+    // TH3: TRƯỜNG HỢP CÒN LẠI (Vỡ form TH1, TH2) -> ĐÁNH THEO BỆT
+    // ==========================================
+    // Cứ D->D, S->S. Nhịp cuối là gì đánh cái đó.
+    return { th: 'th3', signal: lastVal, action: 'BỆT', desc: `Đánh thuận theo Bệt (${lastVal}->${lastVal})` };
+}
         function renderKLCUI(prediction, desc, action) {
             const decEl = document.getElementById('klc-final-decision');
             const adviceEl = document.getElementById('klc-advice');
