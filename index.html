@@ -787,16 +787,12 @@
 
             <div class="absolute -top-3 left-4 bg-purple-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_10px_rgba(147,51,234,0.8)] tracking-widest border border-purple-400">🧠 KẾT LUẬN CHỐT (KLC)</div>
             
-<!-- BẢNG CÔNG TẮC KLC -->
         <div class="grid grid-cols-3 gap-2 mt-2 mb-3 bg-black/60 p-2 rounded-lg border border-gray-700 shadow-inner">
             <label class="flex flex-col items-center cursor-pointer group">
                 <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-blue-400 transition-colors">TH1 (Săn 1D)</span>
                 <div class="relative">
-                    <!-- THÊM CLASS "peer" VÀO ĐÂY -->
                     <input type="checkbox" id="toggle-th1" class="sr-only peer" checked onchange="toggleKlcRule('th1', this.checked)">
-                    <!-- NỀN NÚT VÀ HIỆU ỨNG PHÁT SÁNG (GLOW) -->
                     <div class="block bg-gray-700 w-10 h-6 rounded-full border border-gray-600 peer-checked:bg-blue-600 peer-checked:border-blue-400 peer-checked:shadow-[0_0_12px_rgba(59,130,246,0.8)] transition-all duration-300"></div>
-                    <!-- CHẤM TRÒN DI CHUYỂN -->
                     <div class="dot absolute left-1 top-1 bg-gray-300 w-4 h-4 rounded-full transition-all duration-300 peer-checked:bg-white peer-checked:translate-x-4 shadow-sm"></div>
                 </div>
             </label>
@@ -1170,6 +1166,7 @@
             
             currentKlcPending: null,
             currentKlcPrediction: null,
+            currentKlcRule: null, // NEW
             klcToggles: { th1: true, th2: true, th3: true }
         };
 
@@ -2256,7 +2253,8 @@
                             gameNum: session.history.length,
                             predicted: masterState.currentKlcPrediction,
                             actual: currentResult,
-                            correct: masterState.currentKlcPrediction === currentResult
+                            correct: masterState.currentKlcPrediction === currentResult,
+                            rule: masterState.currentKlcRule // LƯU RULE ĐỂ LỌC BIỂU ĐỒ SAU NÀY
                         });
                         updateKlcChart(session.klcHistory);
                     }
@@ -2362,6 +2360,7 @@
                 session.klcHistory = []; 
                 updateKlcChart([]);
                 masterState.currentKlcPrediction = null;
+                masterState.currentKlcRule = null;
 
                 saveMasterSessions(); updateCurrentSessionInfo();
                 broadcastToAll('clear_history');
@@ -2713,6 +2712,12 @@
         function toggleKlcRule(rule, isChecked) {
             masterState.klcToggles[rule] = isChecked;
             showToast(`Đã ${isChecked ? 'BẬT' : 'TẮT'} ${rule.toUpperCase()}`, isChecked ? 'success' : 'warning');
+            
+            const session = masterState.sessions[masterState.currentSessionId];
+            if (session && session.klcHistory) {
+                updateKlcChart(session.klcHistory);
+            }
+            calculateSGE(); 
         }
 
         function toggleKLCPanel() {
@@ -2805,6 +2810,7 @@
             // Nếu SGE bỏ qua hoặc chưa có lệnh, KLC cũng chờ
             if (!finalSgeSignal || sgeSignalText.includes('BỎ QUA')) {
                 masterState.currentKlcPrediction = null;
+                masterState.currentKlcRule = null;
                 toggleBtn.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-gray-800 to-gray-900 rounded-full text-white font-black shadow-[0_0_15px_rgba(0,0,0,0.8)] border-2 border-gray-600 hover:scale-105 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative";
                 btnIcon.textContent = "💤"; notifDot.classList.add('hidden');
                 decEl.innerHTML = '<span class="text-xl font-bold text-gray-500">CHỜ TÍN HIỆU SGE</span>';
@@ -2816,23 +2822,7 @@
             // Phân tích logic KLC
             const klcLogic = analyzeKLCLogic(globalSGEArr);
             
-            // Kiểm tra công tắc (Toggles)
-            let isEnabled = false;
-            if (klcLogic.th === 'TH1') isEnabled = masterState.klcToggles.th1;
-            if (klcLogic.th === 'TH2') isEnabled = masterState.klcToggles.th2;
-            if (klcLogic.th === 'TH3') isEnabled = masterState.klcToggles.th3;
-
-            if (!isEnabled) {
-                masterState.currentKlcPrediction = null;
-                toggleBtn.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-gray-700 to-gray-900 rounded-full text-gray-400 font-black shadow-inner border-2 border-gray-500 transition-all flex justify-center items-center z-20 relative";
-                btnIcon.textContent = "🔕"; notifDot.classList.add('hidden');
-                decEl.innerHTML = 'BỎ QUA'; decEl.className = 'text-2xl font-bold text-gray-500 relative z-10';
-                adviceEl.innerHTML = `<span class="text-gray-400 font-bold">${klcLogic.desc}</span><br/><span class="text-red-400">Đã bị TẮT bởi người dùng. Tạm nghỉ!</span>`;
-                if(glowBg) glowBg.className = "absolute inset-0 bg-gray-600/10 transition-colors duration-500 pointer-events-none";
-                return;
-            }
-
-            // Dịch mã D/S sang P/B dựa trên SGE
+            // --- 1. TÍNH TOÁN LUÔN PREDICTION ĐỂ LƯU NGẦM ---
             const getOpposite = (val) => val === 'P' ? 'B' : 'P';
             let klcFinalPB = null;
             let strategyText = '';
@@ -2845,9 +2835,27 @@
                 strategyText = 'Bẻ ngược lại SGE';
             }
 
+            // LƯU VÀO STATE ĐỂ CHẠY NGẦM BẤT KỂ BẬT TẮT
             masterState.currentKlcPrediction = klcFinalPB;
-            
-            // Render UI theo quyết định của KLC
+            masterState.currentKlcRule = klcLogic.th;
+
+            // --- 2. KIỂM TRA CÔNG TẮC (TOGGLES) ĐỂ HIỂN THỊ UI ---
+            let isEnabled = false;
+            if (klcLogic.th === 'TH1') isEnabled = masterState.klcToggles.th1;
+            if (klcLogic.th === 'TH2') isEnabled = masterState.klcToggles.th2;
+            if (klcLogic.th === 'TH3') isEnabled = masterState.klcToggles.th3;
+
+            if (!isEnabled) {
+                // NẾU TẮT: Cập nhật UI thành dạng chạy ngầm
+                toggleBtn.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-gray-700 to-gray-900 rounded-full text-gray-400 font-black shadow-inner border-2 border-gray-500 transition-all flex justify-center items-center z-20 relative";
+                btnIcon.textContent = "🔕"; notifDot.classList.add('hidden');
+                decEl.innerHTML = 'BỎ QUA (CHẠY NGẦM)'; decEl.className = 'text-xl font-bold text-gray-500 relative z-10';
+                adviceEl.innerHTML = `<span class="text-gray-400 font-bold">${klcLogic.desc}</span><br/><span class="text-red-400">Đã tắt hiển thị - Vẫn đang theo dõi ngầm!</span>`;
+                if(glowBg) glowBg.className = "absolute inset-0 bg-gray-600/10 transition-colors duration-500 pointer-events-none";
+                return;
+            }
+
+            // --- 3. RENDER UI KHI ĐƯỢC BẬT ---
             let icon = klcLogic.th === 'TH3' ? '✅' : '🔥';
             let adviceHtml = `<span class="text-purple-400 font-bold uppercase">${klcLogic.desc}</span><br/>
                               ➜ ${strategyText} (SGE báo ${finalSgeSignal}).<br/>
@@ -2879,20 +2887,34 @@
                 return;
             }
 
+            // --- LỌC DỮ LIỆU ĐỂ VẼ BIỂU ĐỒ THEO TRẠNG THÁI CÔNG TẮC ---
+            const filteredHistory = klcHistory.filter(item => {
+                if (item.rule === 'TH1') return masterState.klcToggles.th1;
+                if (item.rule === 'TH2') return masterState.klcToggles.th2;
+                if (item.rule === 'TH3') return masterState.klcToggles.th3;
+                return false;
+            });
+
+            if (filteredHistory.length === 0) {
+                chartEl.innerHTML = '<span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Các TH đều đang tắt biểu đồ</span>';
+                if (wrEl) { wrEl.textContent = '0%'; wrEl.className = 'text-sm font-black text-gray-500 bg-gray-900 px-2 py-0.5 rounded border border-gray-700'; }
+                return;
+            }
+
             let correct = 0; let html = '';
-            klcHistory.forEach(item => {
+            filteredHistory.forEach(item => {
                 if (item.correct) correct++;
                 const bg = item.correct ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
                 const height = item.correct ? 'h-full' : 'h-1/3';
-                html += `<div class="w-2.5 flex-shrink-0 rounded-[1px] ${bg} ${height}" title="Ván ${item.gameNum}: KLC Đoán ${item.predicted} - Thực tế ${item.actual}"></div>`;
+                html += `<div class="w-2.5 flex-shrink-0 rounded-[1px] ${bg} ${height}" title="Ván ${item.gameNum}: [${item.rule}] Đoán ${item.predicted} - Thực tế ${item.actual}"></div>`;
             });
             
             chartEl.innerHTML = html;
             chartEl.scrollLeft = chartEl.scrollWidth;
 
             if (wrEl) {
-                const rate = Math.round((correct / klcHistory.length) * 100);
-                wrEl.textContent = `${rate}% (${correct}/${klcHistory.length})`;
+                const rate = Math.round((correct / filteredHistory.length) * 100);
+                wrEl.textContent = `${rate}% (${correct}/${filteredHistory.length})`;
                 wrEl.className = `text-sm font-black px-2 py-0.5 rounded border ${rate >= 50 ? 'text-green-400 bg-green-900/40 border-green-500/50' : 'text-red-400 bg-red-900/40 border-red-500/50'}`;
             }
         }
