@@ -307,7 +307,7 @@
                         <button onclick="createNewSessionAll()" class="btn bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg">➕ Tạo Mới</button>
                         <button onclick="renameMasterSession()" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg">✏️ Đổi Tên</button>
                         <button onclick="exportMasterData()" class="btn bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-lg col-span-2">📤 Xuất Tổng Thể</button>
-                        <button onclick="document.getElementById('masterFileInput').click()" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg col-span-2">📥 Nhập Dữ LUệU</button>
+                        <button onclick="document.getElementById('masterFileInput').click()" class="btn bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg col-span-2">📥 Nhập Dữ Liệu</button>
                         <input type="file" id="masterFileInput" class="hidden" accept=".json" onchange="importMasterData(event)">
                     </div>
                 </div>
@@ -2857,20 +2857,36 @@
 
             // --- 3. RENDER UI KHI ĐƯỢC BẬT ---
             let icon = klcLogic.th === 'TH3' ? '✅' : '🔥';
-            let adviceHtml = `<span class="text-purple-400 font-bold uppercase">${klcLogic.desc}</span><br/>
+            
+            let isAllIn = klcLogic.money.includes('ALL-IN'); 
+
+            let btnAnimation = isAllIn ? 'animate-bounce border-[3px] scale-110' : 'hover:scale-105 border-2';
+            let panelGlowClass = isAllIn ? 'animate-pulse opacity-60' : 'opacity-20';
+            let textAnimation = isAllIn ? 'animate-pulse scale-110 text-4xl' : 'text-3xl';
+
+            let adviceHtml = '';
+            if (isAllIn) {
+                adviceHtml = `<span class="text-yellow-400 font-black uppercase text-lg drop-shadow-md">🌟 ${klcLogic.desc} 🌟</span><br/>
+                              <span class="text-white font-bold">➜ ${strategyText} (SGE báo ${finalSgeSignal}).</span><br/>
+                              ➜ <span class="text-red-600 font-black text-xl bg-yellow-400 px-2 py-1 rounded-md mt-2 inline-block drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] border border-red-500 animate-pulse">🚨 ${klcLogic.money} 🚨</span>`;
+            } else {
+                adviceHtml = `<span class="text-purple-400 font-bold uppercase">${klcLogic.desc}</span><br/>
                               ➜ ${strategyText} (SGE báo ${finalSgeSignal}).<br/>
                               ➜ <span class="text-yellow-400 font-black">${klcLogic.money}</span>`;
+            }
 
             if (klcFinalPB === 'P') {
-                decEl.innerHTML = '👤 VÀO PLAYER'; decEl.className = 'text-3xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] relative z-10';
-                toggleBtn.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-blue-700 to-purple-900 rounded-full text-white font-black shadow-[0_0_25px_rgba(147,51,234,0.8)] border-2 border-blue-400 hover:scale-105 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative";
+                decEl.innerHTML = isAllIn ? '👤 PLAYER (ALL-IN) 🚀' : '👤 VÀO PLAYER'; 
+                decEl.className = `font-black text-blue-400 drop-shadow-[0_0_20px_rgba(59,130,246,0.9)] relative z-10 transition-all duration-300 ${textAnimation}`;
+                toggleBtn.className = `pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-blue-600 to-blue-800 rounded-full text-white font-black shadow-[0_0_30px_rgba(59,130,246,1)] border-blue-300 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative ${btnAnimation}`;
                 btnIcon.textContent = icon; notifDot.classList.remove('hidden');
-                if(glowBg) glowBg.className = "absolute inset-0 bg-blue-600/20 transition-colors duration-500 pointer-events-none";
+                if(glowBg) glowBg.className = `absolute inset-0 bg-blue-500 transition-colors duration-500 pointer-events-none ${panelGlowClass}`;
             } else if (klcFinalPB === 'B') {
-                decEl.innerHTML = '🏦 VÀO BANKER'; decEl.className = 'text-3xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] relative z-10';
-                toggleBtn.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-red-700 to-purple-900 rounded-full text-white font-black shadow-[0_0_25px_rgba(147,51,234,0.8)] border-2 border-red-400 hover:scale-105 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative";
+                decEl.innerHTML = isAllIn ? '🏦 BANKER (ALL-IN) 🚀' : '🏦 VÀO BANKER'; 
+                decEl.className = `font-black text-red-400 drop-shadow-[0_0_20px_rgba(239,68,68,0.9)] relative z-10 transition-all duration-300 ${textAnimation}`;
+                toggleBtn.className = `pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-red-600 to-red-800 rounded-full text-white font-black shadow-[0_0_30px_rgba(239,68,68,1)] border-red-300 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative ${btnAnimation}`;
                 btnIcon.textContent = icon; notifDot.classList.remove('hidden');
-                if(glowBg) glowBg.className = "absolute inset-0 bg-red-600/20 transition-colors duration-500 pointer-events-none";
+                if(glowBg) glowBg.className = `absolute inset-0 bg-red-500 transition-colors duration-500 pointer-events-none ${panelGlowClass}`;
             }
 
             adviceEl.innerHTML = adviceHtml;
@@ -2934,6 +2950,10 @@
             
             let checkInit = setInterval(() => {
                 if (allSystemsReady()) { 
+                    
+                    // Gọi hàm tự động tạo Session
+                    autoCreateSession();
+                    
                     broadcastToAll('get_accuracy'); 
                     broadcastToAll('get_chot_history'); 
                     broadcastToAll('get_system_details');
@@ -2941,6 +2961,32 @@
                 }
             }, 500);
         });
+
+        // Hàm tự động tạo phiên (Mới eidt vào)
+        function autoCreateSession() {
+            const id = `session-${Date.now()}`;
+            // Đặt tên phiên kèm thời gian tự động
+            const sessionName = `Phiên F5 ${new Date().toLocaleTimeString('vi-VN')}`;
+            
+            masterState.sessions[id] = { id: id, name: sessionName, created: new Date().toISOString(), history: [], geHistory: [] };
+            masterState.currentSessionId = id; 
+            masterState.currentSessionName = sessionName;
+            
+            saveMasterSessions(); 
+            updateMasterSessionSelector(); 
+            
+            // Đặt thẻ select hiển thị đúng phiên vừa tạo
+            const selector = document.getElementById('masterSessionSelector');
+            if(selector) selector.value = id;
+            
+            updateCurrentSessionInfo();
+            
+            // Bắn tín hiệu sang các iframe
+            broadcastToAll('create_session', { name: sessionName, id: id });
+            initializeOriginalPatternDB();
+            
+            showToast('🔄 Đã tự động khởi tạo Phiên mới!', 'success');
+        }
 
     </script>
 </body>
