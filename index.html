@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLT</title>
+    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLT + Equity Curve</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -232,6 +232,7 @@
         </button>
     </div>
 
+    <!-- MODAL QUẢN LÝ KHO MẪU -->
     <div id="pattern-db-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-gray-800 border border-yellow-500/30 rounded-2xl w-11/12 max-w-4xl p-6 shadow-[0_0_30px_rgba(202,138,4,0.15)] flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
@@ -251,6 +252,26 @@
                     <button onclick="resetPatternDBToDefault()" class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-all border border-gray-600">Khôi Phục Gốc (102 Mẫu)</button>
                     <button onclick="savePatternDB()" class="px-6 py-2 bg-yellow-600 hover:bg-yellow-500 text-black font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(202,138,4,0.4)]">Lưu & Dạy Lại AI</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BIỂU ĐỒ EQUITY CURVE KLT (NEW) -->
+    <div id="equity-chart-modal" class="fixed inset-0 bg-black/80 z-[300] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-gray-900 border border-cyan-500/30 rounded-2xl w-11/12 max-w-4xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.15)] flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <h2 class="text-xl md:text-2xl font-bold text-cyan-400 flex items-center gap-2">
+                    📊 BIỂU ĐỒ PHÂN TÍCH TỈ LỆ THẮNG (EQUITY CURVE)
+                </h2>
+                <button onclick="closeEquityChartModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="w-full flex-grow relative bg-gray-800 p-2 md:p-4 rounded-lg min-h-[400px]">
+                <canvas id="equityChartCanvas"></canvas>
+            </div>
+            <div class="text-xs text-gray-500 text-center mt-3">
+                * Biểu đồ mô phỏng lực hút Hồi quy về trung bình (Mean Reversion) và Xu hướng (Trendline)
             </div>
         </div>
     </div>
@@ -735,7 +756,7 @@
         </div>
 
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + KLC + KLT</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + KLC + KLT + Equity Curve</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 và 3 biểu đồ khác để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
@@ -906,6 +927,11 @@
                     <span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>
                 </div>
             </div>
+
+            <!-- Nút gọi biểu đồ Equity Curve Chart.js -->
+            <button onclick="openEquityChartModal()" class="w-full mt-2 py-2 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-lg border border-cyan-500/30 shadow-inner transition-colors flex justify-center items-center gap-2">
+                📈 Mở Biểu Đồ Hồi Quy (Equity Curve)
+            </button>
         </div>
 
         <button id="klt-toggle-btn" onclick="toggleKLTPanel()" class="pointer-events-auto w-[68px] h-[68px] bg-gradient-to-br from-cyan-600 to-teal-800 rounded-full text-white font-black shadow-[0_0_15px_rgba(6,182,212,0.6)] border-2 border-cyan-300 hover:scale-105 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative">
@@ -1690,7 +1716,6 @@
             const last = streaks[streaks.length-1];
             const prev1 = streaks.length > 1 ? streaks[streaks.length-2] : null;
             const prev2 = streaks.length > 2 ? streaks[streaks.length-3] : null;
-            const prev3 = streaks.length > 3 ? streaks[streaks.length-4] : null;
 
             const getOpposite = (val) => {
                 if (type === 'PB') return val === 'P' ? 'B' : 'P';
@@ -1986,10 +2011,8 @@
             if (sgeDecisionText.includes('PLAYER')) finalSgeSignal = 'P';
             else if (sgeDecisionText.includes('BANKER')) finalSgeSignal = 'B';
 
-            // Chạy KLC
             runKLC(globalArr, sgeDecisionText, finalSgeSignal);
             
-            // Chạy KLT (Lớp Phân Tích Cuối Cùng)
             runKLT(session);
 
             masterState.currentSgePending = {
@@ -2544,6 +2567,11 @@
             masterState.currentKltReason = kltReasoning;
 
             renderKltUI(sgeAnalysis, klcAnalysis, sgeTargetPB, klcTargetPB, kltFinalDecision, kltReasoning);
+            
+            // Re-render chart if it is open
+            if (equityChartInstance) {
+                renderEquityChartCanvas();
+            }
         }
 
         function renderKltUI(sgeAnalysis, klcAnalysis, sgeTarget, klcTarget, decision, reason) {
@@ -2623,6 +2651,131 @@
                 wrEl.textContent = `${rate}% (${correct}/${kltHistory.length})`;
                 wrEl.className = `text-sm font-black px-2 py-0.5 rounded border ${rate >= 50 ? 'text-cyan-400 bg-cyan-900/40 border-cyan-500/50' : 'text-red-400 bg-red-900/40 border-red-500/50'}`;
             }
+        }
+
+        /* =========================================================================
+           BIỂU ĐỒ EQUITY CURVE BẰNG CHART.JS
+           ========================================================================= */
+        let equityChartInstance = null;
+
+        function openEquityChartModal() {
+            const modal = document.getElementById('equity-chart-modal');
+            if (modal) modal.classList.remove('hidden');
+            renderEquityChartCanvas();
+        }
+
+        function closeEquityChartModal() {
+            const modal = document.getElementById('equity-chart-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function renderEquityChartCanvas() {
+            if (!masterState.currentSessionId) return;
+            const session = masterState.sessions[masterState.currentSessionId];
+            if (!session) return;
+
+            const sgeHistory = session.sgeHistory || [];
+            const klcHistory = session.klcHistory || [];
+
+            let maxLen = Math.max(sgeHistory.length, klcHistory.length, 10);
+            let labels = Array.from({length: maxLen}, (_, i) => `Ván ${i+1}`);
+
+            let sgeData = [];
+            let sgeCorrects = 0;
+            for (let i = 0; i < sgeHistory.length; i++) {
+                if (sgeHistory[i].correct) sgeCorrects++;
+                sgeData.push((sgeCorrects / (i + 1)) * 100);
+            }
+
+            let klcData = [];
+            let klcCorrects = 0;
+            for (let i = 0; i < klcHistory.length; i++) {
+                if (klcHistory[i].correct) klcCorrects++;
+                klcData.push((klcCorrects / (i + 1)) * 100);
+            }
+            
+            let baseLine = Array(maxLen).fill(50);
+
+            const ctx = document.getElementById('equityChartCanvas').getContext('2d');
+            
+            if (equityChartInstance) {
+                equityChartInstance.destroy();
+            }
+
+            equityChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Đường cong SGE (%)',
+                            data: sgeData,
+                            borderColor: '#eab308', // yellow-500
+                            backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#eab308',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Đường cong KLC (%)',
+                            data: klcData,
+                            borderColor: '#a855f7', // purple-500
+                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#a855f7',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Trục cân bằng (50%)',
+                            data: baseLine,
+                            borderColor: '#6b7280', // gray-500
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: function(value) { return value + '%'; }
+                            },
+                            grid: { color: 'rgba(75, 85, 99, 0.3)' }
+                        },
+                        x: {
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(75, 85, 99, 0.3)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e5e7eb',
+                                font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`; }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            });
         }
 
         /* =========================================================================
@@ -2980,7 +3133,6 @@
                     sgePanel.classList.add('border-yellow-500', 'shadow-[0_0_40px_rgba(234,179,8,0.3)]');
                 }
 
-                // Reset KLC Floating Panel UI
                 const decElKLC = document.getElementById('klc-final-decision');
                 const adviceElKLC = document.getElementById('klc-advice');
                 if(decElKLC) decElKLC.innerHTML = '-';
@@ -2992,7 +3144,6 @@
                 if(btnIconKLC) btnIconKLC.textContent = "💤";
                 if(notifDotKLC) notifDotKLC.classList.add('hidden');
 
-                // Reset SGE Floating Panel UI
                 const floatDecEl = document.getElementById('float-sge-decision');
                 const floatReasonEl = document.getElementById('float-sge-reason');
                 const floatChartEl = document.getElementById('float-sge-chart');
@@ -3012,7 +3163,6 @@
                 renderSGEChart('sge-chart-ge', [], 'DS');
                 renderSGEChart('sge-chart-ht4', [], 'DS');
 
-                // Reset KLT Floating Panel UI
                 const decElKLT = document.getElementById('klt-final-decision');
                 const adviceElKLT = document.getElementById('klt-advice');
                 const btnIconKLT = document.getElementById('klt-btn-icon');
