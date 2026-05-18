@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC</title>
+    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -709,7 +709,131 @@
                     </div>
                 </div>
             </div>
+
+            <!-- KLT PANEL - BẢNG KẾT LUẬN TỔNG NÂNG CAO -->
+            <div id="klt-panel" class="mt-8 bg-gradient-to-br from-gray-900 via-black to-gray-900 p-6 rounded-2xl border-4 border-cyan-500 shadow-[0_0_40px_rgba(6,182,212,0.3)] relative transition-all duration-500">
+                
+                <!-- TITLE BADGE -->
+                <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black px-8 py-2 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.8)] text-xl border-2 border-white whitespace-nowrap z-10">
+                    🌟 KẾT LUẬN TỔNG (KLT) - ĐIỀU KHIỂN TRUNG TÂM 🌟
+                </div>
+
+                <!-- KHU VỰC CÔNG TẮC VÀ BIỂU ĐỒ 6 HỆ THỐNG -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Big Road -->
+                    <div class="bg-gray-800/80 p-3 rounded-xl border border-gray-600 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-gray-300 uppercase">1. Big Road (Cơ bản)</span>
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" id="klt-toggle-br" class="sr-only peer" checked onchange="toggleKltSystem('br', this.checked)">
+                                <div class="w-9 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all"></div>
+                                <div class="absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-all peer-checked:translate-x-4"></div>
+                            </label>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] text-gray-500">Tỷ lệ thắng ngầm:</span>
+                            <span id="klt-rate-br" class="text-xs font-black text-cyan-400">0%</span>
+                        </div>
+                        <div id="klt-chart-br" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar px-1 bg-gray-900 rounded shadow-inner">
+                        </div>
+                    </div>
+
+                    <!-- HT1 -->
+                    <div class="bg-gray-800/80 p-3 rounded-xl border border-gray-600 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-gray-300 uppercase">2. HT1 (N-Gram AI)</span>
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" id="klt-toggle-ht1" class="sr-only peer" checked onchange="toggleKltSystem('ht1', this.checked)">
+                                <div class="w-9 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all"></div>
+                                <div class="absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-all peer-checked:translate-x-4"></div>
+                            </label>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] text-gray-500">Tỷ lệ thắng ngầm:</span>
+                            <span id="klt-rate-ht1" class="text-xs font-black text-cyan-400">0%</span>
+                        </div>
+                        <div id="klt-chart-ht1" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar px-1 bg-gray-900 rounded shadow-inner"></div>
+                    </div>
+
+                    <!-- HT4 -->
+                    <div class="bg-gray-800/80 p-3 rounded-xl border border-gray-600 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-gray-300 uppercase">3. HT4 (Advanced)</span>
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" id="klt-toggle-ht4" class="sr-only peer" checked onchange="toggleKltSystem('ht4', this.checked)">
+                                <div class="w-9 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all"></div>
+                                <div class="absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-all peer-checked:translate-x-4"></div>
+                            </label>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] text-gray-500">Tỷ lệ thắng ngầm:</span>
+                            <span id="klt-rate-ht4" class="text-xs font-black text-cyan-400">0%</span>
+                        </div>
+                        <div id="klt-chart-ht4" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar px-1 bg-gray-900 rounded shadow-inner"></div>
+                    </div>
+
+                    <!-- GE -->
+                    <div class="bg-gray-800/80 p-3 rounded-xl border border-gray-600 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-gray-300 uppercase">4. God Eye (GE)</span>
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" id="klt-toggle-ge" class="sr-only peer" checked onchange="toggleKltSystem('ge', this.checked)">
+                                <div class="w-9 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all"></div>
+                                <div class="absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-all peer-checked:translate-x-4"></div>
+                            </label>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] text-gray-500">Tỷ lệ thắng ngầm:</span>
+                            <span id="klt-rate-ge" class="text-xs font-black text-cyan-400">0%</span>
+                        </div>
+                        <div id="klt-chart-ge" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar px-1 bg-gray-900 rounded shadow-inner"></div>
+                    </div>
+
+                    <!-- SGE -->
+                    <div class="bg-gray-800/80 p-3 rounded-xl border border-gray-600 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-gray-300 uppercase">5. Support GE (SGE)</span>
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" id="klt-toggle-sge" class="sr-only peer" checked onchange="toggleKltSystem('sge', this.checked)">
+                                <div class="w-9 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all"></div>
+                                <div class="absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-all peer-checked:translate-x-4"></div>
+                            </label>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] text-gray-500">Tỷ lệ thắng ngầm:</span>
+                            <span id="klt-rate-sge" class="text-xs font-black text-cyan-400">0%</span>
+                        </div>
+                        <div id="klt-chart-sge" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar px-1 bg-gray-900 rounded shadow-inner"></div>
+                    </div>
+
+                    <!-- KLC -->
+                    <div class="bg-gray-800/80 p-3 rounded-xl border border-gray-600 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-gray-300 uppercase">6. Kết Luận Chốt (KLC)</span>
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" id="klt-toggle-klc" class="sr-only peer" checked onchange="toggleKltSystem('klc', this.checked)">
+                                <div class="w-9 h-5 bg-gray-700 rounded-full peer-checked:bg-cyan-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all"></div>
+                                <div class="absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-all peer-checked:translate-x-4"></div>
+                            </label>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] text-gray-500">Tỷ lệ thắng ngầm:</span>
+                            <span id="klt-rate-klc" class="text-xs font-black text-cyan-400">0%</span>
+                        </div>
+                        <div id="klt-chart-klc" class="flex items-end justify-start overflow-x-auto h-8 gap-1 custom-scrollbar px-1 bg-gray-900 rounded shadow-inner"></div>
+                    </div>
+                </div>
+
+                <!-- MÀN HÌNH CHỐT LỆNH KLT -->
+                <div class="mt-6 bg-black p-6 rounded-xl border border-cyan-500/50 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-inner">
+                    <div id="klt-bg-glow" class="absolute inset-0 bg-cyan-500/10 transition-colors duration-500 pointer-events-none"></div>
+                    <h2 class="text-gray-400 font-bold tracking-widest uppercase mb-2 relative z-10 text-sm">CHỈ THỊ GIAO DỊCH CUỐI CÙNG</h2>
+                    <div id="klt-final-decision" class="text-5xl font-black text-gray-500 drop-shadow-xl transition-all duration-300 relative z-10">ĐANG QUÉT...</div>
+                    <div id="klt-final-reason" class="text-sm text-cyan-300 font-medium mt-3 relative z-10 min-h-[2rem]">-</div>
+                </div>
             </div>
+
+        </div>
 
         <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="text-center p-3 bg-gray-800 rounded-lg border border-gray-700/50">
@@ -1166,8 +1290,12 @@
             
             currentKlcPending: null,
             currentKlcPrediction: null,
-            currentKlcRule: null, // NEW
-            klcToggles: { th1: true, th2: true, th3: true }
+            currentKlcRule: null,
+            klcToggles: { th1: true, th2: true, th3: true },
+
+            // THÊM MỚI KLT
+            kltToggles: { br: true, ht1: true, ht4: true, ge: true, sge: true, klc: true },
+            currentPredictions: { br: null, ht1: null, ht4: null, ge: null, sge: null, klc: null }
         };
 
         let gameAccuracyChart = null;
@@ -1968,6 +2096,14 @@
                 agreedKLs: winningKLs.map(k => parseInt(k.replace('KL', '')))
             };
 
+            // --- NEW: KLT LOGIC ---
+            prepareKLTPredictions();
+            calculateKLT();
+            const sessionRef = masterState.sessions[masterState.currentSessionId];
+            if (sessionRef && sessionRef.kltTracking) {
+                renderKltUI(sessionRef.kltTracking);
+            }
+
             // --- RENDER GIAO DIỆN SGE ---
             const decEl = document.getElementById('sge-final-decision');
             const reasonEl = document.getElementById('sge-final-reason');
@@ -2191,10 +2327,155 @@
             }
         }
 
-
         /* =========================================================================
            7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION VÀ HÀNG ĐỢI (QUEUE SYSTEM)
            ========================================================================= */
+
+        function toggleKltSystem(sys, isChecked) {
+            masterState.kltToggles[sys] = isChecked;
+            showToast(`Đã ${isChecked ? 'BẬT' : 'TẮT'} tham gia KLT: ${sys.toUpperCase()}`, isChecked ? 'success' : 'warning');
+            calculateKLT();
+        }
+
+        function prepareKLTPredictions() {
+            const ht1Details = masterState.systemDetails.ht1 || {};
+            const ht4Details = masterState.systemDetails.ht4 || {};
+            const ht1Chot = ht1Details.chot || null;
+            const ht4Chot = ht4Details.chot || null;
+            
+            const session = masterState.sessions[masterState.currentSessionId];
+            let brPrediction = null;
+            if (session && session.history && session.history.length >= 2) {
+                const h = session.history;
+                if (h[h.length - 1] === h[h.length - 2]) brPrediction = h[h.length - 1]; // Đang bệt -> Theo bệt
+                else brPrediction = h[h.length - 1] === 'P' ? 'B' : 'P'; // Đang 1-1 -> Theo 1-1
+            }
+
+            masterState.currentPredictions = {
+                br: brPrediction,
+                ht1: ht1Chot,
+                ht4: ht4Chot,
+                ge: masterState.currentGePrediction,
+                sge: masterState.currentSgePending ? masterState.currentSgePending.prediction : null,
+                klc: masterState.currentKlcPrediction
+            };
+        }
+
+        function calculateKLT() {
+            const session = masterState.sessions[masterState.currentSessionId];
+            if (!session || !session.kltTracking) return;
+
+            let scoreP = 0;
+            let scoreB = 0;
+            let activeSystemsCount = 0;
+            let reasons = [];
+
+            const preds = masterState.currentPredictions;
+            const toggles = masterState.kltToggles;
+            const tracking = session.kltTracking;
+
+            // Duyệt qua 6 hệ thống
+            ['br', 'ht1', 'ht4', 'ge', 'sge', 'klc'].forEach(sys => {
+                // CHỈ TÍNH NHỮNG HỆ THỐNG ĐƯỢC BẬT VÀ CÓ DỰ ĐOÁN
+                if (toggles[sys] && preds[sys]) {
+                    activeSystemsCount++;
+                    
+                    // Tính tỷ lệ thắng ngầm (Win rate) của hệ thống này trong 20 ván gần nhất
+                    const recentHistory = tracking[sys].slice(-20);
+                    let winRate = 0;
+                    if (recentHistory.length > 0) {
+                        const wins = recentHistory.filter(h => h.correct).length;
+                        winRate = wins / recentHistory.length; // Số từ 0.0 đến 1.0
+                    }
+
+                    // Trọng số động (Hệ thống nào WinRate > 60% sẽ được điểm cao hơn, < 40% bị trừ điểm)
+                    let weight = 1.0;
+                    if (winRate >= 0.7) weight = 2.0;       // Đang form rất mượt
+                    else if (winRate >= 0.5) weight = 1.2;  // Ổn định
+                    else if (winRate < 0.4) weight = 0.5;   // Đang gãy, giảm trọng số tiếng nói
+
+                    if (preds[sys] === 'P') {
+                        scoreP += weight;
+                        reasons.push(`${sys.toUpperCase()} báo P (WR: ${(winRate*100).toFixed(0)}%)`);
+                    } else if (preds[sys] === 'B') {
+                        scoreB += weight;
+                        reasons.push(`${sys.toUpperCase()} báo B (WR: ${(winRate*100).toFixed(0)}%)`);
+                    }
+                }
+            });
+
+            // RENDER KẾT QUẢ RA GIAO DIỆN KLT
+            const decEl = document.getElementById('klt-final-decision');
+            const reasonEl = document.getElementById('klt-final-reason');
+            const glowEl = document.getElementById('klt-bg-glow');
+
+            if (activeSystemsCount === 0) {
+                decEl.textContent = "CHỜ BẬT LỌC";
+                decEl.className = "text-3xl font-black text-gray-500 relative z-10";
+                reasonEl.innerHTML = "Chưa có hệ thống nào được bật hoặc chưa có tín hiệu.";
+                glowEl.className = "absolute inset-0 transition-colors bg-transparent";
+                return;
+            }
+
+            const diff = Math.abs(scoreP - scoreB);
+            
+            if (scoreP > scoreB) {
+                decEl.textContent = diff >= 2.0 ? "👤 PLAYER (TỰ TIN)" : "👤 PLAYER";
+                decEl.className = `text-4xl md:text-5xl font-black text-blue-400 drop-shadow-[0_0_20px_rgba(59,130,246,1)] relative z-10 ${diff>=2.0 ? 'animate-pulse':''}`;
+                glowEl.className = "absolute inset-0 bg-blue-600/20 transition-colors";
+                reasonEl.innerHTML = `Lý do: Lực P (${scoreP.toFixed(1)}) > Lực B (${scoreB.toFixed(1)}).<br><span class="text-gray-400 text-xs">${reasons.join(' | ')}</span>`;
+            } 
+            else if (scoreB > scoreP) {
+                decEl.textContent = diff >= 2.0 ? "🏦 BANKER (TỰ TIN)" : "🏦 BANKER";
+                decEl.className = `text-4xl md:text-5xl font-black text-red-400 drop-shadow-[0_0_20px_rgba(239,68,68,1)] relative z-10 ${diff>=2.0 ? 'animate-pulse':''}`;
+                glowEl.className = "absolute inset-0 bg-red-600/20 transition-colors";
+                reasonEl.innerHTML = `Lý do: Lực B (${scoreB.toFixed(1)}) > Lực P (${scoreP.toFixed(1)}).<br><span class="text-gray-400 text-xs">${reasons.join(' | ')}</span>`;
+            } 
+            else {
+                decEl.textContent = "BỎ QUA - XUNG ĐỘT";
+                decEl.className = "text-3xl font-black text-yellow-400 relative z-10";
+                glowEl.className = "absolute inset-0 bg-yellow-600/10 transition-colors";
+                reasonEl.innerHTML = `Điểm P (${scoreP.toFixed(1)}) hòa Điểm B (${scoreB.toFixed(1)}). Tín hiệu đánh nhau, khuyên nghỉ.`;
+            }
+        }
+
+        function renderKltUI(kltTracking) {
+            if (!kltTracking) return;
+
+            ['br', 'ht1', 'ht4', 'ge', 'sge', 'klc'].forEach(sys => {
+                const history = kltTracking[sys];
+                const chartEl = document.getElementById(`klt-chart-${sys}`);
+                const rateEl = document.getElementById(`klt-rate-${sys}`);
+                
+                if (!chartEl || !rateEl) return;
+
+                if (history.length === 0) {
+                    chartEl.innerHTML = '<span class="text-[10px] text-gray-600 italic w-full text-center mt-1">Chưa có dữ liệu</span>';
+                    rateEl.textContent = '0%';
+                    return;
+                }
+
+                // Tính Win Rate
+                const correct = history.filter(h => h.correct).length;
+                const rate = Math.round((correct / history.length) * 100);
+                
+                rateEl.textContent = `${rate}% (${correct}/${history.length})`;
+                rateEl.className = `text-xs font-black ${rate >= 60 ? 'text-green-400' : (rate >= 40 ? 'text-yellow-400' : 'text-red-400')}`;
+
+                // Vẽ biểu đồ (Chỉ hiển thị 30 ván gần nhất cho gọn)
+                let html = '';
+                const displayHist = history.slice(-30);
+                displayHist.forEach(item => {
+                    const bg = item.correct ? 'bg-green-500' : 'bg-red-500';
+                    const h = item.correct ? 'h-full' : 'h-1/3';
+                    html += `<div class="w-1.5 flex-shrink-0 rounded-[1px] ${bg} ${h} border border-black/20" title="Đoán ${item.predicted} - Thực tế ${item.actual}"></div>`;
+                });
+                
+                chartEl.innerHTML = html;
+                chartEl.scrollLeft = chartEl.scrollWidth; // Tự động cuộn đến cuối
+            });
+        }
+
         function addResultToAll(result) {
             if (!masterState.currentSessionId) { 
                 showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning'); 
@@ -2215,6 +2496,24 @@
                 
                 const session = masterState.sessions[masterState.currentSessionId];
                 if (!session.history) session.history = [];
+
+                // --- CHÈN MỚI: THEO DÕI CHẠY NGẦM KLT ---
+                if (!session.kltTracking) {
+                    session.kltTracking = { br: [], ht1: [], ht4: [], ge: [], sge: [], klc: [] };
+                }
+                
+                const preds = masterState.currentPredictions;
+                ['br', 'ht1', 'ht4', 'ge', 'sge', 'klc'].forEach(sys => {
+                    if (preds[sys]) {
+                        session.kltTracking[sys].push({
+                            gameNum: session.history.length + 1, // +1 vì ván hiện tại chưa push vào history
+                            predicted: preds[sys],
+                            actual: currentResult,
+                            correct: preds[sys] === currentResult
+                        });
+                    }
+                });
+                
                 session.history.push(currentResult);
                 
                 if (masterState.currentGeState && masterState.currentGeState !== "Chưa rõ - Chưa rõ") {
@@ -2263,6 +2562,8 @@
                 saveMasterSessions();
                 updateCurrentSessionInfo();
                 
+                renderKltUI(session.kltTracking);
+                
                 masterState.pendingResultToEvaluate = currentResult; 
                 broadcastToAll('add_result', currentResult);
                 
@@ -2310,6 +2611,19 @@
                 return;
             }
             
+            // --- REVERT KLT ---
+            if (session.kltTracking) {
+                ['br', 'ht1', 'ht4', 'ge', 'sge', 'klc'].forEach(sys => {
+                    if (session.kltTracking[sys].length > 0) {
+                        let lastItem = session.kltTracking[sys][session.kltTracking[sys].length - 1];
+                        if (lastItem.gameNum === session.history.length) { 
+                            session.kltTracking[sys].pop();
+                        }
+                    }
+                });
+                renderKltUI(session.kltTracking);
+            }
+
             session.history.pop();
             
             if (session.geHistory && session.geHistory.length > 0) {
@@ -2355,7 +2669,10 @@
                 session.history = [];
                 session.geHistory = []; 
                 session.sgeHistory = []; 
+                session.kltTracking = { br: [], ht1: [], ht4: [], ge: [], sge: [], klc: [] };
+                
                 updateSGEStatsUI([]);
+                renderKltUI(session.kltTracking);
                 
                 session.klcHistory = []; 
                 updateKlcChart([]);
@@ -2392,6 +2709,11 @@
                     sgePanel.classList.remove('border-red-500', 'shadow-[0_0_50px_rgba(239,68,68,0.6)]');
                     sgePanel.classList.add('border-yellow-500', 'shadow-[0_0_40px_rgba(234,179,8,0.3)]');
                 }
+                
+                const decElKlt = document.getElementById('klt-final-decision');
+                if (decElKlt) { decElKlt.textContent = "ĐANG QUÉT..."; decElKlt.className = 'text-5xl font-black text-gray-500 drop-shadow-xl transition-all duration-300 relative z-10'; }
+                const reasonElKlt = document.getElementById('klt-final-reason');
+                if (reasonElKlt) reasonElKlt.innerHTML = "-";
 
                 // Reset KLC Floating Panel UI
                 const decElKLC = document.getElementById('klc-final-decision');
