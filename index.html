@@ -219,6 +219,12 @@
     <div id="toast-container"></div>
     <div id="warning-container"></div>
 
+    <div id="time-stop-container" class="fixed top-4 right-4 md:right-10 z-[200] bg-gray-900 border-2 border-green-500 p-2 md:p-3 rounded-xl shadow-[0_0_15px_rgba(34,197,94,0.3)] flex flex-col items-center gap-1 cursor-pointer transition-all duration-300 hover:scale-105 select-none" onclick="startSessionTimer(true)">
+        <span class="text-[9px] md:text-[10px] text-gray-400 font-bold uppercase tracking-widest">Thời gian phiên</span>
+        <span id="session-timer" class="text-xl md:text-2xl font-black text-green-400 drop-shadow-md">45:00</span>
+        <div class="absolute -bottom-2 bg-gray-800 text-[8px] text-yellow-400 px-2 rounded-full border border-gray-600 font-bold">Bấm để Cài đặt</div>
+    </div>
+
     <div class="fixed bottom-6 right-6 z-[200] flex flex-col items-center gap-4">
         <div id="fab-menu" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom">
             <a href="#ge-section" class="w-[60px] h-[60px] bg-purple-700 rounded-full text-white font-black shadow-[0_0_15px_rgba(126,34,206,0.5)] hover:bg-purple-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới thuật toán God Eye (GE)">GE</a>
@@ -1316,6 +1322,7 @@
             if (ht1VerdictRaw.includes('P')) baseSignal = 'P';
             else if (ht1VerdictRaw.includes('B')) baseSignal = 'B';
 
+            // User Correction Rule Applied here
             if (ht1VerdictRaw.includes('NGƯỢC')) { impliedResult = 'S'; }
 
             if (!baseSignal) {
@@ -2193,9 +2200,119 @@
 
 
         /* =========================================================================
+           TÍNH NĂNG TIME-STOP (TÙY CHỈNH THỜI GIAN)
+           ========================================================================= */
+        let sessionTimeLimit = 45 * 60; // Mặc định ban đầu là 45 phút
+        let currentSessionTime = sessionTimeLimit;
+        let sessionTimerInterval = null;
+        let isSystemLocked = false;
+
+        function startSessionTimer(isManualSetup = false) {
+            // Khung nhập thời gian tùy chỉnh khi người dùng click vào đồng hồ
+            if (isManualSetup) {
+                let currentMins = Math.floor(sessionTimeLimit / 60);
+                let inputMins = prompt("Nhập thời gian cho phiên này (tính bằng phút):", currentMins);
+                
+                // Nếu người dùng bấm Hủy hoặc không nhập gì
+                if (inputMins === null || inputMins.trim() === "") return; 
+                
+                let parsedMins = parseInt(inputMins);
+                if (isNaN(parsedMins) || parsedMins <= 0) {
+                    showToast("Thời gian không hợp lệ! Vui lòng nhập một số dương.", "error");
+                    return;
+                }
+                sessionTimeLimit = parsedMins * 60;
+                showToast(`Đã thiết lập thời gian phiên: ${parsedMins} phút`, "success");
+            }
+
+            clearInterval(sessionTimerInterval);
+            currentSessionTime = sessionTimeLimit;
+            isSystemLocked = false;
+            updateTimerUI();
+            toggleInputButtons(false); // Mở khóa nút bấm
+
+            sessionTimerInterval = setInterval(() => {
+                currentSessionTime--;
+                updateTimerUI();
+
+                if (currentSessionTime <= 0) {
+                    clearInterval(sessionTimerInterval);
+                    lockSystem();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const timerEl = document.getElementById('session-timer');
+            const containerEl = document.getElementById('time-stop-container');
+            if (!timerEl || !containerEl) return;
+
+            const mins = Math.floor(currentSessionTime / 60).toString().padStart(2, '0');
+            const secs = (currentSessionTime % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${mins}:${secs}`;
+
+            // Tự động tính toán các mốc cảnh báo theo tỷ lệ phần trăm của tổng thời gian
+            const thresholdYellow = Math.floor(sessionTimeLimit * 0.3); // Còn 30% thời gian -> Cảnh báo Vàng
+            const thresholdRed = Math.floor(sessionTimeLimit * 0.1);    // Còn 10% thời gian -> Cảnh báo Đỏ
+
+            if (currentSessionTime > thresholdYellow) {
+                timerEl.className = 'text-xl md:text-2xl font-black text-green-400 drop-shadow-md';
+                containerEl.className = 'fixed top-4 right-4 md:right-10 z-[200] bg-gray-900 border-2 border-green-500 p-2 md:p-3 rounded-xl shadow-[0_0_15px_rgba(34,197,94,0.3)] flex flex-col items-center gap-1 cursor-pointer transition-all duration-300 hover:scale-105';
+            } else if (currentSessionTime > thresholdRed) {
+                timerEl.className = 'text-xl md:text-2xl font-black text-yellow-400 drop-shadow-md';
+                containerEl.className = 'fixed top-4 right-4 md:right-10 z-[200] bg-gray-900 border-2 border-yellow-500 p-2 md:p-3 rounded-xl shadow-[0_0_15px_rgba(234,179,8,0.3)] flex flex-col items-center gap-1 cursor-pointer transition-all duration-300 hover:scale-105';
+            } else {
+                timerEl.className = 'text-xl md:text-2xl font-black text-red-500 drop-shadow-md animate-pulse';
+                containerEl.className = 'fixed top-4 right-4 md:right-10 z-[200] bg-gray-900 border-2 border-red-600 p-2 md:p-3 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.6)] flex flex-col items-center gap-1 cursor-pointer transition-all duration-300 hover:scale-105';
+            }
+        }
+
+        function lockSystem() {
+            isSystemLocked = true;
+            toggleInputButtons(true);
+            showTimeStopModal();
+        }
+
+        function toggleInputButtons(disable) {
+            const pButtons = document.querySelectorAll('button[onclick="addResultToAll(\'P\')"]');
+            const bButtons = document.querySelectorAll('button[onclick="addResultToAll(\'B\')"]');
+            
+            [...pButtons, ...bButtons].forEach(btn => {
+                btn.disabled = disable;
+                if(disable) {
+                    btn.classList.add('opacity-30', 'cursor-not-allowed', 'grayscale');
+                } else {
+                    btn.classList.remove('opacity-30', 'cursor-not-allowed', 'grayscale');
+                }
+            });
+        }
+        
+        function showTimeStopModal() {
+            let existing = document.getElementById('time-stop-warning-modal');
+            if(existing) existing.remove();
+
+            const customMins = Math.floor(sessionTimeLimit / 60);
+
+            const modalHtml = `
+            <div id="time-stop-warning-modal" class="fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center backdrop-blur-md">
+                <div class="bg-gray-900 border-2 border-red-500 rounded-2xl w-11/12 max-w-lg p-8 shadow-[0_0_50px_rgba(239,68,68,0.5)] text-center animate-slideIn">
+                    <div class="text-7xl mb-4 animate-bounce">🛑</div>
+                    <h2 class="text-3xl font-black text-red-500 mb-4 uppercase tracking-wider">Hết giờ phiên chơi!</h2>
+                    <p class="text-gray-300 text-lg mb-6 leading-relaxed">Bạn đã chạm mốc giới hạn <b>${customMins} phút</b>. Khả năng tập trung và phán đoán của não bộ lúc này đã giảm mạnh.<br/><br/><span class="text-yellow-400 font-bold">Hãy chốt lãi/cắt lỗ ngay lập tức và đi ra ngoài. Kỷ luật là chén thánh!</span></p>
+                    <button onclick="document.getElementById('time-stop-warning-modal').remove()" class="px-8 py-4 bg-gradient-to-r from-red-600 to-red-800 hover:scale-105 text-white font-black text-lg rounded-xl transition-all shadow-[0_0_20px_rgba(239,68,68,0.6)] w-full">TÔI SẼ NGHỈ NGƠI VÀ RÚT TIỀN</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        /* =========================================================================
            7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION VÀ HÀNG ĐỢI (QUEUE SYSTEM)
            ========================================================================= */
         function addResultToAll(result) {
+            if (isSystemLocked) {
+                showTimeStopModal();
+                return;
+            }
             if (!masterState.currentSessionId) { 
                 showToast('Vui lòng chọn hoặc tạo phiên trước!', 'warning'); 
                 return; 
@@ -2450,6 +2567,7 @@
                 broadcastToAll('create_session', { name: sessionName, id: id });
                 initializeOriginalPatternDB();
                 showToast('Đã tạo phiên mới', 'success');
+                startSessionTimer();
             }
         }
         function renameMasterSession() {
@@ -2986,6 +3104,7 @@
             initializeOriginalPatternDB();
             
             showToast('🔄 Đã tự động khởi tạo Phiên mới!', 'success');
+            startSessionTimer();
         }
 
     </script>
