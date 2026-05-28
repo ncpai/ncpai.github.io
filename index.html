@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC</title>
+    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -735,6 +735,99 @@
                     </div>
                 </div>
             </div>
+            
+            <div id="klt-panel" class="mt-8 bg-gradient-to-br from-cyan-950 via-gray-900 to-blue-950 p-6 rounded-2xl border-4 border-cyan-500 shadow-[0_0_40px_rgba(6,182,212,0.3)] relative transition-all duration-500 scroll-mt-8">
+                
+                <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-cyan-600 to-cyan-400 text-white font-black px-8 py-2 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.8)] text-xl flex items-center gap-2 border-2 border-white whitespace-nowrap z-10">
+                    🌌 KẾT LUẬN TỔNG (KLT) - BACKTEST AI 🌌
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                    <div class="bg-gray-800/80 p-5 rounded-xl border border-cyan-500/30 flex flex-col">
+                        <h3 class="text-cyan-400 font-bold mb-3 flex items-center gap-2 uppercase text-sm">
+                            <span>🏆 TOP 3 TỔ HỢP WINRATE CAO NHẤT PHIÊN</span>
+                        </h3>
+                        <div id="klt-auto-rankings" class="space-y-3 flex-1">
+                            <div class="text-gray-500 italic text-sm py-4 text-center">Chờ thu thập đủ dữ liệu để Backtest...</div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-700">
+                            <button onclick="syncKltToTop1()" class="w-full py-2 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/50 rounded-lg text-cyan-300 font-bold text-sm transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                                ⚡ ĐỒNG BỘ CÔNG TẮC THEO TOP 1
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800/80 p-5 rounded-xl border border-blue-500/30 flex flex-col">
+                        <h3 class="text-blue-400 font-bold mb-3 uppercase text-sm">
+                            ⚙️ ĐIỀU KHIỂN TỔ HỢP THỦ CÔNG
+                        </h3>
+                        
+                        <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4 bg-gray-900 p-2 rounded-lg border border-gray-700 shadow-inner">
+                            <label class="flex flex-col items-center cursor-pointer group">
+                                <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400">HT1</span>
+                                <input type="checkbox" class="klt-toggle sr-only peer" value="HT1" checked onchange="toggleKltUpdate()">
+                                <div class="w-8 h-4 bg-gray-700 rounded-full peer-checked:bg-cyan-500 transition-all relative">
+                                    <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full peer-checked:translate-x-4 transition-all"></div>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer group">
+                                <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400">HT4</span>
+                                <input type="checkbox" class="klt-toggle sr-only peer" value="HT4" checked onchange="toggleKltUpdate()">
+                                <div class="w-8 h-4 bg-gray-700 rounded-full peer-checked:bg-cyan-500 transition-all relative">
+                                    <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full peer-checked:translate-x-4 transition-all"></div>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer group">
+                                <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400">GE</span>
+                                <input type="checkbox" class="klt-toggle sr-only peer" value="GE" checked onchange="toggleKltUpdate()">
+                                <div class="w-8 h-4 bg-gray-700 rounded-full peer-checked:bg-cyan-500 transition-all relative">
+                                    <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full peer-checked:translate-x-4 transition-all"></div>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer group">
+                                <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400">SGE</span>
+                                <input type="checkbox" class="klt-toggle sr-only peer" value="SGE" checked onchange="toggleKltUpdate()">
+                                <div class="w-8 h-4 bg-gray-700 rounded-full peer-checked:bg-cyan-500 transition-all relative">
+                                    <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full peer-checked:translate-x-4 transition-all"></div>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer group">
+                                <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400">KLC</span>
+                                <input type="checkbox" class="klt-toggle sr-only peer" value="KLC" checked onchange="toggleKltUpdate()">
+                                <div class="w-8 h-4 bg-gray-700 rounded-full peer-checked:bg-cyan-500 transition-all relative">
+                                    <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full peer-checked:translate-x-4 transition-all"></div>
+                                </div>
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer group">
+                                <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400">BigRoad</span>
+                                <input type="checkbox" class="klt-toggle sr-only peer" value="BR" checked onchange="toggleKltUpdate()">
+                                <div class="w-8 h-4 bg-gray-700 rounded-full peer-checked:bg-cyan-500 transition-all relative">
+                                    <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full peer-checked:translate-x-4 transition-all"></div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="bg-black/60 p-4 rounded-xl border border-gray-700 text-center flex-1 flex flex-col justify-center">
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-2">LỆNH KLT HIỆN TẠI</span>
+                            <div id="klt-manual-decision" class="text-3xl md:text-4xl font-black text-gray-500 drop-shadow-md py-2 transition-all">
+                                ĐANG TÍNH...
+                            </div>
+                            <div id="klt-manual-vote-detail" class="text-sm text-gray-400 italic mt-1">-</div>
+                        </div>
+
+                        <div class="mt-4 bg-black/50 p-3 rounded-lg border border-gray-700">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs text-cyan-400 font-bold uppercase tracking-widest">Biểu đồ Lịch sử KLT</span>
+                                <span id="klt-manual-winrate" class="text-sm font-black text-cyan-400 bg-cyan-900/50 px-2 py-0.5 rounded border border-cyan-500/50">0%</span>
+                            </div>
+                            <div id="klt-manual-chart" class="flex items-end justify-start overflow-x-auto h-12 gap-1 custom-scrollbar px-1 py-1 bg-gray-900/80 rounded-lg w-full scroll-smooth shadow-inner">
+                                <span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             </div>
 
         <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -761,7 +854,7 @@
         </div>
 
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + KLC</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + KLC + KLT</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 và 3 biểu đồ khác để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
@@ -1255,8 +1348,12 @@
             
             currentKlcPending: null,
             currentKlcPrediction: null,
-            currentKlcRule: null, // NEW
-            klcToggles: { th1: true, th2: true, th3: true }
+            currentKlcRule: null,
+            klcToggles: { th1: true, th2: true, th3: true },
+
+            // --- BIẾN CHO KLT ---
+            currentKltPending: null,
+            kltManualConfig: ['HT1', 'HT4', 'GE', 'SGE', 'KLC', 'BR']
         };
 
         let gameAccuracyChart = null;
@@ -2446,6 +2543,17 @@
                     updateSGEStatsUI(session.sgeHistory);
                 }
 
+                // --- GHI NHẬN LỊCH SỬ CHO KLT ---
+                if (masterState.currentKltPending) {
+                    if (!session.kltHistory) session.kltHistory = [];
+                    session.kltHistory.push({
+                        gameNum: session.history.length,
+                        actual: currentResult,
+                        predictions: masterState.currentKltPending.signals
+                    });
+                }
+                // --------------------------------
+
                 if (masterState.currentKlcPrediction !== undefined) {
                     if (!session.klcHistory) session.klcHistory = [];
                     if (masterState.currentKlcPrediction !== null) {
@@ -2526,6 +2634,10 @@
                  session.klcHistory = session.klcHistory.filter(h => h.gameNum <= session.history.length);
                  updateKlcChart(session.klcHistory);
             }
+            
+            if (session.kltHistory) {
+                 session.kltHistory = session.kltHistory.filter(h => h.gameNum <= session.history.length);
+            }
 
             saveMasterSessions();
             updateCurrentSessionInfo();
@@ -2558,9 +2670,11 @@
                 updateSGEStatsUI([]);
                 
                 session.klcHistory = []; 
+                session.kltHistory = [];
                 updateKlcChart([]);
                 masterState.currentKlcPrediction = null;
                 masterState.currentKlcRule = null;
+                masterState.currentKltPending = null;
 
                 saveMasterSessions(); updateCurrentSessionInfo();
                 broadcastToAll('clear_history');
@@ -2624,6 +2738,8 @@
                 renderSGEChart('sge-chart-ht1', [], 'DS');
                 renderSGEChart('sge-chart-ge', [], 'DS');
                 renderSGEChart('sge-chart-ht4', [], 'DS');
+                
+                calculateKLT();
 
                 showToast('Lịch sử đã được xoá trắng', 'info');
             }
@@ -2697,6 +2813,7 @@
                 broadcastToAll('reset_system');
                 calculateFinalDecision();
                 renderGodEyeUI("Chưa rõ - Chưa rõ", null, "Hệ thống đã reset toàn bộ.", "-", []);
+                calculateKLT();
                 showToast('Hệ thống đã reset hoàn toàn', 'info');
             }
         }
@@ -3017,6 +3134,7 @@
                 decEl.innerHTML = '<span class="text-xl font-bold text-gray-500">CHỜ TÍN HIỆU SGE</span>';
                 adviceEl.innerHTML = '<span class="text-gray-500 italic">KLC hoạt động dựa trên phán quyết của SGE...</span>';
                 if(glowBg) glowBg.className = "absolute inset-0 transition-colors duration-500 pointer-events-none bg-transparent";
+                calculateKLT();
                 return;
             }
 
@@ -3053,6 +3171,7 @@
                 decEl.innerHTML = 'BỎ QUA (CHẠY NGẦM)'; decEl.className = 'text-xl font-bold text-gray-500 relative z-10';
                 adviceEl.innerHTML = `<span class="text-gray-400 font-bold">${klcLogic.desc}</span><br/><span class="text-red-400">Đã tắt hiển thị - Vẫn đang theo dõi ngầm!</span>`;
                 if(glowBg) glowBg.className = "absolute inset-0 bg-gray-600/10 transition-colors duration-500 pointer-events-none";
+                calculateKLT();
                 return;
             }
 
@@ -3091,6 +3210,9 @@
             }
 
             adviceEl.innerHTML = adviceHtml;
+
+            // --- GỌI KLT SAU KHI TẤT CẢ ĐÃ TÍNH XONG ---
+            calculateKLT();
         }
 
         function updateKlcChart(klcHistory) {
@@ -3134,6 +3256,220 @@
                 wrEl.textContent = `${rate}% (${correct}/${filteredHistory.length})`;
                 wrEl.className = `text-sm font-black px-2 py-0.5 rounded border ${rate >= 50 ? 'text-green-400 bg-green-900/40 border-green-500/50' : 'text-red-400 bg-red-900/40 border-red-500/50'}`;
             }
+        }
+
+        /* =========================================================================
+           8. THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - AUTO BACKTEST 63 TỔ HỢP
+        ========================================================================= */
+        const KLT_SYSTEM_KEYS = ['HT1', 'HT4', 'GE', 'SGE', 'KLC', 'BR'];
+
+        // Hàm sinh 63 tổ hợp chập
+        function generateAllKltCombos(array) {
+            let result = [];
+            const f = function(prefix, arr) {
+                for (let i = 0; i < arr.length; i++) {
+                    let newPrefix = [...prefix, arr[i]];
+                    result.push(newPrefix);
+                    f(newPrefix, arr.slice(i + 1));
+                }
+            }
+            f([], array);
+            return result;
+        }
+        const ALL_KLT_COMBOS = generateAllKltCombos(KLT_SYSTEM_KEYS);
+
+        // Hàm Bỏ Phiếu (Xử lý Hòa -> BỎ QUA)
+        function getKltVote(signals, comboKeys) {
+            let pCount = 0, bCount = 0;
+            comboKeys.forEach(key => {
+                const sig = signals[key];
+                if (sig === 'P') pCount++;
+                else if (sig === 'B') bCount++;
+            });
+            
+            if (pCount > bCount) return 'P';
+            if (bCount > pCount) return 'B';
+            return null; // Bỏ qua nếu hòa hoặc không có tín hiệu
+        }
+
+        // Chạy KLT (Được gọi sau KLC)
+        function calculateKLT() {
+            const session = masterState.sessions[masterState.currentSessionId];
+            if (!session) return;
+
+            // 1. Kéo tín hiệu hiện tại từ 6 nguồn (dùng cho ván tiếp theo)
+            const sgeP = masterState.currentSgePending || {};
+            const currentSignals = {
+                HT1: sgeP.kl2 || null,
+                HT4: sgeP.kl4 || null,
+                GE: sgeP.kl3 || null,
+                SGE: sgeP.prediction || null,
+                KLC: masterState.currentKlcPrediction || null,
+                BR: sgeP.kl1 || null
+            };
+
+            masterState.currentKltPending = { signals: currentSignals };
+
+            // 2. Chạy Backtest toàn bộ lịch sử với 63 Tổ hợp
+            const kltHistory = session.kltHistory || [];
+            let stats = ALL_KLT_COMBOS.map(combo => ({
+                combo: combo,
+                comboStr: combo.join(' + '),
+                wins: 0,
+                losses: 0,
+                totalBets: 0,
+                winRate: 0,
+                historyDS: [] // Lưu lại chuỗi D/S để vẽ biểu đồ
+            }));
+
+            if (kltHistory.length > 0) {
+                kltHistory.forEach(histItem => {
+                    stats.forEach(stat => {
+                        const vote = getKltVote(histItem.predictions, stat.combo);
+                        if (vote) {
+                            stat.totalBets++;
+                            const isCorrect = (vote === histItem.actual);
+                            if (isCorrect) stat.wins++; else stat.losses++;
+                            stat.historyDS.push({ correct: isCorrect, vote: vote, actual: histItem.actual, game: histItem.gameNum });
+                        }
+                    });
+                });
+
+                stats.forEach(stat => {
+                    stat.winRate = stat.totalBets > 0 ? Math.round((stat.wins / stat.totalBets) * 100) : 0;
+                });
+
+                // Ưu tiên: WinRate cao nhất -> Số lệnh bắt được nhiều nhất
+                stats.sort((a, b) => {
+                    if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+                    return b.totalBets - a.totalBets;
+                });
+            }
+
+            renderKLTUI(currentSignals, stats);
+        }
+
+        // Render Giao diện KLT
+        function renderKLTUI(currentSignals, stats) {
+            const autoRankingsEl = document.getElementById('klt-auto-rankings');
+            const manualDecEl = document.getElementById('klt-manual-decision');
+            const manualDetailEl = document.getElementById('klt-manual-vote-detail');
+            const manualChartEl = document.getElementById('klt-manual-chart');
+            const manualWrEl = document.getElementById('klt-manual-winrate');
+
+            if (!autoRankingsEl) return;
+
+            // --- RENDER BẢNG AUTO TOP 3 ---
+            if (stats.length === 0 || stats[0].totalBets === 0) {
+                autoRankingsEl.innerHTML = '<div class="text-gray-500 italic text-sm py-4 text-center">Chờ thu thập đủ dữ liệu để Backtest...</div>';
+            } else {
+                let rankHtml = '';
+                const top3 = stats.slice(0, 3);
+                const medals = ['🥇', '🥈', '🥉'];
+                const colors = ['text-yellow-400', 'text-gray-300', 'text-orange-400'];
+                
+                top3.forEach((stat, idx) => {
+                    if (stat.totalBets === 0) return;
+                    const currentVote = getKltVote(currentSignals, stat.combo);
+                    let voteBadge = '';
+                    if (currentVote === 'P') voteBadge = '<span class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs ml-2 shadow-[0_0_8px_rgba(37,99,235,0.8)]">ĐÁNH PLAYER</span>';
+                    else if (currentVote === 'B') voteBadge = '<span class="bg-red-600 text-white px-2 py-0.5 rounded text-xs ml-2 shadow-[0_0_8px_rgba(239,68,68,0.8)]">ĐÁNH BANKER</span>';
+                    else voteBadge = '<span class="bg-gray-600 text-white px-2 py-0.5 rounded text-xs ml-2">BỎ QUA</span>';
+
+                    rankHtml += `
+                    <div class="bg-gray-900/80 p-3 rounded-lg border border-gray-700 flex flex-col gap-1 relative overflow-hidden">
+                        ${idx === 0 ? '<div class="absolute inset-0 bg-cyan-600/10 animate-pulse pointer-events-none"></div>' : ''}
+                        <div class="flex justify-between items-center z-10">
+                            <span class="font-bold text-sm ${colors[idx]}">${medals[idx]} ${stat.comboStr}</span>
+                            <span class="font-black ${stat.winRate >= 60 ? 'text-green-400' : 'text-yellow-400'}">${stat.winRate}%</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-400 z-10 mt-1">
+                            <span>${stat.wins} Win / ${stat.totalBets} Ván</span>
+                            <span>Lệnh ván này: ${voteBadge}</span>
+                        </div>
+                    </div>`;
+                });
+                autoRankingsEl.innerHTML = rankHtml;
+                
+                // Lưu lại Top 1 vào window để xài cho nút Đồng Bộ
+                window.currentKltTop1Combo = top3[0].combo;
+            }
+
+            // --- RENDER BẢNG THỦ CÔNG ---
+            const manualConfig = masterState.kltManualConfig;
+            
+            // Tìm Data của cấu hình thủ công trong stats
+            const manualStat = stats.find(s => s.combo.length === manualConfig.length && s.combo.every(val => manualConfig.includes(val)));
+            
+            const manualVote = getKltVote(currentSignals, manualConfig);
+            
+            // Render Lệnh Chốt
+            if (manualVote === 'P') {
+                manualDecEl.textContent = '👤 PLAYER'; manualDecEl.className = 'text-3xl md:text-4xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] py-2';
+            } else if (manualVote === 'B') {
+                manualDecEl.textContent = '🏦 BANKER'; manualDecEl.className = 'text-3xl md:text-4xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] py-2';
+            } else {
+                manualDecEl.textContent = 'BỎ QUA (HÒA PHIẾU)'; manualDecEl.className = 'text-2xl md:text-3xl font-black text-gray-500 py-2';
+            }
+
+            // Render Chi tiết số phiếu
+            let pVotes = 0, bVotes = 0, skipVotes = 0;
+            manualConfig.forEach(key => {
+                if(currentSignals[key] === 'P') pVotes++;
+                else if(currentSignals[key] === 'B') bVotes++;
+                else skipVotes++;
+            });
+            manualDetailEl.innerHTML = `(Phiếu P: <span class="text-blue-400 font-bold">${pVotes}</span> | Phiếu B: <span class="text-red-400 font-bold">${bVotes}</span> | Trắng: <span class="text-gray-500">${skipVotes}</span>)`;
+
+            // Render Biểu đồ
+            if (!manualStat || manualStat.historyDS.length === 0) {
+                manualChartEl.innerHTML = '<span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu</span>';
+                manualWrEl.textContent = '0%';
+            } else {
+                manualWrEl.textContent = `${manualStat.winRate}% (${manualStat.wins}/${manualStat.totalBets})`;
+                let html = '';
+                manualStat.historyDS.slice(-30).forEach(item => {
+                    const bg = item.correct ? 'bg-cyan-500 shadow-[0_0_5px_rgba(6,182,212,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
+                    const height = item.correct ? 'h-full' : 'h-1/3';
+                    html += `<div class="w-2.5 flex-shrink-0 rounded-[1px] ${bg} ${height}" title="Ván ${item.game}: Đoán ${item.vote} - KQ ${item.actual}"></div>`;
+                });
+                manualChartEl.innerHTML = html;
+                manualChartEl.scrollLeft = manualChartEl.scrollWidth;
+            }
+        }
+
+        // Bắt sự kiện khi bạn tick thủ công
+        function toggleKltUpdate() {
+            const checkboxes = document.querySelectorAll('.klt-toggle');
+            const selected = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) selected.push(cb.value);
+            });
+            masterState.kltManualConfig = selected;
+            
+            if (selected.length === 0) {
+                showToast('KLT: Bạn phải chọn ít nhất 1 chỉ báo!', 'warning');
+                return;
+            }
+            
+            calculateKLT();
+        }
+
+        // Bắt sự kiện nút "Đồng bộ Top 1"
+        function syncKltToTop1() {
+            if (!window.currentKltTop1Combo || window.currentKltTop1Combo.length === 0) {
+                showToast('Chưa có Top 1 để đồng bộ!', 'warning');
+                return;
+            }
+            masterState.kltManualConfig = [...window.currentKltTop1Combo];
+            
+            const checkboxes = document.querySelectorAll('.klt-toggle');
+            checkboxes.forEach(cb => {
+                cb.checked = window.currentKltTop1Combo.includes(cb.value);
+            });
+            
+            showToast(`Đã đồng bộ tổ hợp: ${window.currentKltTop1Combo.join(' + ')}`, 'success');
+            calculateKLT();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
