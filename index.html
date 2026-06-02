@@ -3343,3 +3343,54 @@
             loadMasterSessions();
             
             const selector = document.getElementById
+            ('masterSessionSelector');
+            if(selector) {
+                selector.addEventListener('change', function(e) {
+                    if (e.target.value && masterState.sessions[e.target.value]) {
+                        masterState.currentSessionId = e.target.value; masterState.currentSessionName = masterState.sessions[e.target.value].name;
+                        updateCurrentSessionInfo(); syncAllSystems();
+                    }
+                });
+            }
+            
+            let checkInit = setInterval(() => {
+                if (allSystemsReady()) { 
+                    
+                    // Gọi hàm tự động tạo Session
+                    autoCreateSession();
+                    
+                    broadcastToAll('get_accuracy'); 
+                    broadcastToAll('get_chot_history'); 
+                    broadcastToAll('get_system_details');
+                    clearInterval(checkInit);
+                }
+            }, 500);
+        });
+
+        // Hàm tự động tạo phiên
+        function autoCreateSession() {
+            const id = `session-${Date.now()}`;
+            const sessionName = `Phiên F5 ${new Date().toLocaleTimeString('vi-VN')}`;
+            
+            masterState.sessions[id] = { id: id, name: sessionName, created: new Date().toISOString(), history: [], geHistory: [] };
+            masterState.currentSessionId = id; 
+            masterState.currentSessionName = sessionName;
+            
+            saveMasterSessions(); 
+            updateMasterSessionSelector(); 
+            
+            const selector = document.getElementById('masterSessionSelector');
+            if(selector) selector.value = id;
+            
+            updateCurrentSessionInfo();
+            
+            broadcastToAll('create_session', { name: sessionName, id: id });
+            initializeOriginalPatternDB();
+            
+            showToast('🔄 Đã tự động khởi tạo Phiên mới!', 'success');
+            startSessionTimer();
+        }
+
+    </script>
+</body>
+</html>
