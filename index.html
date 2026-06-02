@@ -918,25 +918,25 @@
     
     </div> <script>
         /* =========================================================================
-           HỆ THỐNG BẢO MẬT CHỐNG XÓA DOM & MÃ HÓA MẬT KHẨU
+           HỆ THỐNG BẢO MẬT CHỐNG XÓA DOM & MẬT KHẨU
         ========================================================================= */
         const ENCODED_PASSWORDS = ['NjUyNTgz', 'MDc3ODY4', 'MTQxMDIwMDQ=']; 
 
         // 1. Chống Click Chuột Phải
         document.addEventListener('contextmenu', event => event.preventDefault());
 
-        // 2. Chống các tổ hợp phím Hacker (F12, Ctrl+U, Ctrl+Shift+I, Ctrl+Shift+J)
+        // 2. Chống các tổ hợp phím Hacker
         document.onkeydown = function(e) {
-            if(e.keyCode == 123) { return false; } // Khóa F12
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 73) { return false; } // Khóa Ctrl+Shift+I
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 74) { return false; } // Khóa Ctrl+Shift+J
-            if(e.ctrlKey && e.keyCode == 85) { return false; } // Khóa Ctrl+U
+            if(e.keyCode == 123) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 73) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 74) { return false; } 
+            if(e.ctrlKey && e.keyCode == 85) { return false; } 
         };
 
         // 3. Khởi tạo trạng thái bảo mật ban đầu
         document.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('godEye_unlocked') === 'true') {
-                unlockSystem(false); // Đã có session thì mở luôn
+                unlockSystem(false); 
             }
         });
 
@@ -945,7 +945,6 @@
             const input = document.getElementById('auth-password').value;
             const errorText = document.getElementById('auth-error');
             
-            // Mã hóa input của người dùng để so sánh với mảng đã mã hóa
             const encodedInput = btoa(input); 
             
             if (ENCODED_PASSWORDS.includes(encodedInput)) {
@@ -967,10 +966,9 @@
             if(lockScreen) {
                 lockScreen.style.opacity = '0';
                 lockScreen.style.transform = 'scale(1.1)';
-                setTimeout(() => { lockScreen.remove(); }, 500); // Xóa hẳn lớp khóa khỏi DOM
+                setTimeout(() => { lockScreen.remove(); }, 500); 
             }
             
-            // Hiển thị hệ thống cốt lõi và nhả thanh cuộn
             if(coreSystem) coreSystem.style.display = 'block';
             document.body.style.overflow = 'auto';
             
@@ -980,7 +978,7 @@
         }
 
         /* =========================================================================
-           0. TIỆN ÍCH AN TOÀN BỘ NHỚ & TÍNH NĂNG MỚI (COLLAPSE/FAB)
+           0. TIỆN ÍCH AN TOÀN BỘ NHỚ & TÍNH NĂNG MỚI
            ========================================================================= */
         function safeStorageSet(key, dataObj) {
             try {
@@ -1029,7 +1027,7 @@
         }
 
         /* =========================================================================
-           1. CƠ SỞ DỮ LIỆU PATTERN MẪU GỐC & CƠ CHẾ KHỞI TẠO (QUẢN LÝ KHO MẪU)
+           1. CƠ SỞ DỮ LIỆU PATTERN MẪU GỐC & CƠ CHẾ KHỞI TẠO
            ========================================================================= */
         const defaultRawSamples = `1. DSSSSDSDSSDSSDSSSSSSSSDDDDD
 2. SSDSSDDSSSDDSSDSDSDSSDS
@@ -1260,7 +1258,7 @@
         }
 
         /* =========================================================================
-           2. GLOBAL STATE & CƠ CHẾ AI TỰ HỌC (CONTINUOUS LEARNING)
+           2. GLOBAL STATE & CƠ CHẾ AI TỰ HỌC
            ========================================================================= */
         let patternConfig = { minOccurrences: 10, minConfidence: 100 }; 
         
@@ -1452,7 +1450,6 @@
             if (ht1VerdictRaw.includes('P')) baseSignal = 'P';
             else if (ht1VerdictRaw.includes('B')) baseSignal = 'B';
 
-            // User Correction Rule Applied here
             if (ht1VerdictRaw.includes('NGƯỢC')) { impliedResult = 'S'; }
 
             if (!baseSignal) {
@@ -1744,13 +1741,11 @@
         }
 
         /* =========================================================================
-           5.5 THUẬT TOÁN SUPPORT GE (SGE) - PHÁN QUYẾT TỐI CAO TỪ 4 TRẠNG THÁI
+           5.5 THUẬT TOÁN SUPPORT GE (SGE) - PHÁN QUYẾT TỐI CAO
            ========================================================================= */
         function analyzeSGETrend(array, type) {
-            // type: 'PB' (BigRoad) hoặc 'DS' (HT1/HT4/GE)
             if (!array || array.length < 3) return { signal: null, desc: "Cầu quá ngắn", weight: 0 };
 
-            // Phân tích thành các chuỗi (streaks)
             let streaks = [];
             let currentStr = array[0]; let count = 1;
             for(let i=1; i<array.length; i++) {
@@ -1769,32 +1764,28 @@
                 return val === 'D' ? 'S' : 'D';
             };
 
-            // 1. Check BỆT (Từ 3 trở lên)
+            // 1. Check BỆT
             if (last.count >= 3) {
                 return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: last.count };
             }
 
-            // 2. Check Cầu 1-1 (Ping Pong) - Tối thiểu 3 nhịp
+            // 2. Check Cầu 1-1
             if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
                 return { signal: getOpposite(last.val), desc: "Cầu 1-1 rõ ràng", weight: 3 };
             }
 
             // 3. Check Cầu 2-2 
-            // Nếu đang là 2,2,1 -> Đánh giống last để đủ 2
             if (last.count === 1 && prev1 && prev1.count === 2 && prev2 && prev2.count === 2) {
                 return { signal: last.val, desc: "Đang cầu 2-2 (nhịp 1 sang 2)", weight: 3.5 };
             }
-            // Nếu đang là 2,2,2 -> Đánh ngược last để gãy sang màu kia
             if (last.count === 2 && prev1 && prev1.count === 2 && prev2 && prev2.count >= 1) {
                 return { signal: getOpposite(last.val), desc: "Cầu 2-2 (chuyển nhịp)", weight: 3.5 };
             }
 
-            // 4. Các mẫu Quy luật Thói Quen Chuyển Đổi (Áp dụng chung cả PB và DS)
-            // Thói quen 1 tay chuyển (VD: 1P -> sang B)
+            // 4. Các mẫu Quy luật Thói Quen
             if (last.count === 1 && prev1 && prev1.count >= 2 && prev2 && prev2.count === 1) {
                  return { signal: getOpposite(last.val), desc: `Thói quen 1${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
-            // Thói quen 2 tay chuyển (VD: 2P -> sang B)
             if (last.count === 2 && prev1 && prev1.count >= 1 && prev2 && prev2.count === 2) {
                  return { signal: getOpposite(last.val), desc: `Thói quen 2${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
@@ -1831,10 +1822,8 @@
             if (!session) return;
 
             // --- LẤY DATA CÁC TRẠNG THÁI ---
-            // TT1: Big Road
             const arrBR = session.history || [];
             
-            // TT2: BĐKTL HT1
             const ht1Details = masterState.systemDetails.ht1;
             const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht1BaseVerdictRaw = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
@@ -1842,11 +1831,9 @@
             if (ht1BaseVerdictRaw.includes('P')) ht1BaseSignal = 'P'; else if (ht1BaseVerdictRaw.includes('B')) ht1BaseSignal = 'B';
             const ht1IsReverse = ht1BaseVerdictRaw.includes('NGƯỢC');
 
-            // TT3: GE History
             const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
             const geBaseSignal = masterState.currentGePrediction;
 
-            // TT4: BĐKTL HT4
             const ht4Details = masterState.systemDetails.ht4;
             const arrHT4 = ht4Details && ht4Details.intervalHistory ? ht4Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht4BaseVerdictRaw = ht4Details && ht4Details.verdict ? ht4Details.verdict.toUpperCase().trim() : '';
@@ -1860,7 +1847,7 @@
             const resGE = analyzeSGETrend(arrGE, 'DS');
             const resHT4 = analyzeSGETrend(arrHT4, 'DS');
 
-            // --- DỊCH MÃ TT2, TT3 & TT4 (D/S) SANG P/B ---
+            // --- DỊCH MÃ ---
             let finalSignalHT1 = null;
             if (resHT1.signal && ht1BaseSignal) {
                 if (!ht1IsReverse) {
@@ -1888,30 +1875,22 @@
             let scoreP = 0; let scoreB = 0;
             let reasonsList = [];
 
-            // BR
             if (resBR.signal === 'P') { scoreP += resBR.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL1 (BIGROAD) -> P:</span> ${resBR.desc}.</li>`); }
             else if (resBR.signal === 'B') { scoreB += resBR.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL1 (BIGROAD) -> B:</span> ${resBR.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL1 (BIGROAD) BỎ QUA:</span> ${resBR.desc}.</li>`); }
 
-            // HT1
             if (finalSignalHT1 === 'P') { scoreP += resHT1.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL2 (BĐKTL HT1) -> P:</span> ${resHT1.desc}.</li>`); }
             else if (finalSignalHT1 === 'B') { scoreB += resHT1.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL2 (BĐKTL HT1) -> B:</span> ${resHT1.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL2 (BĐKTL HT1) BỎ QUA:</span> ${resHT1.desc} hoặc thiếu tín hiệu HT1.</li>`); }
 
-            // GE
             if (finalSignalGE === 'P') { scoreP += resGE.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL3 (GE Chart) -> P:</span> ${resGE.desc}.</li>`); }
             else if (finalSignalGE === 'B') { scoreB += resGE.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL3 (GE Chart) -> B:</span> ${resGE.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL3 (GE Chart) BỎ QUA:</span> ${resGE.desc} hoặc thiếu tín hiệu GE.</li>`); }
 
-            // HT4
             if (finalSignalHT4 === 'P') { scoreP += resHT4.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL4 (BĐKTL HT4) -> P:</span> ${resHT4.desc}.</li>`); }
             else if (finalSignalHT4 === 'B') { scoreB += resHT4.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL4 (BĐKTL HT4) -> B:</span> ${resHT4.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL4 (BĐKTL HT4) BỎ QUA:</span> ${resHT4.desc} hoặc thiếu tín hiệu HT4.</li>`); }
 
-
-            // ====================================================================
-            // --- LOGIC: ƯU TIÊN CẦU BỆT VÀ BỆT 1-1 CỦA KL ĐÃ ĐÚNG VÁN TRƯỚC (CODE 2)
-            // ====================================================================
             let prevCorrectKLs = [];
             if (session.sgeHistory && session.sgeHistory.length > 0 && session.history && session.history.length > 0) {
                 const lastActual = session.history[session.history.length - 1];
@@ -1941,7 +1920,6 @@
                 reasonsList.push(`<li><span class="text-yellow-400 font-bold bg-yellow-900/40 px-1 rounded block mt-1">🔥 KL4 đang form Bệt/1-1 và ĐÚNG ván trước (+5 đ)</span></li>`);
             }
 
-            // TÍNH TOÁN STATS HIỂN THỊ
             const getRate = (arr) => arr.length > 0 ? Math.round(arr.filter(x=>x==='D').length/arr.length*100) + '%' : '0%';
             const getSeq = (arr) => arr.slice(-10).join('');
             
@@ -1952,7 +1930,6 @@
                 KL4: { desc: resHT4.desc, seq: getSeq(arrHT4), rate: getRate(arrHT4) }
             };
 
-            // --- TÍNH TOÁN PRIMARY KL VÀ SỐ LƯỢNG ĐỒNG THUẬN ---
             let winningKLs = [];
             let sgeAgreeCount = 0;
             let primaryKL = null;
@@ -1973,7 +1950,6 @@
             primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL4') ? 'KL4' : (winningKLs.includes('KL3') ? 'KL3' : (winningKLs.length > 0 ? winningKLs[0] : null)));
 
 
-            // --- PHÁN QUYẾT CUỐI CÙNG ---
             let sgeDecisionText = 'BỎ QUA VÁN NÀY';
             let sgeSubText = '';
             let sgeDecisionClass = 'text-gray-500';
@@ -2064,9 +2040,6 @@
                 reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-red-400 font-bold">=> TỔNG HỢP: Tín hiệu đang đánh nhau (Điểm P: ${scoreP} = Điểm B: ${scoreB}). Tỷ lệ rủi ro cao!</li>`);
             }
 
-            // =========================================================================
-            // GỌI KẾT LUẬN CHỐT (KLC) TRÍCH XUẤT DỮ LIỆU
-            // =========================================================================
             let activeLocalType = '';
             let localTitle = '';
             const allSgeHistory = session.sgeHistory || [];
@@ -2090,9 +2063,7 @@
             if (sgeDecisionText.includes('PLAYER')) finalSgeSignal = 'P';
             else if (sgeDecisionText.includes('BANKER')) finalSgeSignal = 'B';
 
-            // Chạy KLC
             runKLC(globalArr, sgeDecisionText, finalSgeSignal);
-            // =========================================================================
 
             masterState.currentSgePending = {
                 prediction: finalSgeSignal,
@@ -2105,7 +2076,6 @@
                 agreedKLs: winningKLs.map(k => parseInt(k.replace('KL', '')))
             };
 
-            // --- RENDER GIAO DIỆN SGE ---
             const decEl = document.getElementById('sge-final-decision');
             const reasonEl = document.getElementById('sge-final-reason');
             const listEl = document.getElementById('sge-reasoning-list');
@@ -2136,7 +2106,6 @@
                 }
             }
 
-            // --- RENDER FLOAT SGE PANEL UI ---
             const floatDecEl = document.getElementById('float-sge-decision');
             const floatReasonEl = document.getElementById('float-sge-reason');
             const floatToggleBtn = document.getElementById('sge-float-toggle-btn');
@@ -2197,7 +2166,6 @@
             const elDescGe = document.getElementById('sge-desc-ge'); if(elDescGe) elDescGe.textContent = resGE.desc;
             const elDescHt4 = document.getElementById('sge-desc-ht4'); if(elDescHt4) elDescHt4.textContent = resHT4.desc;
 
-            // KÍCH HOẠT KLT (KẾT LUẬN TỔNG) SAU KHI SGE & KLC ĐÃ TÍNH TOÁN XONG
             calculateKLT();
         }
 
@@ -2333,20 +2301,18 @@
 
 
         /* =========================================================================
-           TÍNH NĂNG TIME-STOP (TÙY CHỈNH THỜI GIAN)
+           TÍNH NĂNG TIME-STOP
            ========================================================================= */
-        let sessionTimeLimit = 45 * 60; // Mặc định ban đầu là 45 phút
+        let sessionTimeLimit = 45 * 60; 
         let currentSessionTime = sessionTimeLimit;
         let sessionTimerInterval = null;
         let isSystemLocked = false;
 
         function startSessionTimer(isManualSetup = false) {
-            // Khung nhập thời gian tùy chỉnh khi người dùng click vào đồng hồ
             if (isManualSetup) {
                 let currentMins = Math.floor(sessionTimeLimit / 60);
                 let inputMins = prompt("Nhập thời gian cho phiên này (tính bằng phút):", currentMins);
                 
-                // Nếu người dùng bấm Hủy hoặc không nhập gì
                 if (inputMins === null || inputMins.trim() === "") return; 
                 
                 let parsedMins = parseInt(inputMins);
@@ -2362,7 +2328,7 @@
             currentSessionTime = sessionTimeLimit;
             isSystemLocked = false;
             updateTimerUI();
-            toggleInputButtons(false); // Mở khóa nút bấm
+            toggleInputButtons(false); 
 
             sessionTimerInterval = setInterval(() => {
                 currentSessionTime--;
@@ -2384,9 +2350,8 @@
             const secs = (currentSessionTime % 60).toString().padStart(2, '0');
             timerEl.textContent = `${mins}:${secs}`;
 
-            // Tự động tính toán các mốc cảnh báo theo tỷ lệ phần trăm của tổng thời gian
-            const thresholdYellow = Math.floor(sessionTimeLimit * 0.3); // Còn 30% thời gian -> Cảnh báo Vàng
-            const thresholdRed = Math.floor(sessionTimeLimit * 0.1);    // Còn 10% thời gian -> Cảnh báo Đỏ
+            const thresholdYellow = Math.floor(sessionTimeLimit * 0.3); 
+            const thresholdRed = Math.floor(sessionTimeLimit * 0.1);    
 
             if (currentSessionTime > thresholdYellow) {
                 timerEl.className = 'text-xl md:text-2xl font-black text-green-400 drop-shadow-md';
@@ -2439,7 +2404,7 @@
         }
 
         /* =========================================================================
-           7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION VÀ HÀNG ĐỢI (QUEUE SYSTEM)
+           7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION VÀ HÀNG ĐỢI
            ========================================================================= */
         function addResultToAll(result) {
             if (isSystemLocked) {
@@ -2513,16 +2478,14 @@
                 // TÍCH LŨY LỊCH SỬ KLT
                 if (masterState.currentKltState && masterState.currentKltState !== "Chưa rõ - Chưa rõ") {
                     if (!session.kltHistory) session.kltHistory = [];
-                    if (masterState.currentKltPrediction !== null) {
-                        session.kltHistory.push({
-                            gameNum: session.history.length,
-                            state: masterState.currentKltState,
-                            predicted: masterState.currentKltPrediction,
-                            actual: currentResult,
-                            correct: masterState.currentKltPrediction === currentResult
-                        });
-                        renderKltUI(masterState.currentKltState, masterState.currentKltPrediction, "", "", session.kltHistory);
-                    }
+                    session.kltHistory.push({
+                        gameNum: session.history.length,
+                        state: masterState.currentKltState,
+                        predicted: masterState.currentKltPrediction,
+                        actual: currentResult,
+                        correct: masterState.currentKltPrediction === currentResult
+                    });
+                    renderKltUI(masterState.currentKltState, masterState.currentKltPrediction, "", "", session.kltHistory);
                 }
                 
                 saveMasterSessions();
@@ -2849,7 +2812,7 @@
         }
 
         /* =========================================================================
-           THỐNG KÊ CHI TIẾT SGE (TỔNG HỢP & BIỂU ĐỒ D/S)
+           THỐNG KÊ CHI TIẾT SGE
            ========================================================================= */
         function toggleSGEStats() {
             const container = document.getElementById('sge-stats-container');
@@ -2905,7 +2868,7 @@
             const container = document.getElementById('sge-stats-container');
             if (!container) return;
             
-            // --- UPDATE FLOAT SGE CHART (BIỂU ĐỒ TỔNG SGE NỔI) ---
+            // --- UPDATE FLOAT SGE CHART ---
             const floatChartEl = document.getElementById('float-sge-chart');
             const floatWrEl = document.getElementById('float-sge-winrate');
             
@@ -2982,7 +2945,7 @@
         }
 
         /* =========================================================================
-           THUẬT TOÁN KLC (SĂN LỖI 1D/1S & THUẬN BỆT)
+           THUẬT TOÁN KLC
            ========================================================================= */
         function toggleKlcRule(rule, isChecked) {
             masterState.klcToggles[rule] = isChecked;
@@ -3340,10 +3303,9 @@
             }, 500);
         });
 
-        // Hàm tự động tạo phiên (Mới eidt vào)
+        // Hàm tự động tạo phiên
         function autoCreateSession() {
             const id = `session-${Date.now()}`;
-            // Đặt tên phiên kèm thời gian tự động
             const sessionName = `Phiên F5 ${new Date().toLocaleTimeString('vi-VN')}`;
             
             masterState.sessions[id] = { id: id, name: sessionName, created: new Date().toISOString(), history: [], geHistory: [] };
@@ -3353,13 +3315,11 @@
             saveMasterSessions(); 
             updateMasterSessionSelector(); 
             
-            // Đặt thẻ select hiển thị đúng phiên vừa tạo
             const selector = document.getElementById('masterSessionSelector');
             if(selector) selector.value = id;
             
             updateCurrentSessionInfo();
             
-            // Bắn tín hiệu sang các iframe
             broadcastToAll('create_session', { name: sessionName, id: id });
             initializeOriginalPatternDB();
             
