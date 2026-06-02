@@ -3158,67 +3158,247 @@
             }
         }
 
-        /* =========================================================================
-           THUẬT TOÁN KẾT LUẬN TỔNG (KLT)
+/* =========================================================================
+           THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - META LOGIC (NEW VERSION)
            ========================================================================= */
-        function getDSTrend(historyArray) {
-            if (!historyArray || historyArray.length === 0) return "Chưa rõ";
-            const dsArr = historyArray.map(h => h.correct ? 'D' : 'S');
-            const lastChar = dsArr[dsArr.length - 1];
-            let streak = 1;
-            while (dsArr.length - 1 - streak >= 0 && dsArr[dsArr.length - 1 - streak] === lastChar) streak++;
-            return lastChar + (streak >= 2 ? " TĂNG" : "");
+        
+        // Động cơ phân tích quy luật D/S thông minh (Áp dụng cho HT1, HT4, SGE, KLC, GE)
+        function evaluatePatternTrust(historyArr, baseSignal, isReverse, name) {
+            if (!historyArr || historyArr.length < 5) return { signal: null, desc: "Dữ liệu quá ngắn", score: 0 };
+            if (!baseSignal) return { signal: null, desc: "Thiếu tín hiệu gốc", score: 0 };
+            
+            // Chuyển lịch sử thành chuỗi D/S
+            const dsStr = historyArr.map(x => x.correct ? 'D' : 'S').join('');
+            
+            // Tìm chuỗi hiện tại (Current Streak)
+            let currentStreakChar = dsStr[dsStr.length - 1];
+            let currentStreakCount = 1;
+            for (let i = dsStr.length - 2; i >= 0; i--) {
+                if (dsStr[i] === currentStreakChar) currentStreakCount++;
+                else break;
+            }
+            const currentPattern = currentStreakChar.repeat(currentStreakCount); 
+            
+            // --- 1. BỘ LỌC NHIỄU (CONSTRAINTS) ---
+            // a. Lỗi 1D-1S (Ping Pong) kéo dài (từ lần 5 trở đi không tin cậy)
+            if (currentPattern === 'D' || currentPattern === 'S') {
+                const tail = dsStr.slice(-9); 
+                if (tail.includes('SDSDSDSD') || tail.includes('DSDSDSDS')) {
+                     return { signal: null, desc: `Bỏ qua: Dạng 1-1 đã bão hoà, không đáng tin.`, score: 0 };
+                }
+            }
+            // b. SS hoặc DD lần thứ 2 liên tiếp trở đi không tin cậy
+            if (currentPattern === 'SS' || currentPattern === 'DD') {
+                const allStreaks = dsStr.match(/D+|S+/g) || [];
+                if (allStreaks.length >= 3) {
+                    const lastStreak = allStreaks[allStreaks.length - 1]; 
+                    const prevStreakSameColor = allStreaks[allStreaks.length - 3]; 
+                    if (lastStreak.length >= 2 && prevStreakSameColor && prevStreakSameColor.length >= 2) {
+                        return { signal: null, desc: `Bỏ qua: Cặp ${lastStreak} liên tiếp thiếu ổn định.`, score: 0 };
+                    }
+                }
+            }
+
+            // --- 2. TÌM TỶ LỆ CHUYỂN ĐỔI ---
+            let nextD = 0, nextS = 0;
+            let recentOutcomes = []; 
+            
+            const streaks = dsStr.match(/D+|S+/g) || [];
+            for (let i = 0; i < streaks.length - 1; i++) {
+                if (streaks[i] === currentPattern) {
+                    const nextChar = streaks[i+1][0]; 
+                    if (nextChar === 'D') { nextD++; recentOutcomes.push('D'); }
+                    if (nextChar === 'S') { nextS++; recentOutcomes.push('S'); }
+                }
+            }
+            
+            const total = nextD + nextS;
+            if (total === 0) return { signal: null, desc: `Chưa có lịch sử chuyển đổi cho mẫu [${currentPattern}]`, score: 0 };
+            
+            const rateD = (nextD / total) * 100;
+            const rateS = (nextS / total) * 100;
+            
+            let targetDS = null;
+            let confidenceStr = "";
+            let score = 0;
+            
+            // --- 3. PHÂN TÍCH BIAS (ƯU TIÊN GẦN NHẤT) ---
+            const recent2 = recentOutcomes.slice(-2);
+            if (rateD === 100 || (rateD >= 50 && recent2.length === 2 && recent2.every(x => x === 'D'))) {
+                targetDS = 'D';
+                confidenceStr = rateD === 100 ? "100%" : `Ưu tiên D (Gần đây nghiêng D)`;
+                score = rateD === 100 ? 2 : 1;
+            } else if (rateS === 100 || (rateS >= 50 && recent2.length === 2 && recent2.every(x => x === 'S'))) {
+                targetDS = 'S';
+                confidenceStr = rateS === 100 ? "100%" : `Ưu tiên S (Gần đây nghiêng S)`;
+                score = rateS === 100 ? 2 : 1;
+            }
+            
+            if (!targetDS) return { signal: null, desc: `Mẫu [${currentPattern}]: Tỷ lệ (D:${Math.round(rateD)}% - S:${Math.round(rateS)}%). Không rõ ràng.`, score: 0 };
+            
+            // --- 4. DỊCH MÃ D/S SANG LỆNH P/B ---
+            let finalSignal = null;
+            if (!isReverse) {
+                finalSignal = targetDS === 'D' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
+            } else {
+                finalSignal = targetDS === 'S' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
+            }
+            
+            return { 
+                signal: finalSignal, 
+                desc: `[${currentPattern} ➜ ${targetDS}] (${confidenceStr}) => ${finalSignal}`,
+                score: score
+            };
+        }
+
+        // Động cơ phân tích BigRoad (P/B thuần túy)
+        function evaluateBigRoadLogic(brHistory) {
+            if (!brHistory || brHistory.length < 3) return { signal: null, desc: "BigRoad quá ngắn", score: 0 };
+            const lastVal = brHistory[brHistory.length - 1];
+            let count = 1;
+            for (let i = brHistory.length - 2; i >= 0; i--) {
+                if (brHistory[i] === lastVal) count++;
+                else break;
+            }
+            if (count > 2) return { signal: lastVal, desc: `Đang bệt ${lastVal} > 2. Đu bệt.`, score: 2 };
+            return { signal: null, desc: "Cầu BR đang ngắn/loạn.", score: 0 };
         }
 
         function calculateKLT() {
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
 
-            // 1. Lấy chuỗi trend D/S của SGE và KLC
-            const stateSGE = getDSTrend(session.sgeHistory || []);
-            const stateKLC = getDSTrend(session.klcHistory || []);
+            // --- TRÍCH XUẤT DỮ LIỆU TỪ 6 BIỂU ĐỒ ---
+            const arrBR = session.history || [];
             
-            const currentState = `${stateSGE} - ${stateKLC}`;
-            masterState.currentKltState = currentState;
+            const ht1Det = masterState.systemDetails.ht1;
+            const ht1BaseRaw = ht1Det && ht1Det.verdict ? ht1Det.verdict.toUpperCase() : '';
+            const ht1Base = ht1BaseRaw.includes('P') ? 'P' : (ht1BaseRaw.includes('B') ? 'B' : null);
+            const resHT1 = evaluatePatternTrust(ht1Det ? ht1Det.intervalHistory : [], ht1Base, ht1BaseRaw.includes('NGƯỢC'), 'HT1');
 
-            if (!session.kltHistory) session.kltHistory = [];
-            const kltHist = session.kltHistory;
+            const ht4Det = masterState.systemDetails.ht4;
+            const ht4BaseRaw = ht4Det && ht4Det.verdict ? ht4Det.verdict.toUpperCase() : '';
+            const ht4Base = ht4BaseRaw.includes('P') ? 'P' : (ht4BaseRaw.includes('B') ? 'B' : null);
+            const resHT4 = evaluatePatternTrust(ht4Det ? ht4Det.intervalHistory : [], ht4Base, ht4BaseRaw.includes('NGƯỢC'), 'HT4');
 
-            let prediction = null;
-            let reason = "";
-            let winRateText = "";
+            const geBase = masterState.currentGePrediction;
+            const resGE = evaluatePatternTrust(session.geHistory || [], geBase, false, 'GE');
 
-            // 2. Tra cứu lịch sử matching giống hệt GE
-            if (stateSGE !== "Chưa rõ" && stateKLC !== "Chưa rõ") {
-                const matches = kltHist.filter(h => h.state === currentState);
-                if (matches.length > 0) {
-                    const pCount = matches.filter(m => m.actual === 'P').length;
-                    const bCount = matches.filter(m => m.actual === 'B').length;
-                    const total = matches.length;
-                    
-                    const rateP = Math.round((pCount / total) * 100);
-                    const rateB = Math.round((bCount / total) * 100);
-                    winRateText = `P: ${rateP}% | B: ${rateB}%`;
+            const sgeBase = masterState.currentSgePending ? masterState.currentSgePending.prediction : null;
+            const resSGE = evaluatePatternTrust(session.sgeHistory || [], sgeBase, false, 'SGE');
 
-                    if (pCount > bCount) {
-                        prediction = 'P';
-                        reason = `Lịch sử ưu tiên P (${rateP}%).`;
-                    } else if (bCount > pCount) {
-                        prediction = 'B';
-                        reason = `Lịch sử ưu tiên B (${rateB}%).`;
-                    } else {
-                        prediction = null;
-                        reason = "Tỷ lệ P/B đang 50-50. Quan sát.";
-                    }
-                } else {
-                    reason = "Form trạng thái này chưa từng xuất hiện. Tích lũy...";
-                }
-            } else {
-                reason = "Chờ tín hiệu từ SGE và KLC...";
+            const klcBase = masterState.currentKlcPrediction;
+            const resKLC = evaluatePatternTrust(session.klcHistory || [], klcBase, false, 'KLC');
+
+            const resBR = evaluateBigRoadLogic(arrBR);
+
+            // --- TỔNG HỢP VÀ VOTE LỆNH ---
+            let scoreP = 0, scoreB = 0;
+            const logs = { HT1: resHT1, HT4: resHT4, GE: resGE, SGE: resSGE, KLC: resKLC, BR: resBR };
+            
+            for (const [sys, res] of Object.entries(logs)) {
+                if (res.signal === 'P') scoreP += res.score;
+                if (res.signal === 'B') scoreB += res.score;
             }
 
+            let prediction = null;
+            let reasonHtml = `<div class="flex flex-col gap-2 text-left mt-2">`;
+            
+            for (const [sys, res] of Object.entries(logs)) {
+                const color = res.signal === 'P' ? 'text-blue-400' : (res.signal === 'B' ? 'text-red-400' : 'text-gray-500');
+                reasonHtml += `<div class="bg-gray-800 p-2 rounded border border-gray-700 text-sm">
+                                  <span class="font-bold text-gray-300 w-12 inline-block">${sys}:</span> 
+                                  <span class="${color} font-semibold">${res.signal || 'BỎ QUA'}</span> - ${res.desc}
+                               </div>`;
+            }
+            reasonHtml += `</div>`;
+
+            // Điều kiện để xuất lệnh "CHẮC CHẮN" (Điểm áp đảo)
+            if (scoreP >= 3 && scoreP > scoreB * 2) {
+                prediction = 'P';
+            } else if (scoreB >= 3 && scoreB > scoreP * 2) {
+                prediction = 'B';
+            } else {
+                prediction = null;
+                reasonHtml = `<div class="text-yellow-400 font-bold mb-2 text-center">Tín hiệu loạn hoặc chưa đủ độ chắc chắn (P:${scoreP} vs B:${scoreB}). Khuyên bỏ qua.</div>` + reasonHtml;
+            }
+
+            const stateSummary = `P:${scoreP} - B:${scoreB}`;
+            masterState.currentKltState = stateSummary;
             masterState.currentKltPrediction = prediction;
 
+            if (!session.kltHistory) session.kltHistory = [];
+            
+            renderKltUI(stateSummary, prediction, reasonHtml, `Vote => P:${scoreP} | B:${scoreB}`, session.kltHistory);
+        }
+
+        function renderKltUI(currentState, prediction, reasonHtml, winRateText, kltHistory) {
+            const stateEl = document.getElementById('klt-current-state');
+            const wrEl = document.getElementById('klt-winrate-text');
+            const concEl = document.getElementById('klt-conclusion');
+            const decEl = document.getElementById('klt-final-decision');
+            const accEl = document.getElementById('klt-overall-accuracy');
+
+            if (stateEl) stateEl.textContent = currentState;
+            if (wrEl) wrEl.textContent = winRateText || '-';
+            
+            // Xử lý Giao diện Nút xem chi tiết
+            if (concEl) {
+                if (reasonHtml) {
+                    concEl.innerHTML = `
+                        <button onclick="toggleSection('klt-details', 'klt-details-icon')" class="w-full flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-600 hover:bg-gray-700 transition">
+                            <span class="text-cyan-400 font-bold text-xs">XEM CHI TIẾT 6 BIỂU ĐỒ</span>
+                            <svg id="klt-details-icon" class="w-4 h-4 text-cyan-400 transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="klt-details" class="section-content collapsed mt-2">
+                            ${reasonHtml}
+                        </div>
+                    `;
+                } else {
+                    concEl.innerHTML = '-';
+                }
+            }
+
+            if (decEl) {
+                if (prediction === 'P') {
+                    decEl.textContent = 'PLAYER';
+                    decEl.className = 'text-4xl md:text-5xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] mt-4 transition-all duration-300';
+                } else if (prediction === 'B') {
+                    decEl.textContent = 'BANKER';
+                    decEl.className = 'text-4xl md:text-5xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] mt-4 transition-all duration-300';
+                } else {
+                    decEl.textContent = 'BỎ QUA';
+                    decEl.className = 'text-3xl md:text-4xl font-black text-gray-500 drop-shadow-lg mt-4 transition-all duration-300';
+                }
+            }
+
+            // Render Biểu đồ KLT
+            const chartEl = document.getElementById('klt-history-chart');
+            const validHistory = kltHistory.filter(h => h.predicted !== null);
+            
+            if (chartEl && validHistory.length > 0) {
+                let correct = 0;
+                let chartHtml = '<div class="flex items-end justify-start h-full gap-1 px-1 min-w-max pb-1">';
+                validHistory.forEach(h => {
+                    if (h.correct) correct++;
+                    const color = h.correct ? 'bg-cyan-500 shadow-[0_0_5px_rgba(6,182,212,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
+                    const height = h.correct ? 'h-full' : 'h-2/5';
+                    chartHtml += `<div class="w-2.5 rounded-[1px] ${color} ${height}" title="Ván ${h.gameNum}: KLT dự đoán ${h.predicted} ➜ KQ: ${h.actual}"></div>`;
+                });
+                chartHtml += '</div>';
+                chartEl.innerHTML = chartHtml;
+                chartEl.scrollLeft = chartEl.scrollWidth;
+
+                if (accEl) {
+                    const accRate = Math.round((correct / validHistory.length) * 100);
+                    accEl.textContent = `${accRate}% (${correct}/${validHistory.length})`;
+                    accEl.className = accRate >= 50 ? 'text-cyan-400' : 'text-red-400';
+                }
+            } else if (chartEl) {
+                chartEl.innerHTML = '<p class="text-gray-600 text-xs w-full text-center h-full flex items-center justify-center">Đang tích lũy...</p>';
+                if (accEl) accEl.textContent = '0%';
+            }
+        }
             // 3. Render giao diện KLT
             renderKltUI(currentState, prediction, reason, winRateText, kltHist);
         }
