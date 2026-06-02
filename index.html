@@ -3,58 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLC2</title>
+    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #F9FAFB; }
-        .btn { transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .btn:active { transform: translateY(1px); }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            color: #F9FAFB;
+        }
+        .btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn:active {
+            transform: translateY(1px);
+        }
         .card-glow-total { box-shadow: 0 0 25px rgba(168, 85, 247, 0.7); }
-        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fadeIn 0.3s ease; }
-        .modal-content { background-color: #1f2937; padding: 1.5rem; border-radius: 1rem; width: 90%; max-width: 500px; animation: slideIn 0.3s ease-out; border: 1px solid #374151; }
-        .toast-notification { position: fixed; top: 20px; right: 20px; background-color: #1f2937; color: white; padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 100; animation: slideDown 0.5s ease; border-left: 4px solid; }
-        .warning-alert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #f59e0b; color: white; padding: 1rem 2rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 100; animation: slideDown 0.5s ease; border-left: 4px solid #d97706; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
-        @keyframes superBounce { 0% { transform: translate(-50%, -10px) scale(1); } 100% { transform: translate(-50%, 5px) scale(1.05); } }
-        @keyframes spinPulse { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.3) rotate(18deg); } 100% { transform: scale(1) rotate(-18deg); } }
-        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50; animation: fadeIn 0.3s ease;
+        }
+        .modal-content {
+            background-color: #1f2937;
+            padding: 1.5rem; border-radius: 1rem;
+            width: 90%; max-width: 500px;
+            animation: slideIn 0.3s ease-out;
+            border: 1px solid #374151;
+        }
+        .toast-notification {
+            position: fixed; top: 20px; right: 20px;
+            background-color: #1f2937; color: white;
+            padding: 1rem 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            z-index: 100; animation: slideDown 0.5s ease;
+            border-left: 4px solid;
+        }
+        .warning-alert {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%);
+            background-color: #f59e0b; color: white;
+            padding: 1rem 2rem; border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            z-index: 100; animation: slideDown 0.5s ease;
+            border-left: 4px solid #d97706;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-100%); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+        @keyframes superBounce {
+            0% { transform: translate(-50%, -10px) scale(1); }
+            100% { transform: translate(-50%, 5px) scale(1.05); }
+        }
+        @keyframes spinPulse {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(18deg); }
+            100% { transform: scale(1) rotate(-18deg); }
+        }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
         .animate-slideIn { animation: slideInUp 0.3s ease-out forwards; }
-        .system-frame { border: 2px solid #374151; border-radius: 0.75rem; background: #1f2937; transition: all 0.3s ease; }
-        .system-frame.active { border-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
-        .history-chart { display: flex; align-items: flex-end; justify-content: flex-start; gap: 2px; height: 60px; padding: 5px 0 8px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; }
-        .history-bar { flex-shrink: 0; width: 4px; border-radius: 1px; }
-        .history-bar-correct { background-color: #3b82f6; height: 100%; }
-        .history-bar-incorrect { background-color: #ef4444; height: 40%; }
-        .accuracy-badge { padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        
+        .system-frame {
+            border: 2px solid #374151;
+            border-radius: 0.75rem;
+            background: #1f2937;
+            transition: all 0.3s ease;
+        }
+        .system-frame.active {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+        .history-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            gap: 2px;
+            height: 60px;
+            padding: 5px 0 8px 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+        }
+        .history-bar {
+            flex-shrink: 0;
+            width: 4px;
+            border-radius: 1px;
+        }
+        .history-bar-correct {
+            background-color: #3b82f6;
+            height: 100%;
+        }
+        .history-bar-incorrect {
+            background-color: #ef4444;
+            height: 40%;
+        }
+        .accuracy-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
         .accuracy-high { background-color: #10b981; color: white; }
         .accuracy-medium { background-color: #f59e0b; color: white; }
         .accuracy-low { background-color: #ef4444; color: white; }
-        .system-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        @media (min-width: 1024px) { .system-grid { grid-template-columns: repeat(2, 1fr); } }
-        .game-bar-chart { height: 300px; margin-top: 1rem; }
-        .confidence-interval-chart { height: 200px; margin-top: 1rem; }
-        .game-result-chip { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin: 1px; }
+        .system-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        @media (min-width: 1024px) {
+            .system-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .game-bar-chart {
+            height: 300px;
+            margin-top: 1rem;
+        }
+        .confidence-interval-chart {
+            height: 200px;
+            margin-top: 1rem;
+        }
+        .game-result-chip {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin: 1px;
+        }
         .game-correct { background-color: #10b981; color: white; }
         .game-incorrect { background-color: #ef4444; color: white; }
         .game-neutral { background-color: #6b7280; color: white; }
-        .final-decision-bar { flex-shrink: 0; width: 8px; border-radius: 2px; margin: 0 1px; }
-        .final-decision-correct { background-color: #3b82f6; height: 100%; }
-        .final-decision-incorrect { background-color: #ef4444; height: 40%; }
-        input[type=range] { -webkit-appearance: none; background: #374151; height: 4px; border-radius: 2px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #8b5cf6; cursor: pointer; }
+        .final-decision-bar {
+            flex-shrink: 0;
+            width: 8px;
+            border-radius: 2px;
+            margin: 0 1px;
+        }
+        .final-decision-correct {
+            background-color: #3b82f6;
+            height: 100%;
+        }
+        .final-decision-incorrect {
+            background-color: #ef4444;
+            height: 40%;
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #374151;
+            height: 4px;
+            border-radius: 2px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            cursor: pointer;
+        }
         .custom-scrollbar::-webkit-scrollbar, .history-chart::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track, .history-chart::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb, .history-chart::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover, .history-chart::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-        .section-content { transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out; max-height: 2000px; opacity: 1; overflow: hidden; }
-        .section-content.collapsed { max-height: 0; opacity: 0; margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; }
+
+        .section-content {
+            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out;
+            max-height: 2000px;
+            opacity: 1;
+            overflow: hidden;
+        }
+        .section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8 relative" style="overflow: hidden;">
@@ -648,7 +805,7 @@
         </div>
 
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + KLC + KLC2</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + KLC</p>
             <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 và 3 biểu đồ khác để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
@@ -758,63 +915,6 @@
             </span>
         </button>
     </div>
-
-    <div id="floating-klc2-container" class="fixed bottom-6 right-[100px] z-[260] flex flex-col items-end pointer-events-none">
-        <div id="klc2-floating-panel" class="hidden pointer-events-auto absolute bottom-24 right-0 w-[92vw] md:w-[450px] bg-gradient-to-br from-gray-950 via-red-950 to-orange-950 p-5 rounded-2xl border-2 border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.5)] backdrop-blur-md origin-bottom-right transition-all duration-300">
-            <button onclick="toggleKLC2Panel()" class="absolute top-2 left-2 text-gray-400 hover:text-white bg-gray-800 rounded-full p-1 border border-gray-600 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-
-            <div class="absolute -top-3 right-4 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.8)] tracking-widest border border-red-400">👑 KLC2 - TỐI THƯỢNG</div>
-            
-            <div class="flex justify-center gap-4 mt-2 mb-3 bg-black/60 p-2 rounded-lg border border-gray-700 shadow-inner">
-                <label class="flex flex-col items-center cursor-pointer group">
-                    <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-yellow-400 transition-colors">ĐỌC SGE</span>
-                    <div class="relative">
-                        <input type="checkbox" id="toggle-klc2-sge" class="sr-only peer" checked onchange="toggleKlc2Rule('readSGE', this.checked)">
-                        <div class="block bg-gray-700 w-10 h-6 rounded-full border border-gray-600 peer-checked:bg-yellow-600 peer-checked:border-yellow-400 peer-checked:shadow-[0_0_12px_rgba(234,179,8,0.8)] transition-all duration-300"></div>
-                        <div class="dot absolute left-1 top-1 bg-gray-300 w-4 h-4 rounded-full transition-all duration-300 peer-checked:bg-white peer-checked:translate-x-4 shadow-sm"></div>
-                    </div>
-                </label>
-                <label class="flex flex-col items-center cursor-pointer group border-l border-gray-700 pl-4">
-                    <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-purple-400 transition-colors">ĐỌC KLC1</span>
-                    <div class="relative">
-                        <input type="checkbox" id="toggle-klc2-klc" class="sr-only peer" checked onchange="toggleKlc2Rule('readKLC', this.checked)">
-                        <div class="block bg-gray-700 w-10 h-6 rounded-full border border-gray-600 peer-checked:bg-purple-600 peer-checked:border-purple-400 peer-checked:shadow-[0_0_12px_rgba(168,85,247,0.8)] transition-all duration-300"></div>
-                        <div class="dot absolute left-1 top-1 bg-gray-300 w-4 h-4 rounded-full transition-all duration-300 peer-checked:bg-white peer-checked:translate-x-4 shadow-sm"></div>
-                    </div>
-                </label>
-            </div>
-                
-            <div class="bg-black/80 p-4 rounded-xl border border-red-500/50 flex flex-col items-center text-center gap-2 mb-3 relative overflow-hidden">
-                <div id="klc2-glow-bg" class="absolute inset-0 bg-red-600/10 transition-colors duration-500 pointer-events-none"></div>
-                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest relative z-10">LỆNH TRÙM CUỐI (KLC2)</span>
-                <div id="klc2-final-decision" class="text-3xl font-black drop-shadow-md transition-all relative z-10">-</div>
-                <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent my-1"></div>
-                <div class="relative z-10 w-full text-center">
-                    <div id="klc2-advice" class="text-sm font-medium text-gray-300 leading-relaxed">-</div>
-                </div>
-            </div>
-
-            <div class="bg-black/60 p-3 rounded-lg border border-gray-700">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">Biểu đồ KLC2 Tối Thượng</span>
-                    <span id="klc2-winrate" class="text-sm font-black text-red-400 bg-red-900/50 px-2 py-0.5 rounded border border-red-500/50">0%</span>
-                </div>
-                <div id="klc2-history-chart" class="flex items-end justify-start overflow-x-auto h-12 gap-1 custom-scrollbar px-1 py-1 bg-gray-900/80 rounded-lg w-full scroll-smooth shadow-inner">
-                    <span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>
-                </div>
-            </div>
-        </div>
-
-        <button id="klc2-toggle-btn" onclick="toggleKLC2Panel()" class="pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-red-800 to-orange-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(239,68,68,0.8)] border-2 border-red-400 hover:scale-105 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative">
-            <span id="klc2-btn-icon" class="text-3xl transition-transform duration-300">👑</span>
-            <span id="klc2-notification-dot" class="absolute top-0 right-0 flex h-5 w-5 hidden">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-5 w-5 bg-yellow-500 border-2 border-white"></span>
-            </span>
-        </button>
-    </div>
     
     </div> <script>
         /* =========================================================================
@@ -822,8 +922,10 @@
         ========================================================================= */
         const ENCODED_PASSWORDS = ['NjUyNTgz', 'MDc3ODY4', 'MTQxMDIwMDQ=']; 
 
+        // 1. Chống Click Chuột Phải
         document.addEventListener('contextmenu', event => event.preventDefault());
 
+        // 2. Chống các tổ hợp phím Hacker
         document.onkeydown = function(e) {
             if(e.keyCode == 123) { return false; } 
             if(e.ctrlKey && e.shiftKey && e.keyCode == 73) { return false; } 
@@ -831,12 +933,14 @@
             if(e.ctrlKey && e.keyCode == 85) { return false; } 
         };
 
+        // 3. Khởi tạo trạng thái bảo mật ban đầu
         document.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('godEye_unlocked') === 'true') {
                 unlockSystem(false); 
             }
         });
 
+        // 4. Hàm kiểm tra mật khẩu
         function checkPassword() {
             const input = document.getElementById('auth-password').value;
             const errorText = document.getElementById('auth-error');
@@ -854,6 +958,7 @@
             }
         }
 
+        // 5. Hàm mở khóa an toàn
         function unlockSystem(showNotification) {
             const lockScreen = document.getElementById('security-lock');
             const coreSystem = document.getElementById('vsn-core-system');
@@ -1084,7 +1189,7 @@
 
         async function buildPatternDatabaseAsync(samples) {
             const db = {};
-            const patternSizes = Array.from({length: 18}, (_, i) => i + 3); 
+            const ngramSizes = Array.from({length: 18}, (_, i) => i + 3); 
             const chunkSize = 50; 
             
             for (let idx = 0; idx < samples.length; idx += chunkSize) {
@@ -1092,7 +1197,7 @@
                 for (const line of chunk) {
                     const binaryLine = line.replace(/D/g, '1').replace(/0/g, 'S'); 
                     const formattedLine = line.replace(/D/g, '1').replace(/S/g, '0');
-                    for (const size of patternSizes) {
+                    for (const size of ngramSizes) {
                         for (let i = 0; i <= formattedLine.length - size - 1; i++) {
                             const seqBin = formattedLine.substring(i, i + size);
                             const nextBit = formattedLine[i + size];
@@ -1196,12 +1301,7 @@
             klcToggles: { th1: true, th2: true, th3: true },
 
             currentKltState: "Chưa rõ - Chưa rõ",
-            currentKltPrediction: null,
-
-            // STATE CHO KLC2
-            klc2Toggles: { readSGE: true, readKLC: true },
-            currentKlc2Prediction: null,
-            currentKlc2Reason: ""
+            currentKltPrediction: null
         };
 
         let gameAccuracyChart = null;
@@ -1232,9 +1332,9 @@
                 const newBit = dsSequence.slice(-1);
                 const contextSeq = dsSequence.slice(0, -1);
 
-                const patternSizes = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; 
+                const ngramSizes = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; 
                 
-                for (const size of patternSizes) {
+                for (const size of ngramSizes) {
                     if (contextSeq.length >= size) {
                         const pattern = contextSeq.slice(-size);
                         const key = `${size}|${pattern}`;
@@ -1373,7 +1473,7 @@
                     <div class="font-black text-yellow-300 mb-3 uppercase text-center flex items-center justify-center gap-2">
                         BẢNG ĐIỂM TỔNG HỢP 3 CHỈ BÁO
                     </div>
-                    <div class="flex justify-between border-b border-gray-700 py-2"><span>1. Lõi AI Pattern Custom (${bestMatch.confidence.toFixed(0)}%):</span> <span class="font-bold text-cyan-400">${baseScore > 0 ? '+'+baseScore : baseScore} đ</span></div>
+                    <div class="flex justify-between border-b border-gray-700 py-2"><span>1. Lõi AI N-Gram (${bestMatch.confidence.toFixed(0)}%):</span> <span class="font-bold text-cyan-400">${baseScore > 0 ? '+'+baseScore : baseScore} đ</span></div>
                     <div class="flex justify-between border-b border-gray-700 py-2"><span>2. Phong độ Win/Lose AI:</span> <span class="font-bold ${aiScore > 0 ? 'text-green-400' : (aiScore < 0 ? 'text-red-400' : 'text-gray-400')}">${aiScore > 0 ? '+'+aiScore : aiScore} đ</span></div>
                     <div class="flex justify-between py-2"><span>3. Xu hướng Big Road:</span> <span class="font-bold ${bigRoadScore > 0 ? 'text-green-400' : (bigRoadScore < 0 ? 'text-red-400' : 'text-gray-400')}">${bigRoadScore > 0 ? '+'+bigRoadScore : bigRoadScore} đ</span></div>
                     <div class="mt-3 pt-3 border-t border-gray-500 flex justify-between items-center bg-gray-900/50 p-2 rounded">
@@ -1499,6 +1599,7 @@
             
             if (!session || !ht1Details || !ht1Details.intervalHistory) return;
 
+            // --- CỘT 1 (Trạng thái Biểu đồ HT1 & Phán Quyết) ---
             let cot1 = "Chưa rõ";
             const dsArr = ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S');
             const verdictStr = ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
@@ -1516,14 +1617,17 @@
                 if (baseSignal) {
                     let impliedActual = '';
                     if (!isNgược) { 
+                        // Thuận
                         impliedActual = (lastChar === 'D') ? baseSignal : (baseSignal === 'P' ? 'B' : 'P'); 
                     } else { 
+                        // Ngược
                         impliedActual = (lastChar === 'S') ? baseSignal : (baseSignal === 'P' ? 'B' : 'P'); 
                     }
                     cot1 = impliedActual + (streak >= 2 ? " Tăng" : "");
                 }
             }
 
+            // --- CỘT 2 (Trạng thái Big Road) ---
             let cot2 = "Chưa rõ";
             const br = session.history || [];
             if (br.length > 0) {
@@ -1539,6 +1643,7 @@
             if (!session.geHistory) session.geHistory = [];
             const geHistory = session.geHistory;
 
+            // --- DỰ ĐOÁN DỰA TRÊN LUẬT GOD EYE ---
             let prediction = null;
             let reason = "";
             let winRateText = "";
@@ -1573,7 +1678,10 @@
 
             masterState.currentGePrediction = prediction;
 
+            // --- RENDER GOD EYE UI ---
             renderGodEyeUI(currentState, prediction, reason, winRateText, geHistory);
+            
+            // --- KÍCH HOẠT SUPPORT GE (SGE) ---
             calculateSGE();
         }
 
@@ -1603,6 +1711,7 @@
                 }
             }
 
+            // Render matching history
             const matchBody = document.getElementById('ge-history-matches-body');
             const matches = geHistory.filter(h => h.state === currentState);
             if (occEl) occEl.textContent = `${matches.length} lần`;
@@ -1627,6 +1736,7 @@
                 }
             }
 
+            // Render overall history chart
             updateGeHistoryChart(geHistory);
         }
 
@@ -1654,14 +1764,17 @@
                 return val === 'D' ? 'S' : 'D';
             };
 
+            // 1. Check BỆT
             if (last.count >= 3) {
                 return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: last.count };
             }
 
+            // 2. Check Cầu 1-1
             if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
                 return { signal: getOpposite(last.val), desc: "Cầu 1-1 rõ ràng", weight: 3 };
             }
 
+            // 3. Check Cầu 2-2 
             if (last.count === 1 && prev1 && prev1.count === 2 && prev2 && prev2.count === 2) {
                 return { signal: last.val, desc: "Đang cầu 2-2 (nhịp 1 sang 2)", weight: 3.5 };
             }
@@ -1669,6 +1782,7 @@
                 return { signal: getOpposite(last.val), desc: "Cầu 2-2 (chuyển nhịp)", weight: 3.5 };
             }
 
+            // 4. Các mẫu Quy luật Thói Quen
             if (last.count === 1 && prev1 && prev1.count >= 2 && prev2 && prev2.count === 1) {
                  return { signal: getOpposite(last.val), desc: `Thói quen 1${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
@@ -1707,6 +1821,7 @@
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
 
+            // --- LẤY DATA CÁC TRẠNG THÁI ---
             const arrBR = session.history || [];
             
             const ht1Details = masterState.systemDetails.ht1;
@@ -1726,11 +1841,13 @@
             if (ht4BaseVerdictRaw.includes('P')) ht4BaseSignal = 'P'; else if (ht4BaseVerdictRaw.includes('B')) ht4BaseSignal = 'B';
             const ht4IsReverse = ht4BaseVerdictRaw.includes('NGƯỢC');
 
+            // --- PHÂN TÍCH ---
             const resBR = analyzeSGETrend(arrBR, 'PB');
             const resHT1 = analyzeSGETrend(arrHT1, 'DS');
             const resGE = analyzeSGETrend(arrGE, 'DS');
             const resHT4 = analyzeSGETrend(arrHT4, 'DS');
 
+            // --- DỊCH MÃ ---
             let finalSignalHT1 = null;
             if (resHT1.signal && ht1BaseSignal) {
                 if (!ht1IsReverse) {
@@ -1754,6 +1871,7 @@
                 }
             }
 
+            // --- TỔNG HỢP TRỌNG SỐ ---
             let scoreP = 0; let scoreB = 0;
             let reasonsList = [];
 
@@ -2357,20 +2475,6 @@
                     }
                 }
 
-                // ====== GẮN THÊM VÀO TRONG PROCESSQUEUE KLC2 ======
-                if (masterState.currentKlc2Prediction !== undefined) {
-                    if (!session.klc2History) session.klc2History = [];
-                    if (masterState.currentKlc2Prediction !== null) {
-                        session.klc2History.push({
-                            gameNum: session.history.length,
-                            predicted: masterState.currentKlc2Prediction,
-                            actual: currentResult,
-                            correct: masterState.currentKlc2Prediction === currentResult
-                        });
-                        updateKlc2Chart(session.klc2History);
-                    }
-                }
-
                 // TÍCH LŨY LỊCH SỬ KLT
                 if (masterState.currentKltState && masterState.currentKltState !== "Chưa rõ - Chưa rõ") {
                     if (!session.kltHistory) session.kltHistory = [];
@@ -2451,11 +2555,6 @@
                  updateKlcChart(session.klcHistory);
             }
 
-            if (session.klc2History) {
-                 session.klc2History = session.klc2History.filter(h => h.gameNum <= session.history.length);
-                 updateKlc2Chart(session.klc2History);
-            }
-
             if (session.kltHistory) {
                 session.kltHistory = session.kltHistory.filter(h => h.gameNum <= session.history.length);
                 renderKltUI(masterState.currentKltState, masterState.currentKltPrediction, "", "", session.kltHistory);
@@ -2495,10 +2594,6 @@
                 updateKlcChart([]);
                 masterState.currentKlcPrediction = null;
                 masterState.currentKlcRule = null;
-
-                session.klc2History = []; 
-                updateKlc2Chart([]);
-                masterState.currentKlc2Prediction = null;
 
                 session.kltHistory = [];
                 masterState.currentKltPrediction = null;
@@ -2547,16 +2642,6 @@
                 if(toggleBtnKLC) toggleBtnKLC.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-gray-800 to-gray-900 rounded-full text-white font-black shadow-[0_0_15px_rgba(0,0,0,0.8)] border-2 border-gray-600 hover:scale-105 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative";
                 if(btnIconKLC) btnIconKLC.textContent = "💤";
                 if(notifDotKLC) notifDotKLC.classList.add('hidden');
-
-                // Reset KLC2 Floating Panel UI
-                const decElKlc2 = document.getElementById('klc2-final-decision');
-                const adviceElKlc2 = document.getElementById('klc2-advice');
-                if(decElKlc2) decElKlc2.innerHTML = '-';
-                if(adviceElKlc2) adviceElKlc2.innerHTML = '-';
-                const toggleBtnKlc2 = document.getElementById('klc2-toggle-btn');
-                const notifDotKlc2 = document.getElementById('klc2-notification-dot');
-                if(toggleBtnKlc2) toggleBtnKlc2.classList.remove('animate-bounce', 'border-blue-500', 'border-red-500');
-                if(notifDotKlc2) notifDotKlc2.classList.add('hidden');
 
                 // Reset SGE Floating Panel UI
                 const floatDecEl = document.getElementById('float-sge-decision');
@@ -2860,29 +2945,8 @@
         }
 
         /* =========================================================================
-           THUẬT TOÁN KLC1 & KLC2
+           THUẬT TOÁN KLC
            ========================================================================= */
-        
-        // Toggles KLC2
-        function toggleKLC2Panel() {
-            const panel = document.getElementById('klc2-floating-panel');
-            if (panel.classList.contains('hidden')) {
-                panel.classList.remove('hidden');
-                panel.classList.add('animate-slideIn'); 
-                panel.style.transform = "scale(1)"; panel.style.opacity = "1";
-            } else {
-                panel.classList.add('hidden');
-                panel.style.transform = "scale(0.95)"; panel.style.opacity = "0";
-            }
-        }
-
-        function toggleKlc2Rule(rule, isChecked) {
-            masterState.klc2Toggles[rule] = isChecked;
-            showToast(`Đã ${isChecked ? 'BẬT' : 'TẮT'} đọc dữ liệu ${rule.replace('read', '')} cho KLC2`, isChecked ? 'success' : 'warning');
-            runKLC2(); 
-        }
-        
-        // Toggles KLC1
         function toggleKlcRule(rule, isChecked) {
             masterState.klcToggles[rule] = isChecked;
             showToast(`Đã ${isChecked ? 'BẬT' : 'TẮT'} ${rule.toUpperCase()}`, isChecked ? 'success' : 'warning');
@@ -2982,7 +3046,6 @@
                 decEl.innerHTML = '<span class="text-xl font-bold text-gray-500">CHỜ TÍN HIỆU SGE</span>';
                 adviceEl.innerHTML = '<span class="text-gray-500 italic">KLC hoạt động dựa trên phán quyết của SGE...</span>';
                 if(glowBg) glowBg.className = "absolute inset-0 transition-colors duration-500 pointer-events-none bg-transparent";
-                runKLC2();
                 return;
             }
 
@@ -3014,11 +3077,11 @@
                 decEl.innerHTML = 'BỎ QUA (CHẠY NGẦM)'; decEl.className = 'text-xl font-bold text-gray-500 relative z-10';
                 adviceEl.innerHTML = `<span class="text-gray-400 font-bold">${klcLogic.desc}</span><br/><span class="text-red-400">Đã tắt hiển thị - Vẫn đang theo dõi ngầm!</span>`;
                 if(glowBg) glowBg.className = "absolute inset-0 bg-gray-600/10 transition-colors duration-500 pointer-events-none";
-                runKLC2();
                 return;
             }
 
             let icon = klcLogic.th === 'TH3' ? '✅' : '🔥';
+            
             let isAllIn = klcLogic.money.includes('ALL-IN'); 
 
             let btnAnimation = isAllIn ? 'animate-bounce border-[3px] scale-110' : 'hover:scale-105 border-2';
@@ -3051,7 +3114,6 @@
             }
 
             adviceEl.innerHTML = adviceHtml;
-            runKLC2();
         }
 
         function updateKlcChart(klcHistory) {
@@ -3096,135 +3158,6 @@
             }
         }
 
-        // ================= KLC2 LÕI THUẬT TOÁN =================
-        function runKLC2() {
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session) return;
-
-            const sgeHistory = session.sgeHistory || [];
-            const klcHistory = session.klcHistory || [];
-            
-            const readSGE = masterState.klc2Toggles.readSGE;
-            const readKLC = masterState.klc2Toggles.readKLC;
-
-            const decEl = document.getElementById('klc2-final-decision');
-            const adviceEl = document.getElementById('klc2-advice');
-            const toggleBtn = document.getElementById('klc2-toggle-btn');
-            const notifDot = document.getElementById('klc2-notification-dot');
-
-            let sgeCurrentSignal = masterState.currentSgePending ? masterState.currentSgePending.prediction : null;
-            let klc1CurrentSignal = masterState.currentKlcPrediction;
-
-            if (!readSGE) sgeCurrentSignal = null;
-            if (!readKLC) klc1CurrentSignal = null;
-
-            if (!sgeCurrentSignal && !klc1CurrentSignal) {
-                masterState.currentKlc2Prediction = null;
-                decEl.innerHTML = '<span class="text-xl font-bold text-gray-500">CHỜ TÍN HIỆU</span>';
-                adviceEl.innerHTML = 'Cần bật ít nhất 1 biểu đồ (SGE hoặc KLC1) để KLC2 hoạt động.';
-                notifDot.classList.add('hidden');
-                toggleBtn.classList.remove('animate-bounce');
-                return;
-            }
-
-            const getRecentWinrate = (historyArr) => {
-                if (!historyArr || historyArr.length === 0) return { rate: 0, weight: 0 };
-                const recent = historyArr.slice(-10); 
-                const corrects = recent.filter(h => h.correct).length;
-                return { 
-                    rate: Math.round((corrects / recent.length) * 100), 
-                    weight: corrects 
-                };
-            };
-
-            const sgeStats = getRecentWinrate(sgeHistory);
-            const klcStats = getRecentWinrate(klcHistory);
-
-            let finalKlc2Signal = null;
-            let adviceHtml = '';
-            let isAllIn = false;
-
-            if (sgeCurrentSignal && klc1CurrentSignal) {
-                if (sgeCurrentSignal === klc1CurrentSignal) {
-                    finalKlc2Signal = sgeCurrentSignal;
-                    isAllIn = true;
-                    adviceHtml = `<span class="text-green-400 font-black">🔥 2 PHÓ TƯỚNG ĐỒNG THUẬN 🔥</span><br/>SGE và KLC1 đều báo ${finalKlc2Signal}. Đánh ALL-IN!`;
-                } else {
-                    if (sgeStats.rate > klcStats.rate && sgeStats.rate >= 50) {
-                        finalKlc2Signal = sgeCurrentSignal;
-                        adviceHtml = `<span class="text-yellow-400 font-bold">XUNG ĐỘT: Nghe theo SGE</span><br/>SGE đang có phong độ tốt hơn (${sgeStats.rate}% > ${klcStats.rate}%). Đánh nhẹ tay!`;
-                    } else if (klcStats.rate > sgeStats.rate && klcStats.rate >= 50) {
-                        finalKlc2Signal = klc1CurrentSignal;
-                        adviceHtml = `<span class="text-purple-400 font-bold">XUNG ĐỘT: Nghe theo KLC1</span><br/>KLC1 đang có phong độ tốt hơn (${klcStats.rate}% > ${sgeStats.rate}%). Đánh nhẹ tay!`;
-                    } else {
-                        finalKlc2Signal = null;
-                        adviceHtml = `<span class="text-red-400 font-bold">BỎ QUA - CẢ 2 ĐỀU ĐANG LOẠN</span><br/>Winrate SGE: ${sgeStats.rate}%, KLC1: ${klcStats.rate}%. Rủi ro cực cao!`;
-                    }
-                }
-            } else {
-                if (sgeCurrentSignal) {
-                    finalKlc2Signal = sgeCurrentSignal;
-                    adviceHtml = `<span class="text-gray-300 font-bold">Chỉ SGE có tín hiệu (Winrate 10 ván: ${sgeStats.rate}%)</span><br/>Đánh theo SGE.`;
-                } else if (klc1CurrentSignal) {
-                    finalKlc2Signal = klc1CurrentSignal;
-                    adviceHtml = `<span class="text-gray-300 font-bold">Chỉ KLC1 có tín hiệu (Winrate 10 ván: ${klcStats.rate}%)</span><br/>Đánh theo KLC1.`;
-                }
-            }
-
-            masterState.currentKlc2Prediction = finalKlc2Signal;
-
-            let textAnimation = isAllIn ? 'animate-pulse scale-110 text-4xl' : 'text-3xl';
-            
-            if (finalKlc2Signal === 'P') {
-                decEl.innerHTML = isAllIn ? '👤 PLAYER (VÀO MẠNH) 🚀' : '👤 VÀO PLAYER'; 
-                decEl.className = `font-black text-blue-400 drop-shadow-[0_0_20px_rgba(59,130,246,0.9)] relative z-10 transition-all duration-300 ${textAnimation}`;
-                toggleBtn.classList.add('border-blue-500');
-                if(isAllIn) toggleBtn.classList.add('animate-bounce');
-                notifDot.classList.remove('hidden');
-            } else if (finalKlc2Signal === 'B') {
-                decEl.innerHTML = isAllIn ? '🏦 BANKER (VÀO MẠNH) 🚀' : '🏦 VÀO BANKER'; 
-                decEl.className = `font-black text-red-400 drop-shadow-[0_0_20px_rgba(239,68,68,0.9)] relative z-10 transition-all duration-300 ${textAnimation}`;
-                toggleBtn.classList.add('border-red-500');
-                if(isAllIn) toggleBtn.classList.add('animate-bounce');
-                notifDot.classList.remove('hidden');
-            } else {
-                decEl.innerHTML = '<span class="text-2xl font-bold text-gray-500">BỎ QUA / NẰM IM</span>';
-                notifDot.classList.add('hidden');
-                toggleBtn.classList.remove('animate-bounce', 'border-blue-500', 'border-red-500');
-            }
-
-            adviceEl.innerHTML = adviceHtml;
-        }
-
-        function updateKlc2Chart(klc2History) {
-            const chartEl = document.getElementById('klc2-history-chart');
-            const wrEl = document.getElementById('klc2-winrate');
-            if (!chartEl) return;
-            
-            if (!klc2History || klc2History.length === 0) {
-                chartEl.innerHTML = '<span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu chốt</span>';
-                if (wrEl) { wrEl.textContent = '0%'; wrEl.className = 'text-sm font-black text-gray-500 bg-gray-900 px-2 py-0.5 rounded border border-gray-700'; }
-                return;
-            }
-
-            let correct = 0; let html = '';
-            klc2History.forEach(item => {
-                if (item.correct) correct++;
-                const bg = item.correct ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
-                const height = item.correct ? 'h-full' : 'h-1/3';
-                html += `<div class="w-2.5 flex-shrink-0 rounded-[1px] ${bg} ${height}" title="Ván ${item.gameNum}: [Trùm Cuối] Đoán ${item.predicted} - Thực tế ${item.actual}"></div>`;
-            });
-            
-            chartEl.innerHTML = html;
-            chartEl.scrollLeft = chartEl.scrollWidth;
-
-            if (wrEl) {
-                const rate = Math.round((correct / klc2History.length) * 100);
-                wrEl.textContent = `${rate}% (${correct}/${klc2History.length})`;
-                wrEl.className = `text-sm font-black px-2 py-0.5 rounded border ${rate >= 50 ? 'text-green-400 bg-green-900/40 border-green-500/50' : 'text-red-400 bg-red-900/40 border-red-500/50'}`;
-            }
-        }
-
         /* =========================================================================
            THUẬT TOÁN KẾT LUẬN TỔNG (KLT)
            ========================================================================= */
@@ -3241,6 +3174,7 @@
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
 
+            // 1. Lấy chuỗi trend D/S của SGE và KLC
             const stateSGE = getDSTrend(session.sgeHistory || []);
             const stateKLC = getDSTrend(session.klcHistory || []);
             
@@ -3254,6 +3188,7 @@
             let reason = "";
             let winRateText = "";
 
+            // 2. Tra cứu lịch sử matching giống hệt GE
             if (stateSGE !== "Chưa rõ" && stateKLC !== "Chưa rõ") {
                 const matches = kltHist.filter(h => h.state === currentState);
                 if (matches.length > 0) {
@@ -3284,6 +3219,7 @@
 
             masterState.currentKltPrediction = prediction;
 
+            // 3. Render giao diện KLT
             renderKltUI(currentState, prediction, reason, winRateText, kltHist);
         }
 
@@ -3311,6 +3247,7 @@
                 }
             }
 
+            // Render Biểu đồ KLT
             const chartEl = document.getElementById('klt-history-chart');
             const validHistory = kltHistory.filter(h => h.predicted !== null);
             
@@ -3342,8 +3279,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadMasterSessions();
             
-            const selector = document.getElementById
-            ('masterSessionSelector');
+            const selector = document.getElementById('masterSessionSelector');
             if(selector) {
                 selector.addEventListener('change', function(e) {
                     if (e.target.value && masterState.sessions[e.target.value]) {
