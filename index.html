@@ -3158,115 +3158,125 @@
            THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - MARKOV PATTERN MATCHING
            ========================================================================= */
 
-        function analyzeMarkovPattern(arr, type, baseSignal, isReverse, chartName) {
-            if (!arr || arr.length < 3) return { signal: null, score: 0, reason: `Chưa đủ dữ liệu (> 3 ván)` };
+function analyzeMarkovPattern(arr, type, baseSignal, isReverse, chartName) {
+    if (!arr || arr.length < 3) return { signal: null, score: 0, reason: `Chưa đủ dữ liệu (> 3 ván)` };
 
-            let lastChar = arr[arr.length - 1];
-            let streak = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] === lastChar) streak++;
-                else break;
+    let lastChar = arr[arr.length - 1];
+    let streak = 1;
+    for (let i = arr.length - 2; i >= 0; i--) {
+        if (arr[i] === lastChar) streak++;
+        else break;
+    }
+
+    let pingpong = 1;
+    for (let i = arr.length - 2; i >= 0; i--) {
+        if (arr[i] !== arr[i+1]) pingpong++;
+        else break;
+    }
+
+    let warning = "";
+    if (pingpong >= 5) warning = " (⚠️ 1-1 dài)";
+    if (streak >= 4) warning = " (⚠️ Bệt dài)";
+
+    let maxClusterSize = Math.min(arr.length - 1, 5); 
+    let bestMatch = null;
+    let highestScore = -1;
+
+    // [CẢI TIẾN 4] Ngưỡng tin cậy tối thiểu. Dưới mức này, KLT sẽ kiên quyết BỎ QUA để bảo toàn vốn.
+    const MIN_KLT_CONFIDENCE = 60; 
+
+    for (let size = 1; size <= maxClusterSize; size++) {
+        let currentCluster = arr.slice(-size).join('');
+        let nextPossibilities = [];
+        
+        // [CẢI TIẾN 3] Biến lưu trữ trọng số phân rã thời gian
+        let timeDecayBonus = 0; 
+
+        for (let i = 0; i <= arr.length - size - 1; i++) {
+            let pastCluster = arr.slice(i, i + size).join('');
+            if (pastCluster === currentCluster) {
+                nextPossibilities.push(arr[i + size]);
+                // Cộng điểm thưởng nếu mẫu này xuất hiện ở sát thời điểm hiện tại (cuối mảng)
+                timeDecayBonus += (i / arr.length) * 5; 
             }
-
-            let pingpong = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] !== arr[i+1]) pingpong++;
-                else break;
-            }
-
-            let warning = "";
-            if (pingpong >= 5) warning = " (⚠️ 1-1 dài)";
-            if (streak >= 4) warning = " (⚠️ Bệt dài)";
-
-            let maxClusterSize = Math.min(arr.length - 1, 5); 
-            let bestMatch = null;
-            let highestScore = -1;
-
-            for (let size = 1; size <= maxClusterSize; size++) {
-                let currentCluster = arr.slice(-size).join('');
-                let nextPossibilities = [];
-
-                for (let i = 0; i <= arr.length - size - 1; i++) {
-                    let pastCluster = arr.slice(i, i + size).join('');
-                    if (pastCluster === currentCluster) {
-                        nextPossibilities.push(arr[i + size]);
-                    }
-                }
-
-                if (nextPossibilities.length > 0) {
-                    let count1 = 0, count2 = 0;
-                    let val1 = type === 'DS' ? 'D' : 'P';
-                    let val2 = type === 'DS' ? 'S' : 'B';
-
-                    nextPossibilities.forEach(x => {
-                        if (x === val1) count1++;
-                        else if (x === val2) count2++;
-                    });
-
-                    let total = nextPossibilities.length;
-                    let rate1 = (count1 / total) * 100;
-                    let rate2 = (count2 / total) * 100;
-
-                    let predictRaw = null;
-                    let confidence = 0;
-
-                    if (rate1 === 100) { predictRaw = val1; confidence = 100; }
-                    else if (rate2 === 100) { predictRaw = val2; confidence = 100; }
-                    else if (rate1 >= 75) { predictRaw = val1; confidence = rate1; }
-                    else if (rate2 >= 75) { predictRaw = val2; confidence = rate2; }
-                    else if (total >= 2) {
-                        let lastTwo = nextPossibilities.slice(-2);
-                        if (lastTwo[0] === lastTwo[1]) {
-                            predictRaw = lastTwo[1];
-                            confidence = 55;
-                        }
-                    }
-
-                    if (predictRaw) {
-                        let score = confidence * total; 
-                        if (confidence === 55) score = 55;
-
-                        if (score > highestScore) {
-                            highestScore = score;
-                            let detailStr = "";
-                            if (confidence === 100) {
-                                detailStr = `Cụm [${currentCluster}]➜${predictRaw} 100% (${total}/${total})`;
-                            } else if (confidence === 55) {
-                                detailStr = `Cụm [${currentCluster}] 2 lần gần nhất ra ${predictRaw}`;
-                            } else {
-                                detailStr = `Cụm [${currentCluster}]➜${predictRaw} ${confidence.toFixed(0)}% (Từ ${total})`;
-                            }
-                            bestMatch = { cluster: currentCluster, predictRaw, confidence, detailStr, total, score };
-                        }
-                    }
-                }
-            }
-
-            if (!bestMatch) {
-                return { signal: null, score: 0, reason: `Chưa có cụm Markov đủ uy tín.` };
-            }
-
-            let finalPB = null;
-            if (type === 'PB') {
-                finalPB = bestMatch.predictRaw; 
-            } else {
-                if (!baseSignal) return { signal: null, score: 0, reason: `<span class="text-white">${bestMatch.detailStr}</span> (Thiếu lệnh nền).` };
-                
-                let targetDS = bestMatch.predictRaw; 
-                if (!isReverse) {
-                    finalPB = targetDS === 'D' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
-                } else {
-                    finalPB = targetDS === 'S' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
-                }
-            }
-
-            return { 
-                signal: finalPB, 
-                score: bestMatch.score,
-                reason: `<span class="text-white">${bestMatch.detailStr}</span> ➜ Chốt: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>${warning}` 
-            };
         }
 
+        if (nextPossibilities.length > 0) {
+            let count1 = 0, count2 = 0;
+            let val1 = type === 'DS' ? 'D' : 'P';
+            let val2 = type === 'DS' ? 'S' : 'B';
+
+            nextPossibilities.forEach(x => {
+                if (x === val1) count1++;
+                else if (x === val2) count2++;
+            });
+
+            let total = nextPossibilities.length;
+            let rate1 = (count1 / total) * 100;
+            let rate2 = (count2 / total) * 100;
+
+            let predictRaw = null;
+            let confidence = 0;
+
+            if (rate1 === 100) { predictRaw = val1; confidence = 100; }
+            else if (rate2 === 100) { predictRaw = val2; confidence = 100; }
+            else if (rate1 >= 75) { predictRaw = val1; confidence = rate1; }
+            else if (rate2 >= 75) { predictRaw = val2; confidence = rate2; }
+            else if (total >= 2) {
+                let lastTwo = nextPossibilities.slice(-2);
+                if (lastTwo[0] === lastTwo[1]) {
+                    predictRaw = lastTwo[1];
+                    // Thay thế mức 55% cứng nhắc bằng tham số cấu hình
+                    confidence = MIN_KLT_CONFIDENCE; 
+                }
+            }
+
+            if (predictRaw && confidence >= MIN_KLT_CONFIDENCE) {
+                // [CẢI TIẾN 1 & 2] Áp dụng Logarit để cân bằng giữa Tỉ lệ trúng và Số lần xuất hiện, cộng thêm hệ số Time Decay
+                let score = (confidence * 10) + (Math.log10(total > 0 ? total : 1) * 100) + timeDecayBonus;
+
+                if (score > highestScore) {
+                    highestScore = score;
+                    let detailStr = "";
+                    if (confidence === 100) {
+                        detailStr = `Cụm [${currentCluster}]➜${predictRaw} 100% (${total}/${total})`;
+                    } else if (confidence === MIN_KLT_CONFIDENCE) {
+                        detailStr = `Cụm [${currentCluster}] 2 lần gần nhất ra ${predictRaw}`;
+                    } else {
+                        detailStr = `Cụm [${currentCluster}]➜${predictRaw} ${confidence.toFixed(0)}% (Từ ${total})`;
+                    }
+                    bestMatch = { cluster: currentCluster, predictRaw, confidence, detailStr, total, score };
+                }
+            }
+        }
+    }
+
+    if (!bestMatch) {
+        return { signal: null, score: 0, reason: `Chưa có cụm mẫu nào đạt độ tin cậy (> ${MIN_KLT_CONFIDENCE}%).` };
+    }
+
+    let finalPB = null;
+    if (type === 'PB') {
+        finalPB = bestMatch.predictRaw; 
+    } else {
+        if (!baseSignal) return { signal: null, score: 0, reason: `<span class="text-white">${bestMatch.detailStr}</span> (Thiếu lệnh nền).` };
+        
+        let targetDS = bestMatch.predictRaw; 
+        
+        // Cốt lõi logic: Kết quả 'S' bắt buộc phải đảo ngược lệnh nền (P -> B, B -> P)
+        if (!isReverse) {
+            finalPB = targetDS === 'D' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
+        } else {
+            finalPB = targetDS === 'S' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
+        }
+    }
+
+    return { 
+        signal: finalPB, 
+        score: bestMatch.score,
+        reason: `<span class="text-white">${bestMatch.detailStr}</span> ➜ Chốt: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>${warning}` 
+    };
+}
         function calculateKLT() {
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
