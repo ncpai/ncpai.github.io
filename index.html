@@ -1446,6 +1446,7 @@
             if (ht1VerdictRaw.includes('P')) baseSignal = 'P';
             else if (ht1VerdictRaw.includes('B')) baseSignal = 'B';
 
+            // User Correction Override: "Không phải đâu cứ ngược là S"
             if (ht1VerdictRaw.includes('NGƯỢC')) { impliedResult = 'S'; }
 
             if (!baseSignal) {
@@ -1464,6 +1465,7 @@
             let impliedText = impliedResult === 'S' ? 'CỘT ĐỎ (NGƯỢC)' : 'CỘT XANH (THEO)';
             let actionText = bestMatch.target === impliedResult ? 'GIỮ NGUYÊN' : 'BẺ NGƯỢC';
 
+            // User Correction Override: Absolute removal of N-Gram AI keywords
             let synthesisHtml = `
                 <div class="mt-4 bg-gray-800 p-4 rounded-xl border border-gray-600 text-sm shadow-inner">
                     <div class="font-black text-yellow-300 mb-3 uppercase text-center flex items-center justify-center gap-2">
@@ -1657,7 +1659,7 @@
 
                     if (pCount > bCount) {
                         prediction = 'P'; 
-                        reason = `Dựa vào Tần suất quá quá khứ nghiêng về P (${rateP}%).`;
+                        reason = `Dựa vào Tần suất quá khứ nghiêng về P (${rateP}%).`;
                     } else if (bCount > pCount) {
                         prediction = 'B'; 
                         reason = `Dựa vào Tần suất quá khứ nghiêng về B (${rateB}%).`;
@@ -3158,10 +3160,13 @@
            THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - MARKOV PATTERN MATCHING
            ========================================================================= */
 
+        // Hàm phân tích cụm Markov và Bộ lọc dớp (BẢN CẬP NHẬT: TÌM CỤM UY TÍN NHẤT)
         function analyzeMarkovPattern(arr, type, baseSignal, isReverse, chartName) {
-            if (!arr || arr.length < 3) return { signal: null, score: 0, reason: `Chưa đủ dữ liệu (> 3 ván)` };
+            if (!arr || arr.length < 3) return { signal: null, reason: `Chưa đủ dữ liệu (Cần > 3 ván)` };
 
+            // 1. KIỂM TRA BỘ LỌC DỚP (Tránh các tay rủi ro cao)
             let lastChar = arr[arr.length - 1];
+            
             let streak = 1;
             for (let i = arr.length - 2; i >= 0; i--) {
                 if (arr[i] === lastChar) streak++;
@@ -3174,18 +3179,24 @@
                 else break;
             }
 
-            let warning = "";
-            if (pingpong >= 5) warning = " (⚠️ 1-1 dài)";
-            if (streak >= 4) warning = " (⚠️ Bệt dài)";
+            // Luật từ chối tín hiệu rủi ro (Theo yêu cầu: DD/SS lần 2 trở đi, 1-1 dài)
+            if (pingpong >= 5) {
+                return { signal: null, reason: `Từ chối: Cầu 1-1 đã kéo dài ${pingpong} nhịp (Dễ bẻ).` };
+            }
+            if (streak >= 4) { 
+                return { signal: null, reason: `Từ chối: Bệt ${lastChar} đã kéo dài ${streak} nhịp (Rủi ro gãy).` };
+            }
 
+            // 2. PHÂN TÍCH MARKOV: CHẤM ĐIỂM TÌM CỤM UY TÍN NHẤT
             let maxClusterSize = Math.min(arr.length - 1, 5); 
             let bestMatch = null;
-            let highestScore = -1;
+            let highestScore = -1; // Điểm số = Tỷ lệ % x Số lần lặp lại
 
             for (let size = 1; size <= maxClusterSize; size++) {
                 let currentCluster = arr.slice(-size).join('');
                 let nextPossibilities = [];
 
+                // Quét lại lịch sử xem cụm này từng ra gì tiếp theo
                 for (let i = 0; i <= arr.length - size - 1; i++) {
                     let pastCluster = arr.slice(i, i + size).join('');
                     if (pastCluster === currentCluster) {
@@ -3215,6 +3226,7 @@
                     else if (rate1 >= 75) { predictRaw = val1; confidence = rate1; }
                     else if (rate2 >= 75) { predictRaw = val2; confidence = rate2; }
                     else if (total >= 2) {
+                        // Xử lý trường hợp 50-50: Bắt nhịp 2 lần gần nhất
                         let lastTwo = nextPossibilities.slice(-2);
                         if (lastTwo[0] === lastTwo[1]) {
                             predictRaw = lastTwo[1];
@@ -3223,34 +3235,40 @@
                     }
 
                     if (predictRaw) {
+                        // TÍNH ĐIỂM TIN CẬY: Một mẫu 100% lặp 3 lần (300 điểm) sẽ "đè chết" mẫu 100% lặp 1 lần (100 điểm)
                         let score = confidence * total; 
+                        
+                        // Giảm trọng số của cụm 50-50 để không cạnh tranh với cụm chuẩn
                         if (confidence === 55) score = 55;
 
                         if (score > highestScore) {
                             highestScore = score;
                             let detailStr = "";
+                            
                             if (confidence === 100) {
-                                detailStr = `Cụm [${currentCluster}]➜${predictRaw} 100% (${total}/${total})`;
+                                detailStr = `Cụm ${currentCluster}->${predictRaw} 100% (${total}/${total} lần)`;
                             } else if (confidence === 55) {
-                                detailStr = `Cụm [${currentCluster}] 2 lần gần nhất ra ${predictRaw}`;
+                                detailStr = `Cụm ${currentCluster} tỷ lệ thấp, nhưng 2 lần gần nhất đều ra ${predictRaw}`;
                             } else {
-                                detailStr = `Cụm [${currentCluster}]➜${predictRaw} ${confidence.toFixed(0)}% (Từ ${total})`;
+                                detailStr = `Cụm ${currentCluster}->${predictRaw} ${confidence.toFixed(0)}% (Từ ${total} lần)`;
                             }
-                            bestMatch = { cluster: currentCluster, predictRaw, confidence, detailStr, total, score };
+                            
+                            bestMatch = { cluster: currentCluster, predictRaw, confidence, detailStr, total };
                         }
                     }
                 }
             }
 
             if (!bestMatch) {
-                return { signal: null, score: 0, reason: `Chưa có cụm Markov đủ uy tín.` };
+                return { signal: null, reason: `Chưa có cụm quy luật rõ ràng (Tỷ lệ thấp).` };
             }
 
+            // 3. CHUYỂN ĐỔI TÍN HIỆU RA P/B
             let finalPB = null;
             if (type === 'PB') {
                 finalPB = bestMatch.predictRaw; 
             } else {
-                if (!baseSignal) return { signal: null, score: 0, reason: `<span class="text-white">${bestMatch.detailStr}</span> (Thiếu lệnh nền).` };
+                if (!baseSignal) return { signal: null, reason: `<span class="text-white">${bestMatch.detailStr}</span> nhưng thiếu lệnh nền để chốt.` };
                 
                 let targetDS = bestMatch.predictRaw; 
                 if (!isReverse) {
@@ -3262,8 +3280,7 @@
 
             return { 
                 signal: finalPB, 
-                score: bestMatch.score,
-                reason: `<span class="text-white">${bestMatch.detailStr}</span> ➜ Chốt: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>${warning}` 
+                reason: `<span class="text-white">${bestMatch.detailStr}</span> ➜ Lệnh: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>` 
             };
         }
 
@@ -3271,29 +3288,37 @@
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
 
+            // --- CHUẨN BỊ DỮ LIỆU TỪ 6 BIỂU ĐỒ ---
+            // 1. Big Road (PB)
             const arrBR = session.history || [];
-            
+
+            // 2. HT1 (DS)
             const ht1Details = masterState.systemDetails.ht1;
             const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht1BaseVerdict = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
             let ht1Base = ht1BaseVerdict.includes('P') ? 'P' : (ht1BaseVerdict.includes('B') ? 'B' : null);
             let ht1Rev = ht1BaseVerdict.includes('NGƯỢC');
 
+            // 3. HT4 (DS)
             const ht4Details = masterState.systemDetails.ht4;
             const arrHT4 = ht4Details && ht4Details.intervalHistory ? ht4Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht4BaseVerdict = ht4Details && ht4Details.verdict ? ht4Details.verdict.toUpperCase().trim() : '';
             let ht4Base = ht4BaseVerdict.includes('P') ? 'P' : (ht4BaseVerdict.includes('B') ? 'B' : null);
             let ht4Rev = ht4BaseVerdict.includes('NGƯỢC');
 
+            // 4. GE (DS)
             const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
             const geBase = masterState.currentGePrediction;
 
+            // 5. SGE (DS)
             const arrSGE = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
             const sgeBase = masterState.currentSgePending ? masterState.currentSgePending.prediction : null;
 
+            // 6. KLC (DS)
             const arrKLC = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
             const klcBase = masterState.currentKlcPrediction;
 
+            // --- PHÂN TÍCH MARKOV CHO TỪNG BIỂU ĐỒ ---
             const evalBR = analyzeMarkovPattern(arrBR, 'PB', null, false, 'BIGROAD');
             const evalHT1 = analyzeMarkovPattern(arrHT1, 'DS', ht1Base, ht1Rev, 'HT1');
             const evalHT4 = analyzeMarkovPattern(arrHT4, 'DS', ht4Base, ht4Rev, 'HT4');
@@ -3310,60 +3335,58 @@
                 { name: 'KLC', res: evalKLC }
             ];
 
-            let scoreP = 0;
-            let scoreB = 0;
+            // --- ĐẾM SỐ LƯỢNG ĐỒNG THUẬN TỪ NHỮNG TÍN HIỆU ĐÁNG TIN CẬY ---
+            let countP = 0;
+            let countB = 0;
             let validSignalsCount = 0;
 
             evaluations.forEach(ev => {
-                if (ev.res.signal === 'P') { scoreP += ev.res.score; validSignalsCount++; }
-                if (ev.res.signal === 'B') { scoreB += ev.res.score; validSignalsCount++; }
+                if (ev.res.signal === 'P') { countP++; validSignalsCount++; }
+                if (ev.res.signal === 'B') { countB++; validSignalsCount++; }
             });
 
             let finalPrediction = null;
             let finalReasonText = "";
 
             if (validSignalsCount === 0) {
-                finalReasonText = "Không có bất kỳ biểu đồ nào tìm thấy quy luật. Hệ thống chờ thêm tín hiệu.";
-            } else if (scoreP > scoreB) {
+                finalReasonText = "Tất cả các biểu đồ đều rơi vào trạng thái rủi ro (Bệt dài/Ping-pong) hoặc không có quy luật Markov. Khuyên BỎ QUA.";
+            } else if (countP > countB && countB === 0) {
                 finalPrediction = 'P';
-                finalReasonText = `Ưu tiên PLAYER: Tổng điểm ${scoreP.toFixed(0)} áp đảo BANKER (${scoreB.toFixed(0)} đ).`;
-            } else if (scoreB > scoreP) {
+                finalReasonText = `Đồng thuận PLAYER từ ${countP} biểu đồ có quy luật chuẩn.`;
+            } else if (countB > countP && countP === 0) {
                 finalPrediction = 'B';
-                finalReasonText = `Ưu tiên BANKER: Tổng điểm ${scoreB.toFixed(0)} áp đảo PLAYER (${scoreP.toFixed(0)} đ).`;
+                finalReasonText = `Đồng thuận BANKER từ ${countB} biểu đồ có quy luật chuẩn.`;
             } else {
-                if (evalBR.res.signal) {
-                    finalPrediction = evalBR.res.signal;
-                    finalReasonText = `Điểm hòa (P:${scoreP.toFixed(0)} = B:${scoreB.toFixed(0)}). KLT chốt lệnh theo Big Road (${finalPrediction}).`;
-                } else {
-                    finalPrediction = 'BỎ QUA';
-                    finalReasonText = `Xung đột tín hiệu ngang bằng và Big Road không có quy luật.`;
-                }
+                finalReasonText = `Xung đột tín hiệu chắc chắn (P:${countP} - B:${countB}). Hệ thống tự động huỷ bỏ lệnh để bảo toàn vốn.`;
             }
 
             masterState.currentKltPrediction = finalPrediction;
-            const currentStateStr = `${validSignalsCount} Biểu đồ có quy luật`;
+            
+            // Tích luỹ lịch sử
+            const currentStateStr = `${validSignalsCount} Biểu đồ đạt chuẩn`;
             masterState.currentKltState = currentStateStr;
 
+            // --- TẠO GIAO DIỆN HIỂN THỊ CHI TIẾT ---
             let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-left w-full">`;
             evaluations.forEach(ev => {
-                let statusColor = ev.res.signal ? (ev.res.signal === 'P' ? 'border-blue-500/50 bg-blue-900/20 hover:border-blue-400' : 'border-red-500/50 bg-red-900/20 hover:border-red-400') : 'border-gray-600 bg-gray-800/50 hover:border-yellow-400';
-                let badge = ev.res.signal ? `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-900 ${ev.res.signal === 'P' ? 'text-blue-400' : 'text-red-400'}">${ev.res.signal} (${ev.res.score.toFixed(0)}đ)</span>` : `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-700 text-gray-400">BỎ QUA</span>`;
+                let statusColor = ev.res.signal ? (ev.res.signal === 'P' ? 'border-blue-500/50 bg-blue-900/20' : 'border-red-500/50 bg-red-900/20') : 'border-gray-600 bg-gray-800/50';
+                let badge = ev.res.signal ? `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-900 ${ev.res.signal === 'P' ? 'text-blue-400' : 'text-red-400'}">${ev.res.signal}</span>` : `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-700 text-gray-400">BỎ QUA</span>`;
                 
                 detailsHtml += `
-                    <div class="p-3 rounded-lg border ${statusColor} text-sm cursor-pointer transition-colors relative" onclick="toggleKltSubChart('${ev.name}')">
+                    <div class="p-3 rounded-lg border ${statusColor} text-sm">
                         <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-1">
                             <span class="font-bold text-gray-300 uppercase">${ev.name}</span>
                             ${badge}
                         </div>
                         <div class="text-gray-400 mt-1">${ev.res.reason}</div>
-                        <div id="klt-subchart-${ev.name}" class="mt-2 hidden bg-black/60 p-2 rounded border border-gray-600 h-14 overflow-x-auto flex items-end gap-[2px] custom-scrollbar"></div>
-                        <div class="absolute top-1 right-24 text-[10px] text-gray-500 italic">Bấm xem biểu đồ</div>
                     </div>
                 `;
             });
             detailsHtml += `</div>`;
 
             if (!session.kltHistory) session.kltHistory = [];
+            
+            // Render
             renderKltUI(currentStateStr, finalPrediction, finalReasonText, detailsHtml, session.kltHistory);
         }
 
@@ -3373,31 +3396,18 @@
             const decEl = document.getElementById('klt-final-decision');
             const accEl = document.getElementById('klt-overall-accuracy');
 
-            const existingPanel = document.getElementById('klt-details-panel');
-            const isPanelOpen = existingPanel && !existingPanel.classList.contains('hidden');
-
             if (stateEl) stateEl.textContent = currentState;
             
             if (concEl) {
                 concEl.innerHTML = `
-                    <div class="text-white">${reason}</div>
-                    <button onclick="toggleGlobalKltDetails()" class="mt-2 text-xs bg-cyan-900/50 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-1 rounded transition-colors w-full text-center font-bold">
-                        👁️ BẬT / TẮT CHI TIẾT TỪNG BIỂU ĐỒ (MARKOV)
+                    <div>${reason}</div>
+                    <button onclick="document.getElementById('klt-details-panel').classList.toggle('hidden')" class="mt-2 text-xs bg-cyan-900/50 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-1 rounded transition-colors w-full text-center font-bold">
+                        👁️ XEM CHI TIẾT TỪNG BIỂU ĐỒ (MARKOV)
                     </button>
-                    <div id="klt-details-panel" class="${isPanelOpen ? '' : 'hidden'} w-full transition-all duration-300">
+                    <div id="klt-details-panel" class="hidden w-full transition-all duration-300">
                         ${detailsHtml}
                     </div>
                 `;
-                
-                if (isPanelOpen && window.openSubCharts) {
-                    window.openSubCharts.forEach(name => {
-                        const chartDiv = document.getElementById(`klt-subchart-${name}`);
-                        if (chartDiv) {
-                            chartDiv.classList.remove('hidden');
-                            renderMiniKltChart(name, chartDiv);
-                        }
-                    });
-                }
             }
 
             if (decEl) {
@@ -3413,6 +3423,7 @@
                 }
             }
 
+            // Render Biểu đồ KLT
             const chartEl = document.getElementById('klt-history-chart');
             const validHistory = (kltHistory || []).filter(h => h.predicted !== null);
             
@@ -3438,61 +3449,6 @@
                 chartEl.innerHTML = '<p class="text-gray-600 text-xs w-full text-center h-full flex items-center justify-center">Đang tích lũy...</p>';
                 if (accEl) accEl.textContent = '0%';
             }
-        }
-
-        window.openSubCharts = new Set(); 
-
-        function toggleGlobalKltDetails() {
-            const p = document.getElementById('klt-details-panel');
-            if (p) p.classList.toggle('hidden');
-        }
-
-        function toggleKltSubChart(chartName) {
-            const chartDiv = document.getElementById(`klt-subchart-${chartName}`);
-            if (!chartDiv) return;
-
-            if (!chartDiv.classList.contains('hidden')) {
-                chartDiv.classList.add('hidden');
-                window.openSubCharts.delete(chartName);
-                return;
-            }
-            
-            chartDiv.classList.remove('hidden');
-            window.openSubCharts.add(chartName);
-            renderMiniKltChart(chartName, chartDiv);
-        }
-
-        function renderMiniKltChart(chartName, targetDiv) {
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session) return;
-
-            let arr = [];
-            if (chartName === 'BIGROAD') arr = session.history || [];
-            else if (chartName === 'HT1') arr = masterState.systemDetails.ht1?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
-            else if (chartName === 'HT4') arr = masterState.systemDetails.ht4?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
-            else if (chartName === 'GE') arr = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
-            else if (chartName === 'SGE') arr = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
-            else if (chartName === 'KLC') arr = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
-
-            if (arr.length === 0) {
-                 targetDiv.innerHTML = '<span class="text-xs text-gray-500 w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu</span>';
-                 return;
-            }
-
-            let html = '';
-            arr.slice(-40).forEach(val => { 
-                if (chartName === 'BIGROAD') {
-                    const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_3px_rgba(59,130,246,0.5)]' : 'bg-red-500 shadow-[0_0_3px_rgba(239,68,68,0.5)]';
-                    html += `<div class="w-[14px] h-[14px] flex-shrink-0 rounded-full ${color} text-[8px] flex items-center justify-center text-white font-bold border border-white/20 mb-1">${val}</div>`;
-                } else {
-                    const color = val === 'D' ? 'bg-green-500 shadow-[0_0_2px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_2px_rgba(239,68,68,0.5)]';
-                    const h = val === 'D' ? 'h-full' : 'h-1/3';
-                    html += `<div class="w-1.5 flex-shrink-0 rounded-[1px] ${color} ${h}"></div>`;
-                }
-            });
-            
-            targetDiv.innerHTML = html;
-            targetDiv.scrollLeft = targetDiv.scrollWidth;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
