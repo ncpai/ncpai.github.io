@@ -245,25 +245,23 @@
         <div class="absolute -bottom-2 bg-gray-800 text-[8px] text-yellow-400 px-2 rounded-full border border-gray-600 font-bold">Bấm để Cài đặt</div>
     </div>
 
-    <div class="fixed bottom-6 right-[110px] z-[200] flex flex-col items-center gap-4">
-        <button onclick="undoLastAll()" class="w-[60px] h-[60px] bg-gray-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(75,85,99,0.5)] hover:bg-gray-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Hoàn Tác Tín Hiệu Gần Nhất">
-            ↩️
-        </button>
-        <a href="#klt-section" class="w-[72px] h-[72px] bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full text-white font-black shadow-[0_0_20px_rgba(6,182,212,0.6)] border-2 border-cyan-300 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-xl select-none" title="Tới Kết Luận Tổng (KLT)">
-            KLT
-        </a>
-    </div>
-
-    <div class="fixed bottom-6 right-6 z-[200] flex flex-col items-center gap-4">
-        <div id="fab-menu" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom">
-            <a href="#ht1-chart-section" class="w-[60px] h-[60px] bg-indigo-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới biểu đồ HT1">HT1</a>
-            <a href="#input-section" class="w-[60px] h-[60px] bg-gray-700 rounded-full text-white font-bold shadow-[0_0_15px_rgba(55,65,81,0.5)] hover:bg-gray-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Lên chỗ Nhập">⬆️</a>
-            <button onclick="addResultToAll('P')" class="w-[60px] h-[60px] bg-blue-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(37,99,235,0.6)] hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập PLAYER (P)">P</button>
-            <button onclick="addResultToAll('B')" class="w-[60px] h-[60px] bg-red-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(239,68,68,0.6)] hover:bg-red-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập BANKER (B)">B</button>
+    <div class="fixed bottom-6 right-6 z-[200] flex items-end gap-4">
+        <div id="fab-menu-left" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom mb-[88px]">
+            <a href="#klt-section" class="w-[60px] h-[60px] bg-teal-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(13,148,136,0.5)] hover:bg-teal-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới KLT">KLT</a>
+            <button onclick="undoLastAll()" class="w-[60px] h-[60px] bg-gray-600 rounded-full text-white font-bold shadow-[0_0_15px_rgba(75,85,99,0.5)] hover:bg-gray-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Hoàn Tác">↩️</button>
         </div>
-        <button onclick="toggleFAB()" id="fab-main-btn" class="w-[72px] h-[72px] bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full text-black font-black shadow-[0_0_25px_rgba(202,138,4,0.7)] hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center transform z-10 select-none">
-            <svg id="fab-icon" class="w-10 h-10 transition-transform duration-500 ease-out" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-        </button>
+
+        <div class="flex flex-col items-center gap-4">
+            <div id="fab-menu" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom">
+                <a href="#ht1-chart-section" class="w-[60px] h-[60px] bg-indigo-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới biểu đồ HT1">HT1</a>
+                <a href="#input-section" class="w-[60px] h-[60px] bg-gray-700 rounded-full text-white font-bold shadow-[0_0_15px_rgba(55,65,81,0.5)] hover:bg-gray-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Lên chỗ Nhập">⬆️</a>
+                <button onclick="addResultToAll('P')" class="w-[60px] h-[60px] bg-blue-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(37,99,235,0.6)] hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập PLAYER (P)">P</button>
+                <button onclick="addResultToAll('B')" class="w-[60px] h-[60px] bg-red-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(239,68,68,0.6)] hover:bg-red-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập BANKER (B)">B</button>
+            </div>
+            <button onclick="toggleFAB()" id="fab-main-btn" class="w-[72px] h-[72px] bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full text-black font-black shadow-[0_0_25px_rgba(202,138,4,0.7)] hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center transform z-10 select-none">
+                <svg id="fab-icon" class="w-10 h-10 transition-transform duration-500 ease-out" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            </button>
+        </div>
     </div>
 
     <div id="pattern-db-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
@@ -1011,15 +1009,18 @@
 
         function toggleFAB() {
             const menu = document.getElementById('fab-menu');
+            const menuLeft = document.getElementById('fab-menu-left');
             const icon = document.getElementById('fab-icon');
             if (!menu || !icon) return;
             const isClosed = menu.classList.contains('opacity-0');
             
             if (isClosed) {
                 menu.classList.remove('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
+                if (menuLeft) menuLeft.classList.remove('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
                 icon.classList.add('rotate-[135deg]'); 
             } else {
                 menu.classList.add('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
+                if (menuLeft) menuLeft.classList.add('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
                 icon.classList.remove('rotate-[135deg]');
             }
         }
@@ -1454,6 +1455,7 @@
             if (ht1VerdictRaw.includes('P')) baseSignal = 'P';
             else if (ht1VerdictRaw.includes('B')) baseSignal = 'B';
 
+            // User Correction Override: "Không phải đâu cứ ngược là S"
             if (ht1VerdictRaw.includes('NGƯỢC')) { impliedResult = 'S'; }
 
             if (!baseSignal) {
@@ -1472,6 +1474,7 @@
             let impliedText = impliedResult === 'S' ? 'CỘT ĐỎ (NGƯỢC)' : 'CỘT XANH (THEO)';
             let actionText = bestMatch.target === impliedResult ? 'GIỮ NGUYÊN' : 'BẺ NGƯỢC';
 
+            // User Correction Override: Absolute removal of N-Gram AI keywords
             let synthesisHtml = `
                 <div class="mt-4 bg-gray-800 p-4 rounded-xl border border-gray-600 text-sm shadow-inner">
                     <div class="font-black text-yellow-300 mb-3 uppercase text-center flex items-center justify-center gap-2">
@@ -3163,10 +3166,10 @@
         }
 
         /* =========================================================================
-           THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - MARKOV PATTERN MATCHING
+           THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - MARKOV PATTERN MATCHING & TRỰC QUAN HOÁ
            ========================================================================= */
 
-        // BIẾN TRẠNG THÁI VÀ HÀM ĐIỀU KHIỂN CHI TIẾT KLT
+        // Biến lưu trạng thái bảng KLT (Chống tự đóng)
         let isKltDetailsOpen = false;
 
         function toggleKltDetails() {
@@ -3178,28 +3181,23 @@
             }
         }
 
-        function scrollToSectionAndHighlight(targetId) {
-            // Xử lý riêng cho KLC vì nó là bảng nổi (Floating Panel)
-            if (targetId === 'KLC') {
-                const klcPanel = document.getElementById('klc-floating-panel');
-                if (klcPanel && klcPanel.classList.contains('hidden')) {
-                    toggleKLCPanel();
+        // Sinh HTML cho biểu đồ xem trực tiếp bên trong chi tiết KLT
+        function generateKltMiniChartHtml(arr, type) {
+            if (!arr || arr.length === 0) return '<div class="text-xs text-center text-gray-500 italic py-2">Chưa có dữ liệu</div>';
+            let html = '<div class="flex items-end justify-start h-8 gap-[2px] overflow-x-auto custom-scrollbar pb-1 min-w-max">';
+            const displayArr = arr.slice(-35); // Hiển thị 35 ván gần nhất
+            displayArr.forEach(val => {
+                if (type === 'PB') {
+                    const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_5px_rgba(59,130,246,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
+                    html += `<div class="w-4 h-4 rounded-full ${color} flex-shrink-0 flex items-center justify-center text-[8px] text-white font-black">${val}</div>`;
+                } else {
+                    const bg = val === 'D' ? 'bg-green-500' : 'bg-red-500';
+                    const h = val === 'D' ? 'h-full' : 'h-1/3';
+                    html += `<div class="w-[5px] flex-shrink-0 rounded-[1px] ${bg} ${h}"></div>`;
                 }
-                return;
-            }
-
-            const el = document.getElementById(targetId);
-            if (el) {
-                // Trượt mượt mà đến vị trí biểu đồ
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Tạo hiệu ứng nháy sáng (Highlight) để dễ nhận biết
-                const oldBoxShadow = el.style.boxShadow;
-                el.style.boxShadow = '0 0 40px rgba(6,182,212,1)';
-                setTimeout(() => {
-                    el.style.boxShadow = oldBoxShadow;
-                }, 1500);
-            }
+            });
+            html += '</div>';
+            return html;
         }
 
         // Hàm phân tích cụm Markov và Bộ lọc dớp
@@ -3221,7 +3219,7 @@
                 else break;
             }
 
-            // Luật từ chối tín hiệu rủi ro
+            // Luật từ chối tín hiệu rủi ro (Theo yêu cầu: DD/SS lần 2 trở đi, 1-1 dài)
             if (pingpong >= 5) {
                 return { signal: null, reason: `Từ chối: Cầu 1-1 đã kéo dài ${pingpong} nhịp (Dễ bẻ).` };
             }
@@ -3277,10 +3275,10 @@
                     }
 
                     if (predictRaw) {
-                        // TÍNH ĐIỂM TIN CẬY
+                        // TÍNH ĐIỂM TIN CẬY: Một mẫu 100% lặp 3 lần (300 điểm) sẽ "đè chết" mẫu 100% lặp 1 lần (100 điểm)
                         let score = confidence * total; 
                         
-                        // Giảm trọng số của cụm 50-50
+                        // Giảm trọng số của cụm 50-50 để không cạnh tranh với cụm chuẩn
                         if (confidence === 55) score = 55;
 
                         if (score > highestScore) {
@@ -3368,13 +3366,14 @@
             const evalSGE = analyzeMarkovPattern(arrSGE, 'DS', sgeBase, false, 'SGE');
             const evalKLC = analyzeMarkovPattern(arrKLC, 'DS', klcBase, false, 'KLC');
 
+            // Kèm mảng dữ liệu gốc và kiểu để làm mini-chart
             const evaluations = [
-                { name: 'BIGROAD', res: evalBR },
-                { name: 'HT1', res: evalHT1 },
-                { name: 'HT4', res: evalHT4 },
-                { name: 'GE', res: evalGE },
-                { name: 'SGE', res: evalSGE },
-                { name: 'KLC', res: evalKLC }
+                { name: 'BIGROAD', res: evalBR, arr: arrBR, type: 'PB' },
+                { name: 'HT1', res: evalHT1, arr: arrHT1, type: 'DS' },
+                { name: 'HT4', res: evalHT4, arr: arrHT4, type: 'DS' },
+                { name: 'GE', res: evalGE, arr: arrGE, type: 'DS' },
+                { name: 'SGE', res: evalSGE, arr: arrSGE, type: 'DS' },
+                { name: 'KLC', res: evalKLC, arr: arrKLC, type: 'DS' }
             ];
 
             // --- ĐẾM SỐ LƯỢNG ĐỒNG THUẬN TỪ NHỮNG TÍN HIỆU ĐÁNG TIN CẬY ---
@@ -3408,26 +3407,27 @@
             const currentStateStr = `${validSignalsCount} Biểu đồ đạt chuẩn`;
             masterState.currentKltState = currentStateStr;
 
-            // --- TẠO GIAO DIỆN HIỂN THỊ CHI TIẾT ---
+            // --- TẠO GIAO DIỆN HIỂN THỊ CHI TIẾT KÈM BIỂU ĐỒ TRỰC TIẾP ---
             let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-left w-full">`;
             evaluations.forEach(ev => {
-                let statusColor = ev.res.signal ? (ev.res.signal === 'P' ? 'border-blue-500/50 bg-blue-900/20 hover:bg-blue-900/40' : 'border-red-500/50 bg-red-900/20 hover:bg-red-900/40') : 'border-gray-600 bg-gray-800/50 hover:bg-gray-700/50';
+                let statusColor = ev.res.signal ? (ev.res.signal === 'P' ? 'border-blue-500/50 bg-blue-900/20' : 'border-red-500/50 bg-red-900/20') : 'border-gray-600 bg-gray-800/50';
                 let badge = ev.res.signal ? `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-900 ${ev.res.signal === 'P' ? 'text-blue-400' : 'text-red-400'}">${ev.res.signal}</span>` : `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-700 text-gray-400">BỎ QUA</span>`;
                 
-                let targetId = '';
-                if (ev.name === 'BIGROAD' || ev.name === 'SGE') targetId = 'sge-panel';
-                else if (ev.name === 'HT1') targetId = 'ht1-chart-section';
-                else if (ev.name === 'HT4') targetId = 'ht4-frame';
-                else if (ev.name === 'GE') targetId = 'ge-section';
-                else if (ev.name === 'KLC') targetId = 'KLC';
+                let miniChart = generateKltMiniChartHtml(ev.arr, ev.type);
 
                 detailsHtml += `
-                    <div onclick="scrollToSectionAndHighlight('${targetId}')" class="p-3 rounded-lg border ${statusColor} text-sm cursor-pointer transition-all active:scale-95 shadow-sm hover:shadow-md">
-                        <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-1 pointer-events-none">
+                    <div class="p-3 rounded-lg border ${statusColor} text-sm cursor-pointer hover:bg-gray-700/50 transition-colors" onclick="this.querySelector('.klt-mini-chart').classList.toggle('hidden')">
+                        <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-1">
                             <span class="font-bold text-gray-300 uppercase">${ev.name}</span>
-                            ${badge}
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-yellow-300 italic animate-pulse">Nhấn xem biểu đồ</span>
+                                ${badge}
+                            </div>
                         </div>
-                        <div class="text-gray-400 mt-1 pointer-events-none">${ev.res.reason}</div>
+                        <div class="text-gray-400 mt-1">${ev.res.reason}</div>
+                        <div class="klt-mini-chart hidden mt-3 bg-black/60 p-2 rounded border border-gray-700 shadow-inner">
+                            ${miniChart}
+                        </div>
                     </div>
                 `;
             });
@@ -3448,14 +3448,12 @@
             if (stateEl) stateEl.textContent = currentState;
             
             if (concEl) {
-                const panelClass = isKltDetailsOpen ? "" : "hidden";
-                
                 concEl.innerHTML = `
                     <div>${reason}</div>
-                    <button onclick="toggleKltDetails()" class="mt-2 text-xs bg-cyan-900/50 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-1 rounded transition-colors w-full text-center font-bold shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-                        👁️ XEM CHI TIẾT TỪNG BIỂU ĐỒ (MARKOV)
+                    <button onclick="toggleKltDetails()" class="mt-2 text-xs bg-cyan-900/50 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-1 rounded transition-colors w-full text-center font-bold">
+                        👁️ CHI TIẾT TỪNG BIỂU ĐỒ (MỞ/ĐÓNG)
                     </button>
-                    <div id="klt-details-panel" class="${panelClass} w-full transition-all duration-300">
+                    <div id="klt-details-panel" class="${isKltDetailsOpen ? '' : 'hidden'} w-full transition-all duration-300">
                         ${detailsHtml}
                     </div>
                 `;
