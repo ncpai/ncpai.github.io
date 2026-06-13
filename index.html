@@ -1310,6 +1310,14 @@
             currentKltPrediction: null
         };
 
+        const parseBaseSignal = (verdictRaw) => {
+            if (!verdictRaw) return null;
+            if (verdictRaw.includes('BỎ QUA')) return null;
+            if (verdictRaw.match(/\bP\b/) || verdictRaw.includes('PLAYER')) return 'P';
+            if (verdictRaw.match(/\bB\b/) || verdictRaw.includes('BANKER')) return 'B';
+            return null;
+        };
+
         let gameAccuracyChart = null;
         let currentChartSystem = 'ht1';
 
@@ -1450,11 +1458,8 @@
             const bestMatch = allMatches.reduce((prev, current) => (prev.score > current.score) ? prev : current);
 
             const ht1VerdictRaw = ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
-            let baseSignal = null;
+            let baseSignal = parseBaseSignal(ht1VerdictRaw);
             let impliedResult = 'D'; 
-
-            if (ht1VerdictRaw.includes('P')) baseSignal = 'P';
-            else if (ht1VerdictRaw.includes('B')) baseSignal = 'B';
 
             if (ht1VerdictRaw.includes('NGƯỢC')) { impliedResult = 'S'; }
 
@@ -1615,10 +1620,8 @@
                 let streak = 1;
                 while (dsArr.length - 1 - streak >= 0 && dsArr[dsArr.length - 1 - streak] === lastChar) streak++;
                 
-                let baseSignal = null;
                 let isNgược = verdictStr.includes('NGƯỢC');
-                if (verdictStr.includes('P')) baseSignal = 'P';
-                else if (verdictStr.includes('B')) baseSignal = 'B';
+                let baseSignal = parseBaseSignal(verdictStr);
                 
                 if (baseSignal) {
                     let impliedActual = '';
@@ -1833,8 +1836,7 @@
             const ht1Details = masterState.systemDetails.ht1;
             const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht1BaseVerdictRaw = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
-            let ht1BaseSignal = null;
-            if (ht1BaseVerdictRaw.includes('P')) ht1BaseSignal = 'P'; else if (ht1BaseVerdictRaw.includes('B')) ht1BaseSignal = 'B';
+            let ht1BaseSignal = parseBaseSignal(ht1BaseVerdictRaw);
             const ht1IsReverse = ht1BaseVerdictRaw.includes('NGƯỢC');
 
             const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
@@ -1843,8 +1845,7 @@
             const ht4Details = masterState.systemDetails.ht4;
             const arrHT4 = ht4Details && ht4Details.intervalHistory ? ht4Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht4BaseVerdictRaw = ht4Details && ht4Details.verdict ? ht4Details.verdict.toUpperCase().trim() : '';
-            let ht4BaseSignal = null;
-            if (ht4BaseVerdictRaw.includes('P')) ht4BaseSignal = 'P'; else if (ht4BaseVerdictRaw.includes('B')) ht4BaseSignal = 'B';
+            let ht4BaseSignal = parseBaseSignal(ht4BaseVerdictRaw);
             const ht4IsReverse = ht4BaseVerdictRaw.includes('NGƯỢC');
 
             // --- PHÂN TÍCH ---
@@ -3346,14 +3347,14 @@
             const ht1Details = masterState.systemDetails.ht1;
             const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht1BaseVerdict = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
-            let ht1Base = ht1BaseVerdict.includes('P') ? 'P' : (ht1BaseVerdict.includes('B') ? 'B' : null);
+            let ht1Base = parseBaseSignal(ht1BaseVerdict);
             let ht1Rev = ht1BaseVerdict.includes('NGƯỢC');
 
             // 3. HT4 (DS)
             const ht4Details = masterState.systemDetails.ht4;
             const arrHT4 = ht4Details && ht4Details.intervalHistory ? ht4Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht4BaseVerdict = ht4Details && ht4Details.verdict ? ht4Details.verdict.toUpperCase().trim() : '';
-            let ht4Base = ht4BaseVerdict.includes('P') ? 'P' : (ht4BaseVerdict.includes('B') ? 'B' : null);
+            let ht4Base = parseBaseSignal(ht4BaseVerdict);
             let ht4Rev = ht4BaseVerdict.includes('NGƯỢC');
 
             // 4. GE (DS)
@@ -3639,7 +3640,7 @@
             }
 
             let html = '';
-            arr.slice(-40).forEach(val => { // Lấy 40 tay gầnnhất
+            arr.slice(-40).forEach(val => { // Lấy 40 tay gần nhất
                 if (chartName === 'BIGROAD') {
                     const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_3px_rgba(59,130,246,0.5)]' : 'bg-red-500 shadow-[0_0_3px_rgba(239,68,68,0.5)]';
                     html += `<div class="w-[14px] h-[14px] flex-shrink-0 rounded-full ${color} text-[8px] flex items-center justify-center text-white font-bold border border-white/20">${val}</div>`;
@@ -3656,4 +3657,4 @@
 
     </script>
 </body>
-</html>
+</html>    
