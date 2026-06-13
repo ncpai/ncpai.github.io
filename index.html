@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLT</title>
+    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -245,24 +245,19 @@
         <div class="absolute -bottom-2 bg-gray-800 text-[8px] text-yellow-400 px-2 rounded-full border border-gray-600 font-bold">Bấm để Cài đặt</div>
     </div>
 
-    <div class="fixed bottom-6 right-6 z-[200] flex items-end gap-4">
-        <div id="fab-menu-left" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom mb-[88px]">
-            <a href="#klt-section" class="w-[60px] h-[60px] bg-teal-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(13,148,136,0.5)] hover:bg-teal-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới KLT">KLT</a>
-            <button onclick="undoLastAll()" class="w-[60px] h-[60px] bg-gray-600 rounded-full text-white font-bold shadow-[0_0_15px_rgba(75,85,99,0.5)] hover:bg-gray-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Hoàn Tác">↩️</button>
+    <div class="fixed bottom-6 right-6 z-[200] flex flex-col items-center gap-4">
+        <div id="fab-menu" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom">
+            <a href="#ge-section" class="w-[60px] h-[60px] bg-purple-700 rounded-full text-white font-black shadow-[0_0_15px_rgba(126,34,206,0.5)] hover:bg-purple-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới thuật toán God Eye (GE)">GE</a>
+            <a href="#ht1-chart-section" class="w-[60px] h-[60px] bg-indigo-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới biểu đồ HT1">HT1</a>
+            <a href="#input-section" class="w-[60px] h-[60px] bg-gray-700 rounded-full text-white font-bold shadow-[0_0_15px_rgba(55,65,81,0.5)] hover:bg-gray-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Lên chỗ Nhập">⬆️</a>
+            <button onclick="addResultToAll('P')" class="w-[60px] h-[60px] bg-blue-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(37,99,235,0.6)] hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập PLAYER (P)">P</button>
+            <button onclick="addResultToAll('B')" class="w-[60px] h-[60px] bg-red-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(239,68,68,0.6)] hover:bg-red-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập BANKER (B)">B</button>
         </div>
-
-        <div class="flex flex-col items-center gap-4">
-            <div id="fab-menu" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom">
-                <a href="#ht1-chart-section" class="w-[60px] h-[60px] bg-indigo-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới biểu đồ HT1">HT1</a>
-                <a href="#input-section" class="w-[60px] h-[60px] bg-gray-700 rounded-full text-white font-bold shadow-[0_0_15px_rgba(55,65,81,0.5)] hover:bg-gray-600 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Lên chỗ Nhập">⬆️</a>
-                <button onclick="addResultToAll('P')" class="w-[60px] h-[60px] bg-blue-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(37,99,235,0.6)] hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập PLAYER (P)">P</button>
-                <button onclick="addResultToAll('B')" class="w-[60px] h-[60px] bg-red-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(239,68,68,0.6)] hover:bg-red-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center select-none" title="Nhập BANKER (B)">B</button>
-            </div>
-            <button onclick="toggleFAB()" id="fab-main-btn" class="w-[72px] h-[72px] bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full text-black font-black shadow-[0_0_25px_rgba(202,138,4,0.7)] hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center transform z-10 select-none">
-                <svg id="fab-icon" class="w-10 h-10 transition-transform duration-500 ease-out" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-            </button>
-        </div>
+        <button onclick="toggleFAB()" id="fab-main-btn" class="w-[72px] h-[72px] bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full text-black font-black shadow-[0_0_25px_rgba(202,138,4,0.7)] hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center transform z-10 select-none">
+            <svg id="fab-icon" class="w-10 h-10 transition-transform duration-500 ease-out" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+        </button>
     </div>
+
     <div id="pattern-db-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-gray-800 border border-yellow-500/30 rounded-2xl w-11/12 max-w-4xl p-6 shadow-[0_0_30px_rgba(202,138,4,0.15)] flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
@@ -742,46 +737,6 @@
             </div>
             </div>
 
-        <div id="klt-section" class="mt-8 bg-gradient-to-br from-teal-900 via-gray-900 to-cyan-900 p-6 rounded-2xl border-4 border-cyan-500 shadow-[0_0_40px_rgba(6,182,212,0.3)] relative transition-all duration-500">
-            <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-cyan-600 to-teal-500 text-white font-black px-8 py-2 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.8)] text-xl flex items-center gap-2 border-2 border-black whitespace-nowrap z-10">
-                🌐 KẾT LUẬN TỔNG (KLT) - META LOGIC
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                <div class="bg-gray-800 p-5 rounded-xl border border-cyan-500/30 shadow-inner">
-                    <h3 class="text-cyan-400 font-bold mb-2 text-sm uppercase text-center">Trạng Thái KLT</h3>
-                    <div id="klt-current-state" class="text-2xl md:text-3xl font-black text-white text-center py-4 bg-gray-900 rounded-lg border border-cyan-500/50 drop-shadow-md">
-                        Chờ dữ liệu...
-                    </div>
-                    <div class="mt-4 space-y-2 text-sm">
-                        <div class="pt-2 text-center bg-gray-900/50 p-3 rounded-lg border border-gray-700 mt-2">
-                            <span class="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">LÝ DO KLT</span>
-                            <div id="klt-conclusion" class="font-bold text-blue-300 text-sm leading-relaxed">-</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <div class="bg-gray-800 p-5 rounded-xl border border-cyan-500/30 flex-1 flex flex-col justify-center items-center relative overflow-hidden">
-                        <div class="absolute top-2 left-2 text-xs font-bold text-gray-500 uppercase tracking-wider">PHÁN QUYẾT KLT</div>
-                        <div class="absolute top-2 right-2 text-xs font-bold text-cyan-400 bg-cyan-900/30 px-2 py-1 rounded border border-cyan-500/30 shadow-sm">
-                            Tỉ lệ chuẩn: <span id="klt-overall-accuracy">0%</span>
-                        </div>
-                        <div id="klt-final-decision" class="text-5xl md:text-6xl font-black text-gray-600 drop-shadow-lg mt-4 transition-all duration-300">-</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-4 bg-gray-900 p-4 rounded-xl border border-cyan-500/30">
-                <h3 class="text-xs text-gray-400 font-bold mb-2 uppercase flex items-center justify-between">
-                    <span>BIỂU ĐỒ ĐÚNG/SAI CỦA KLT (PHIÊN NÀY)</span>
-                </h3>
-                <div id="klt-history-chart" class="history-chart h-[50px] items-center bg-black/50 rounded-lg px-2 border border-gray-800 shadow-inner">
-                    <p class="text-gray-600 text-xs w-full text-center h-full flex items-center justify-center">Đang tích lũy...</p>
-                </div>
-            </div>
-        </div>
-
         <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="text-center p-3 bg-gray-800 rounded-lg border border-gray-700/50">
                 <div class="text-xs text-gray-400 font-bold uppercase mb-1">Trạng thái HT1</div>
@@ -917,28 +872,27 @@
         </button>
     </div>
     
-    </div> 
-    <script>
+    </div> <script>
         /* =========================================================================
-           HỆ THỐNG BẢO MẬT CHỐNG XÓA DOM & MẬT KHẨU
+           HỆ THỐNG BẢO MẬT CHỐNG XÓA DOM & MÃ HÓA MẬT KHẨU
         ========================================================================= */
         const ENCODED_PASSWORDS = ['NjUyNTgz', 'MDc3ODY4', 'MTQxMDIwMDQ=']; 
 
         // 1. Chống Click Chuột Phải
         document.addEventListener('contextmenu', event => event.preventDefault());
 
-        // 2. Chống các tổ hợp phím Hacker
+        // 2. Chống các tổ hợp phím Hacker (F12, Ctrl+U, Ctrl+Shift+I, Ctrl+Shift+J)
         document.onkeydown = function(e) {
-            if(e.keyCode == 123) { return false; } 
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 73) { return false; } 
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 74) { return false; } 
-            if(e.ctrlKey && e.keyCode == 85) { return false; } 
+            if(e.keyCode == 123) { return false; } // Khóa F12
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 73) { return false; } // Khóa Ctrl+Shift+I
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 74) { return false; } // Khóa Ctrl+Shift+J
+            if(e.ctrlKey && e.keyCode == 85) { return false; } // Khóa Ctrl+U
         };
 
         // 3. Khởi tạo trạng thái bảo mật ban đầu
         document.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('godEye_unlocked') === 'true') {
-                unlockSystem(false); 
+                unlockSystem(false); // Đã có session thì mở luôn
             }
         });
 
@@ -947,6 +901,7 @@
             const input = document.getElementById('auth-password').value;
             const errorText = document.getElementById('auth-error');
             
+            // Mã hóa input của người dùng để so sánh với mảng đã mã hóa
             const encodedInput = btoa(input); 
             
             if (ENCODED_PASSWORDS.includes(encodedInput)) {
@@ -968,9 +923,10 @@
             if(lockScreen) {
                 lockScreen.style.opacity = '0';
                 lockScreen.style.transform = 'scale(1.1)';
-                setTimeout(() => { lockScreen.remove(); }, 500); 
+                setTimeout(() => { lockScreen.remove(); }, 500); // Xóa hẳn lớp khóa khỏi DOM
             }
             
+            // Hiển thị hệ thống cốt lõi và nhả thanh cuộn
             if(coreSystem) coreSystem.style.display = 'block';
             document.body.style.overflow = 'auto';
             
@@ -980,7 +936,7 @@
         }
 
         /* =========================================================================
-           0. TIỆN ÍCH AN TOÀN BỘ NHỚ & TÍNH NĂNG MỚI
+           0. TIỆN ÍCH AN TOÀN BỘ NHỚ & TÍNH NĂNG MỚI (COLLAPSE/FAB)
            ========================================================================= */
         function safeStorageSet(key, dataObj) {
             try {
@@ -1007,21 +963,17 @@
             }
         }
 
-        // --- HÀM TOGGLE FAB ĐÃ CẬP NHẬT ---
         function toggleFAB() {
             const menu = document.getElementById('fab-menu');
-            const menuLeft = document.getElementById('fab-menu-left');
             const icon = document.getElementById('fab-icon');
             if (!menu || !icon) return;
             const isClosed = menu.classList.contains('opacity-0');
             
             if (isClosed) {
                 menu.classList.remove('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
-                if (menuLeft) menuLeft.classList.remove('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
                 icon.classList.add('rotate-[135deg]'); 
             } else {
                 menu.classList.add('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
-                if (menuLeft) menuLeft.classList.add('translate-y-8', 'scale-75', 'opacity-0', 'pointer-events-none');
                 icon.classList.remove('rotate-[135deg]');
             }
         }
@@ -1033,7 +985,7 @@
         }
 
         /* =========================================================================
-           1. CƠ SỞ DỮ LIỆU PATTERN MẪU GỐC & CƠ CHẾ KHỞI TẠO
+           1. CƠ SỞ DỮ LIỆU PATTERN MẪU GỐC & CƠ CHẾ KHỞI TẠO (QUẢN LÝ KHO MẪU)
            ========================================================================= */
         const defaultRawSamples = `1. DSSSSDSDSSDSSDSSSSSSSSDDDDD
 2. SSDSSDDSSSDDSSDSDSDSSDS
@@ -1195,7 +1147,7 @@
 
         async function buildPatternDatabaseAsync(samples) {
             const db = {};
-            const patternSizes = Array.from({length: 18}, (_, i) => i + 3); 
+            const ngramSizes = Array.from({length: 18}, (_, i) => i + 3); 
             const chunkSize = 50; 
             
             for (let idx = 0; idx < samples.length; idx += chunkSize) {
@@ -1203,7 +1155,7 @@
                 for (const line of chunk) {
                     const binaryLine = line.replace(/D/g, '1').replace(/0/g, 'S'); 
                     const formattedLine = line.replace(/D/g, '1').replace(/S/g, '0');
-                    for (const size of patternSizes) {
+                    for (const size of ngramSizes) {
                         for (let i = 0; i <= formattedLine.length - size - 1; i++) {
                             const seqBin = formattedLine.substring(i, i + size);
                             const nextBit = formattedLine[i + size];
@@ -1264,7 +1216,7 @@
         }
 
         /* =========================================================================
-           2. GLOBAL STATE & CƠ CHẾ AI TỰ HỌC
+           2. GLOBAL STATE & CƠ CHẾ AI TỰ HỌC (CONTINUOUS LEARNING)
            ========================================================================= */
         let patternConfig = { minOccurrences: 10, minConfidence: 100 }; 
         
@@ -1303,11 +1255,8 @@
             
             currentKlcPending: null,
             currentKlcPrediction: null,
-            currentKlcRule: null,
-            klcToggles: { th1: true, th2: true, th3: true },
-
-            currentKltState: "Chưa rõ - Chưa rõ",
-            currentKltPrediction: null
+            currentKlcRule: null, // NEW
+            klcToggles: { th1: true, th2: true, th3: true }
         };
 
         let gameAccuracyChart = null;
@@ -1338,9 +1287,9 @@
                 const newBit = dsSequence.slice(-1);
                 const contextSeq = dsSequence.slice(0, -1);
 
-                const patternSizes = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; 
+                const ngramSizes = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; 
                 
-                for (const size of patternSizes) {
+                for (const size of ngramSizes) {
                     if (contextSeq.length >= size) {
                         const pattern = contextSeq.slice(-size);
                         const key = `${size}|${pattern}`;
@@ -1456,6 +1405,7 @@
             if (ht1VerdictRaw.includes('P')) baseSignal = 'P';
             else if (ht1VerdictRaw.includes('B')) baseSignal = 'B';
 
+            // User Correction Rule Applied here
             if (ht1VerdictRaw.includes('NGƯỢC')) { impliedResult = 'S'; }
 
             if (!baseSignal) {
@@ -1479,7 +1429,7 @@
                     <div class="font-black text-yellow-300 mb-3 uppercase text-center flex items-center justify-center gap-2">
                         BẢNG ĐIỂM TỔNG HỢP 3 CHỈ BÁO
                     </div>
-                    <div class="flex justify-between border-b border-gray-700 py-2"><span>1. Lõi AI Pattern (${bestMatch.confidence.toFixed(0)}%):</span> <span class="font-bold text-cyan-400">${baseScore > 0 ? '+'+baseScore : baseScore} đ</span></div>
+                    <div class="flex justify-between border-b border-gray-700 py-2"><span>1. Lõi AI N-Gram (${bestMatch.confidence.toFixed(0)}%):</span> <span class="font-bold text-cyan-400">${baseScore > 0 ? '+'+baseScore : baseScore} đ</span></div>
                     <div class="flex justify-between border-b border-gray-700 py-2"><span>2. Phong độ Win/Lose AI:</span> <span class="font-bold ${aiScore > 0 ? 'text-green-400' : (aiScore < 0 ? 'text-red-400' : 'text-gray-400')}">${aiScore > 0 ? '+'+aiScore : aiScore} đ</span></div>
                     <div class="flex justify-between py-2"><span>3. Xu hướng Big Road:</span> <span class="font-bold ${bigRoadScore > 0 ? 'text-green-400' : (bigRoadScore < 0 ? 'text-red-400' : 'text-gray-400')}">${bigRoadScore > 0 ? '+'+bigRoadScore : bigRoadScore} đ</span></div>
                     <div class="mt-3 pt-3 border-t border-gray-500 flex justify-between items-center bg-gray-900/50 p-2 rounded">
@@ -1747,11 +1697,13 @@
         }
 
         /* =========================================================================
-           5.5 THUẬT TOÁN SUPPORT GE (SGE) - PHÁN QUYẾT TỐI CAO
+           5.5 THUẬT TOÁN SUPPORT GE (SGE) - PHÁN QUYẾT TỐI CAO TỪ 4 TRẠNG THÁI
            ========================================================================= */
         function analyzeSGETrend(array, type) {
+            // type: 'PB' (BigRoad) hoặc 'DS' (HT1/HT4/GE)
             if (!array || array.length < 3) return { signal: null, desc: "Cầu quá ngắn", weight: 0 };
 
+            // Phân tích thành các chuỗi (streaks)
             let streaks = [];
             let currentStr = array[0]; let count = 1;
             for(let i=1; i<array.length; i++) {
@@ -1770,28 +1722,32 @@
                 return val === 'D' ? 'S' : 'D';
             };
 
-            // 1. Check BỆT
+            // 1. Check BỆT (Từ 3 trở lên)
             if (last.count >= 3) {
                 return { signal: last.val, desc: `Đang Bệt ${last.val} (${last.count} tay)`, weight: last.count };
             }
 
-            // 2. Check Cầu 1-1
+            // 2. Check Cầu 1-1 (Ping Pong) - Tối thiểu 3 nhịp
             if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
                 return { signal: getOpposite(last.val), desc: "Cầu 1-1 rõ ràng", weight: 3 };
             }
 
             // 3. Check Cầu 2-2 
+            // Nếu đang là 2,2,1 -> Đánh giống last để đủ 2
             if (last.count === 1 && prev1 && prev1.count === 2 && prev2 && prev2.count === 2) {
                 return { signal: last.val, desc: "Đang cầu 2-2 (nhịp 1 sang 2)", weight: 3.5 };
             }
+            // Nếu đang là 2,2,2 -> Đánh ngược last để gãy sang màu kia
             if (last.count === 2 && prev1 && prev1.count === 2 && prev2 && prev2.count >= 1) {
                 return { signal: getOpposite(last.val), desc: "Cầu 2-2 (chuyển nhịp)", weight: 3.5 };
             }
 
-            // 4. Các mẫu Quy luật Thói Quen
+            // 4. Các mẫu Quy luật Thói Quen Chuyển Đổi (Áp dụng chung cả PB và DS)
+            // Thói quen 1 tay chuyển (VD: 1P -> sang B)
             if (last.count === 1 && prev1 && prev1.count >= 2 && prev2 && prev2.count === 1) {
                  return { signal: getOpposite(last.val), desc: `Thói quen 1${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
+            // Thói quen 2 tay chuyển (VD: 2P -> sang B)
             if (last.count === 2 && prev1 && prev1.count >= 1 && prev2 && prev2.count === 2) {
                  return { signal: getOpposite(last.val), desc: `Thói quen 2${last.val} sang ${getOpposite(last.val)}`, weight: 2.5 };
             }
@@ -1828,8 +1784,10 @@
             if (!session) return;
 
             // --- LẤY DATA CÁC TRẠNG THÁI ---
+            // TT1: Big Road
             const arrBR = session.history || [];
             
+            // TT2: BĐKTL HT1
             const ht1Details = masterState.systemDetails.ht1;
             const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht1BaseVerdictRaw = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
@@ -1837,9 +1795,11 @@
             if (ht1BaseVerdictRaw.includes('P')) ht1BaseSignal = 'P'; else if (ht1BaseVerdictRaw.includes('B')) ht1BaseSignal = 'B';
             const ht1IsReverse = ht1BaseVerdictRaw.includes('NGƯỢC');
 
+            // TT3: GE History
             const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
             const geBaseSignal = masterState.currentGePrediction;
 
+            // TT4: BĐKTL HT4
             const ht4Details = masterState.systemDetails.ht4;
             const arrHT4 = ht4Details && ht4Details.intervalHistory ? ht4Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
             const ht4BaseVerdictRaw = ht4Details && ht4Details.verdict ? ht4Details.verdict.toUpperCase().trim() : '';
@@ -1853,7 +1813,7 @@
             const resGE = analyzeSGETrend(arrGE, 'DS');
             const resHT4 = analyzeSGETrend(arrHT4, 'DS');
 
-            // --- DỊCH MÃ ---
+            // --- DỊCH MÃ TT2, TT3 & TT4 (D/S) SANG P/B ---
             let finalSignalHT1 = null;
             if (resHT1.signal && ht1BaseSignal) {
                 if (!ht1IsReverse) {
@@ -1881,22 +1841,30 @@
             let scoreP = 0; let scoreB = 0;
             let reasonsList = [];
 
+            // BR
             if (resBR.signal === 'P') { scoreP += resBR.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL1 (BIGROAD) -> P:</span> ${resBR.desc}.</li>`); }
             else if (resBR.signal === 'B') { scoreB += resBR.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL1 (BIGROAD) -> B:</span> ${resBR.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL1 (BIGROAD) BỎ QUA:</span> ${resBR.desc}.</li>`); }
 
+            // HT1
             if (finalSignalHT1 === 'P') { scoreP += resHT1.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL2 (BĐKTL HT1) -> P:</span> ${resHT1.desc}.</li>`); }
             else if (finalSignalHT1 === 'B') { scoreB += resHT1.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL2 (BĐKTL HT1) -> B:</span> ${resHT1.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL2 (BĐKTL HT1) BỎ QUA:</span> ${resHT1.desc} hoặc thiếu tín hiệu HT1.</li>`); }
 
+            // GE
             if (finalSignalGE === 'P') { scoreP += resGE.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL3 (GE Chart) -> P:</span> ${resGE.desc}.</li>`); }
             else if (finalSignalGE === 'B') { scoreB += resGE.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL3 (GE Chart) -> B:</span> ${resGE.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL3 (GE Chart) BỎ QUA:</span> ${resGE.desc} hoặc thiếu tín hiệu GE.</li>`); }
 
+            // HT4
             if (finalSignalHT4 === 'P') { scoreP += resHT4.weight; reasonsList.push(`<li><span class="text-blue-400 font-bold">KL4 (BĐKTL HT4) -> P:</span> ${resHT4.desc}.</li>`); }
             else if (finalSignalHT4 === 'B') { scoreB += resHT4.weight; reasonsList.push(`<li><span class="text-red-400 font-bold">KL4 (BĐKTL HT4) -> B:</span> ${resHT4.desc}.</li>`); }
             else { reasonsList.push(`<li><span class="text-gray-500 font-bold">KL4 (BĐKTL HT4) BỎ QUA:</span> ${resHT4.desc} hoặc thiếu tín hiệu HT4.</li>`); }
 
+
+            // ====================================================================
+            // --- LOGIC: ƯU TIÊN CẦU BỆT VÀ BỆT 1-1 CỦA KL ĐÃ ĐÚNG VÁN TRƯỚC (CODE 2)
+            // ====================================================================
             let prevCorrectKLs = [];
             if (session.sgeHistory && session.sgeHistory.length > 0 && session.history && session.history.length > 0) {
                 const lastActual = session.history[session.history.length - 1];
@@ -1926,6 +1894,7 @@
                 reasonsList.push(`<li><span class="text-yellow-400 font-bold bg-yellow-900/40 px-1 rounded block mt-1">🔥 KL4 đang form Bệt/1-1 và ĐÚNG ván trước (+5 đ)</span></li>`);
             }
 
+            // TÍNH TOÁN STATS HIỂN THỊ
             const getRate = (arr) => arr.length > 0 ? Math.round(arr.filter(x=>x==='D').length/arr.length*100) + '%' : '0%';
             const getSeq = (arr) => arr.slice(-10).join('');
             
@@ -1936,6 +1905,7 @@
                 KL4: { desc: resHT4.desc, seq: getSeq(arrHT4), rate: getRate(arrHT4) }
             };
 
+            // --- TÍNH TOÁN PRIMARY KL VÀ SỐ LƯỢNG ĐỒNG THUẬN ---
             let winningKLs = [];
             let sgeAgreeCount = 0;
             let primaryKL = null;
@@ -1955,6 +1925,8 @@
             sgeAgreeCount = winningKLs.length;
             primaryKL = winningKLs.includes('KL2') ? 'KL2' : (winningKLs.includes('KL4') ? 'KL4' : (winningKLs.includes('KL3') ? 'KL3' : (winningKLs.length > 0 ? winningKLs[0] : null)));
 
+
+            // --- PHÁN QUYẾT CUỐI CÙNG ---
             let sgeDecisionText = 'BỎ QUA VÁN NÀY';
             let sgeSubText = '';
             let sgeDecisionClass = 'text-gray-500';
@@ -2045,6 +2017,9 @@
                 reasonsList.push(`<li class="mt-2 pt-2 border-t border-gray-700 text-red-400 font-bold">=> TỔNG HỢP: Tín hiệu đang đánh nhau (Điểm P: ${scoreP} = Điểm B: ${scoreB}). Tỷ lệ rủi ro cao!</li>`);
             }
 
+            // =========================================================================
+            // GỌI KẾT LUẬN CHỐT (KLC) TRÍCH XUẤT DỮ LIỆU
+            // =========================================================================
             let activeLocalType = '';
             let localTitle = '';
             const allSgeHistory = session.sgeHistory || [];
@@ -2068,7 +2043,9 @@
             if (sgeDecisionText.includes('PLAYER')) finalSgeSignal = 'P';
             else if (sgeDecisionText.includes('BANKER')) finalSgeSignal = 'B';
 
+            // Chạy KLC
             runKLC(globalArr, sgeDecisionText, finalSgeSignal);
+            // =========================================================================
 
             masterState.currentSgePending = {
                 prediction: finalSgeSignal,
@@ -2081,6 +2058,7 @@
                 agreedKLs: winningKLs.map(k => parseInt(k.replace('KL', '')))
             };
 
+            // --- RENDER GIAO DIỆN SGE ---
             const decEl = document.getElementById('sge-final-decision');
             const reasonEl = document.getElementById('sge-final-reason');
             const listEl = document.getElementById('sge-reasoning-list');
@@ -2111,6 +2089,7 @@
                 }
             }
 
+            // --- RENDER FLOAT SGE PANEL UI ---
             const floatDecEl = document.getElementById('float-sge-decision');
             const floatReasonEl = document.getElementById('float-sge-reason');
             const floatToggleBtn = document.getElementById('sge-float-toggle-btn');
@@ -2170,8 +2149,6 @@
             const elDescHt1 = document.getElementById('sge-desc-ht1'); if(elDescHt1) elDescHt1.textContent = resHT1.desc;
             const elDescGe = document.getElementById('sge-desc-ge'); if(elDescGe) elDescGe.textContent = resGE.desc;
             const elDescHt4 = document.getElementById('sge-desc-ht4'); if(elDescHt4) elDescHt4.textContent = resHT4.desc;
-
-            calculateKLT();
         }
 
         /* =========================================================================
@@ -2306,18 +2283,20 @@
 
 
         /* =========================================================================
-           TÍNH NĂNG TIME-STOP
+           TÍNH NĂNG TIME-STOP (TÙY CHỈNH THỜI GIAN)
            ========================================================================= */
-        let sessionTimeLimit = 45 * 60; 
+        let sessionTimeLimit = 45 * 60; // Mặc định ban đầu là 45 phút
         let currentSessionTime = sessionTimeLimit;
         let sessionTimerInterval = null;
         let isSystemLocked = false;
 
         function startSessionTimer(isManualSetup = false) {
+            // Khung nhập thời gian tùy chỉnh khi người dùng click vào đồng hồ
             if (isManualSetup) {
                 let currentMins = Math.floor(sessionTimeLimit / 60);
                 let inputMins = prompt("Nhập thời gian cho phiên này (tính bằng phút):", currentMins);
                 
+                // Nếu người dùng bấm Hủy hoặc không nhập gì
                 if (inputMins === null || inputMins.trim() === "") return; 
                 
                 let parsedMins = parseInt(inputMins);
@@ -2333,7 +2312,7 @@
             currentSessionTime = sessionTimeLimit;
             isSystemLocked = false;
             updateTimerUI();
-            toggleInputButtons(false); 
+            toggleInputButtons(false); // Mở khóa nút bấm
 
             sessionTimerInterval = setInterval(() => {
                 currentSessionTime--;
@@ -2355,8 +2334,9 @@
             const secs = (currentSessionTime % 60).toString().padStart(2, '0');
             timerEl.textContent = `${mins}:${secs}`;
 
-            const thresholdYellow = Math.floor(sessionTimeLimit * 0.3); 
-            const thresholdRed = Math.floor(sessionTimeLimit * 0.1);    
+            // Tự động tính toán các mốc cảnh báo theo tỷ lệ phần trăm của tổng thời gian
+            const thresholdYellow = Math.floor(sessionTimeLimit * 0.3); // Còn 30% thời gian -> Cảnh báo Vàng
+            const thresholdRed = Math.floor(sessionTimeLimit * 0.1);    // Còn 10% thời gian -> Cảnh báo Đỏ
 
             if (currentSessionTime > thresholdYellow) {
                 timerEl.className = 'text-xl md:text-2xl font-black text-green-400 drop-shadow-md';
@@ -2409,7 +2389,7 @@
         }
 
         /* =========================================================================
-           7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION VÀ HÀNG ĐỢI
+           7. XỬ LÝ NHẬP LỆNH, HOÀN TÁC, SESSION VÀ HÀNG ĐỢI (QUEUE SYSTEM)
            ========================================================================= */
         function addResultToAll(result) {
             if (isSystemLocked) {
@@ -2474,23 +2454,10 @@
                             predicted: masterState.currentKlcPrediction,
                             actual: currentResult,
                             correct: masterState.currentKlcPrediction === currentResult,
-                            rule: masterState.currentKlcRule 
+                            rule: masterState.currentKlcRule // LƯU RULE ĐỂ LỌC BIỂU ĐỒ SAU NÀY
                         });
                         updateKlcChart(session.klcHistory);
                     }
-                }
-
-                // TÍCH LŨY LỊCH SỬ KLT
-                if (masterState.currentKltState && masterState.currentKltState !== "Chưa rõ - Chưa rõ") {
-                    if (!session.kltHistory) session.kltHistory = [];
-                    session.kltHistory.push({
-                        gameNum: session.history.length,
-                        state: masterState.currentKltState,
-                        predicted: masterState.currentKltPrediction,
-                        actual: currentResult,
-                        correct: masterState.currentKltPrediction === currentResult
-                    });
-                    renderKltUI(masterState.currentKltState, masterState.currentKltPrediction, "", "", session.kltHistory);
                 }
                 
                 saveMasterSessions();
@@ -2560,11 +2527,6 @@
                  updateKlcChart(session.klcHistory);
             }
 
-            if (session.kltHistory) {
-                session.kltHistory = session.kltHistory.filter(h => h.gameNum <= session.history.length);
-                renderKltUI(masterState.currentKltState, masterState.currentKltPrediction, "", "", session.kltHistory);
-            }
-
             saveMasterSessions();
             updateCurrentSessionInfo();
             broadcastToAll('undo_last');
@@ -2599,11 +2561,6 @@
                 updateKlcChart([]);
                 masterState.currentKlcPrediction = null;
                 masterState.currentKlcRule = null;
-
-                session.kltHistory = [];
-                masterState.currentKltPrediction = null;
-                masterState.currentKltState = "Chưa rõ - Chưa rõ";
-                renderKltUI("Chưa rõ - Chưa rõ", null, "Đã xoá lịch sử phiên.", "-", []);
 
                 saveMasterSessions(); updateCurrentSessionInfo();
                 broadcastToAll('clear_history');
@@ -2740,7 +2697,6 @@
                 broadcastToAll('reset_system');
                 calculateFinalDecision();
                 renderGodEyeUI("Chưa rõ - Chưa rõ", null, "Hệ thống đã reset toàn bộ.", "-", []);
-                renderKltUI("Chưa rõ - Chưa rõ", null, "Hệ thống đã reset toàn bộ.", "-", []);
                 showToast('Hệ thống đã reset hoàn toàn', 'info');
             }
         }
@@ -2817,7 +2773,7 @@
         }
 
         /* =========================================================================
-           THỐNG KÊ CHI TIẾT SGE
+           THỐNG KÊ CHI TIẾT SGE (TỔNG HỢP & BIỂU ĐỒ D/S)
            ========================================================================= */
         function toggleSGEStats() {
             const container = document.getElementById('sge-stats-container');
@@ -2873,7 +2829,7 @@
             const container = document.getElementById('sge-stats-container');
             if (!container) return;
             
-            // --- UPDATE FLOAT SGE CHART ---
+            // --- UPDATE FLOAT SGE CHART (BIỂU ĐỒ TỔNG SGE NỔI) ---
             const floatChartEl = document.getElementById('float-sge-chart');
             const floatWrEl = document.getElementById('float-sge-winrate');
             
@@ -2938,11 +2894,13 @@
         function toggleSGEFloatingPanel() {
             const panel = document.getElementById('sge-floating-panel');
             if (panel.classList.contains('hidden')) {
+                // Mở lên
                 panel.classList.remove('hidden');
                 panel.classList.add('animate-slideIn'); 
                 panel.style.transform = "scale(1)";
                 panel.style.opacity = "1";
             } else {
+                // Đóng lại
                 panel.classList.add('hidden');
                 panel.style.transform = "scale(0.95)";
                 panel.style.opacity = "0";
@@ -2950,7 +2908,7 @@
         }
 
         /* =========================================================================
-           THUẬT TOÁN KLC
+           THUẬT TOÁN KLC (SĂN LỖI 1D/1S & THUẬN BỆT)
            ========================================================================= */
         function toggleKlcRule(rule, isChecked) {
             masterState.klcToggles[rule] = isChecked;
@@ -2975,6 +2933,7 @@
             }
         }
 
+        // Hàm phân tích lõi thói quen KLC
         function analyzeKLCLogic(arr) {
             if (!arr || arr.length === 0) return { th: 'NONE', predictDS: null, money: '', desc: 'Chưa có dữ liệu' };
 
@@ -2988,24 +2947,27 @@
 
             let last = streaks[streaks.length - 1];
 
+            // Tìm Gốc Bệt D gần nhất
             let latestBetDIndex = -1;
             for (let i = streaks.length - 1; i >= 0; i--) {
                 if (streaks[i].val === 'D' && streaks[i].count >= 3) { latestBetDIndex = i; break; }
             }
 
+            // Tìm Gốc Bệt S gần nhất
             let latestBetSIndex = -1;
             for (let i = streaks.length - 1; i >= 0; i--) {
                 if (streaks[i].val === 'S' && streaks[i].count >= 3) { latestBetSIndex = i; break; }
             }
 
+            // --- XỬ LÝ TH1 (SĂN LỖI 1D BỊ BẺ VỀ S) ---
             let isTH1Valid = false;
             let th1CatchCount = 0;
             if (latestBetDIndex !== -1) {
                 isTH1Valid = true;
                 for (let i = latestBetDIndex + 1; i < streaks.length; i++) {
                     if (streaks[i].val === 'D') {
-                        if (streaks[i].count >= 2) { isTH1Valid = false; break; } 
-                        if (streaks[i].count === 1) { th1CatchCount++; } 
+                        if (streaks[i].count >= 2) { isTH1Valid = false; break; } // Vỡ form nếu có 2D trở lên
+                        if (streaks[i].count === 1) { th1CatchCount++; } // Đếm số lần xuất hiện 1D
                     }
                 }
             }
@@ -3015,14 +2977,15 @@
                 return { th: 'TH1', predictDS: 'S', money: money, desc: `TH1: Bắt lỗi 1D bẻ về S (Lần săn thứ ${th1CatchCount})` };
             }
 
+            // --- XỬ LÝ TH2 (SĂN LỖI 1S BỊ BẺ VỀ D) ---
             let isTH2Valid = false;
             let th2CatchCount = 0;
             if (latestBetSIndex !== -1) {
                 isTH2Valid = true;
                 for (let i = latestBetSIndex + 1; i < streaks.length; i++) {
                     if (streaks[i].val === 'S') {
-                        if (streaks[i].count >= 2) { isTH2Valid = false; break; } 
-                        if (streaks[i].count === 1) { th2CatchCount++; } 
+                        if (streaks[i].count >= 2) { isTH2Valid = false; break; } // Vỡ form nếu có 2S trở lên
+                        if (streaks[i].count === 1) { th2CatchCount++; } // Đếm số lần xuất hiện 1S
                     }
                 }
             }
@@ -3032,9 +2995,11 @@
                 return { th: 'TH2', predictDS: 'D', money: money, desc: `TH2: Bắt lỗi 1S bẻ về D (Lần săn thứ ${th2CatchCount})` };
             }
 
+            // --- XỬ LÝ TH3 (THUẬN BỆT KHI CẦU VỠ/CHƯA CÓ GỐC) ---
             return { th: 'TH3', predictDS: last.val, money: '✅ ĐÁNH ĐỀU TAY', desc: `TH3: Form loạn/Vỡ quy luật. Theo Thuận Bệt (${last.val})` };
         }
 
+        // Động cơ chính của KLC
         function runKLC(globalSGEArr, sgeSignalText, finalSgeSignal) {
             const toggleBtn = document.getElementById('klc-toggle-btn');
             const notifDot = document.getElementById('klc-notification-dot');
@@ -3043,6 +3008,7 @@
             const decEl = document.getElementById('klc-final-decision');
             const adviceEl = document.getElementById('klc-advice');
 
+            // Nếu SGE bỏ qua hoặc chưa có lệnh, KLC cũng chờ
             if (!finalSgeSignal || sgeSignalText.includes('BỎ QUA')) {
                 masterState.currentKlcPrediction = null;
                 masterState.currentKlcRule = null;
@@ -3054,29 +3020,34 @@
                 return;
             }
 
+            // Phân tích logic KLC
             const klcLogic = analyzeKLCLogic(globalSGEArr);
             
+            // --- 1. TÍNH TOÁN LUÔN PREDICTION ĐỂ LƯU NGẦM ---
             const getOpposite = (val) => val === 'P' ? 'B' : 'P';
             let klcFinalPB = null;
             let strategyText = '';
 
             if (klcLogic.predictDS === 'D') {
-                klcFinalPB = finalSgeSignal; 
+                klcFinalPB = finalSgeSignal; // Đồng thuận với SGE
                 strategyText = 'Đồng tình với SGE';
             } else if (klcLogic.predictDS === 'S') {
-                klcFinalPB = getOpposite(finalSgeSignal); 
+                klcFinalPB = getOpposite(finalSgeSignal); // Bẻ SGE
                 strategyText = 'Bẻ ngược lại SGE';
             }
 
+            // LƯU VÀO STATE ĐỂ CHẠY NGẦM BẤT KỂ BẬT TẮT
             masterState.currentKlcPrediction = klcFinalPB;
             masterState.currentKlcRule = klcLogic.th;
 
+            // --- 2. KIỂM TRA CÔNG TẮC (TOGGLES) ĐỂ HIỂN THỊ UI ---
             let isEnabled = false;
             if (klcLogic.th === 'TH1') isEnabled = masterState.klcToggles.th1;
             if (klcLogic.th === 'TH2') isEnabled = masterState.klcToggles.th2;
             if (klcLogic.th === 'TH3') isEnabled = masterState.klcToggles.th3;
 
             if (!isEnabled) {
+                // NẾU TẮT: Cập nhật UI thành dạng chạy ngầm
                 toggleBtn.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-gray-700 to-gray-900 rounded-full text-gray-400 font-black shadow-inner border-2 border-gray-500 transition-all flex justify-center items-center z-20 relative";
                 btnIcon.textContent = "🔕"; notifDot.classList.add('hidden');
                 decEl.innerHTML = 'BỎ QUA (CHẠY NGẦM)'; decEl.className = 'text-xl font-bold text-gray-500 relative z-10';
@@ -3085,6 +3056,7 @@
                 return;
             }
 
+            // --- 3. RENDER UI KHI ĐƯỢC BẬT ---
             let icon = klcLogic.th === 'TH3' ? '✅' : '🔥';
             
             let isAllIn = klcLogic.money.includes('ALL-IN'); 
@@ -3132,6 +3104,7 @@
                 return;
             }
 
+            // --- LỌC DỮ LIỆU ĐỂ VẼ BIỂU ĐỒ THEO TRẠNG THÁI CÔNG TẮC ---
             const filteredHistory = klcHistory.filter(item => {
                 if (item.rule === 'TH1') return masterState.klcToggles.th1;
                 if (item.rule === 'TH2') return masterState.klcToggles.th2;
@@ -3163,316 +3136,6 @@
             }
         }
 
-        /* =========================================================================
-           THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - MARKOV PATTERN MATCHING
-           ========================================================================= */
-
-        function analyzeMarkovPattern(arr, type, baseSignal, isReverse, chartName) {
-            if (!arr || arr.length < 3) return { signal: null, reason: `Chưa đủ dữ liệu (Cần > 3 ván)` };
-
-            // 1. KIỂM TRA BỘ LỌC DỚP (Tránh các tay rủi ro cao)
-            let lastChar = arr[arr.length - 1];
-            
-            let streak = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] === lastChar) streak++;
-                else break;
-            }
-
-            let pingpong = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] !== arr[i+1]) pingpong++;
-                else break;
-            }
-
-            // Luật từ chối tín hiệu rủi ro (Theo yêu cầu: DD/SS lần 2 trở đi, 1-1 dài)
-            if (pingpong >= 5) {
-                return { signal: null, reason: `Từ chối: Cầu 1-1 đã kéo dài ${pingpong} nhịp (Dễ bẻ).` };
-            }
-            if (streak >= 4) { 
-                return { signal: null, reason: `Từ chối: Bệt ${lastChar} đã kéo dài ${streak} nhịp (Rủi ro gãy).` };
-            }
-
-            // 2. PHÂN TÍCH MARKOV: CHẤM ĐIỂM TÌM CỤM UY TÍN NHẤT
-            let maxClusterSize = Math.min(arr.length - 1, 5); 
-            let bestMatch = null;
-            let highestScore = -1; // Điểm số = Tỷ lệ % x Số lần lặp lại
-
-            for (let size = 1; size <= maxClusterSize; size++) {
-                let currentCluster = arr.slice(-size).join('');
-                let nextPossibilities = [];
-
-                // Quét lại lịch sử xem cụm này từng ra gì tiếp theo
-                for (let i = 0; i <= arr.length - size - 1; i++) {
-                    let pastCluster = arr.slice(i, i + size).join('');
-                    if (pastCluster === currentCluster) {
-                        nextPossibilities.push(arr[i + size]);
-                    }
-                }
-
-                if (nextPossibilities.length > 0) {
-                    let count1 = 0, count2 = 0;
-                    let val1 = type === 'DS' ? 'D' : 'P';
-                    let val2 = type === 'DS' ? 'S' : 'B';
-
-                    nextPossibilities.forEach(x => {
-                        if (x === val1) count1++;
-                        else if (x === val2) count2++;
-                    });
-
-                    let total = nextPossibilities.length;
-                    let rate1 = (count1 / total) * 100;
-                    let rate2 = (count2 / total) * 100;
-
-                    let predictRaw = null;
-                    let confidence = 0;
-
-                    if (rate1 === 100) { predictRaw = val1; confidence = 100; }
-                    else if (rate2 === 100) { predictRaw = val2; confidence = 100; }
-                    else if (rate1 >= 75) { predictRaw = val1; confidence = rate1; }
-                    else if (rate2 >= 75) { predictRaw = val2; confidence = rate2; }
-                    else if (total >= 2) {
-                        // Xử lý trường hợp 50-50: Bắt nhịp 2 lần gần nhất
-                        let lastTwo = nextPossibilities.slice(-2);
-                        if (lastTwo[0] === lastTwo[1]) {
-                            predictRaw = lastTwo[1];
-                            confidence = 55;
-                        }
-                    }
-
-                    if (predictRaw) {
-                        // TÍNH ĐIỂM TIN CẬY: Một mẫu 100% lặp 3 lần (300 điểm) sẽ "đè chết" mẫu 100% lặp 1 lần (100 điểm)
-                        let score = confidence * total; 
-                        
-                        // Giảm trọng số của cụm 50-50 để không cạnh tranh với cụm chuẩn
-                        if (confidence === 55) score = 55;
-
-                        if (score > highestScore) {
-                            highestScore = score;
-                            let detailStr = "";
-                            
-                            if (confidence === 100) {
-                                detailStr = `Cụm ${currentCluster}->${predictRaw} 100% (${total}/${total} lần)`;
-                            } else if (confidence === 55) {
-                                detailStr = `Cụm ${currentCluster} tỷ lệ thấp, nhưng 2 lần gần nhất đều ra ${predictRaw}`;
-                            } else {
-                                detailStr = `Cụm ${currentCluster}->${predictRaw} ${confidence.toFixed(0)}% (Từ ${total} lần)`;
-                            }
-                            
-                            bestMatch = { cluster: currentCluster, predictRaw, confidence, detailStr, total };
-                        }
-                    }
-                }
-            }
-
-            if (!bestMatch) {
-                return { signal: null, reason: `Chưa có cụm quy luật rõ ràng (Tỷ lệ thấp).` };
-            }
-
-            // 3. CHUYỂN ĐỔI TÍN HIỆU RA P/B
-            let finalPB = null;
-            if (type === 'PB') {
-                finalPB = bestMatch.predictRaw; 
-            } else {
-                if (!baseSignal) return { signal: null, reason: `<span class="text-white">${bestMatch.detailStr}</span> nhưng thiếu lệnh nền để chốt.` };
-                
-                let targetDS = bestMatch.predictRaw; 
-                if (!isReverse) {
-                    finalPB = targetDS === 'D' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
-                } else {
-                    finalPB = targetDS === 'S' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
-                }
-            }
-
-            return { 
-                signal: finalPB, 
-                reason: `<span class="text-white">${bestMatch.detailStr}</span> ➜ Lệnh: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>` 
-            };
-        }
-
-        function calculateKLT() {
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session) return;
-
-            // --- CHUẨN BỊ DỮ LIỆU TỪ 6 BIỂU ĐỒ ---
-            // 1. Big Road (PB)
-            const arrBR = session.history || [];
-
-            // 2. HT1 (DS)
-            const ht1Details = masterState.systemDetails.ht1;
-            const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
-            const ht1BaseVerdict = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
-            let ht1Base = ht1BaseVerdict.includes('P') ? 'P' : (ht1BaseVerdict.includes('B') ? 'B' : null);
-            let ht1Rev = ht1BaseVerdict.includes('NGƯỢC');
-
-            // 3. HT4 (DS)
-            const ht4Details = masterState.systemDetails.ht4;
-            const arrHT4 = ht4Details && ht4Details.intervalHistory ? ht4Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
-            const ht4BaseVerdict = ht4Details && ht4Details.verdict ? ht4Details.verdict.toUpperCase().trim() : '';
-            let ht4Base = ht4BaseVerdict.includes('P') ? 'P' : (ht4BaseVerdict.includes('B') ? 'B' : null);
-            let ht4Rev = ht4BaseVerdict.includes('NGƯỢC');
-
-            // 4. GE (DS)
-            const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
-            const geBase = masterState.currentGePrediction;
-
-            // 5. SGE (DS)
-            const arrSGE = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
-            const sgeBase = masterState.currentSgePending ? masterState.currentSgePending.prediction : null;
-
-            // 6. KLC (DS)
-            const arrKLC = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
-            const klcBase = masterState.currentKlcPrediction;
-
-            // --- PHÂN TÍCH MARKOV CHO TỪNG BIỂU ĐỒ ---
-            const evalBR = analyzeMarkovPattern(arrBR, 'PB', null, false, 'BIGROAD');
-            const evalHT1 = analyzeMarkovPattern(arrHT1, 'DS', ht1Base, ht1Rev, 'HT1');
-            const evalHT4 = analyzeMarkovPattern(arrHT4, 'DS', ht4Base, ht4Rev, 'HT4');
-            const evalGE = analyzeMarkovPattern(arrGE, 'DS', geBase, false, 'GE');
-            const evalSGE = analyzeMarkovPattern(arrSGE, 'DS', sgeBase, false, 'SGE');
-            const evalKLC = analyzeMarkovPattern(arrKLC, 'DS', klcBase, false, 'KLC');
-
-            const evaluations = [
-                { name: 'BIGROAD', res: evalBR },
-                { name: 'HT1', res: evalHT1 },
-                { name: 'HT4', res: evalHT4 },
-                { name: 'GE', res: evalGE },
-                { name: 'SGE', res: evalSGE },
-                { name: 'KLC', res: evalKLC }
-            ];
-
-            // --- ĐẾM SỐ LƯỢNG ĐỒNG THUẬN TỪ NHỮNG TÍN HIỆU ĐÁNG TIN CẬY ---
-            let countP = 0;
-            let countB = 0;
-            let validSignalsCount = 0;
-
-            evaluations.forEach(ev => {
-                if (ev.res.signal === 'P') { countP++; validSignalsCount++; }
-                if (ev.res.signal === 'B') { countB++; validSignalsCount++; }
-            });
-
-            let finalPrediction = null;
-            let finalReasonText = "";
-
-            if (validSignalsCount === 0) {
-                finalReasonText = "Tất cả các biểu đồ đều rơi vào trạng thái rủi ro (Bệt dài/Ping-pong) hoặc không có quy luật Markov. Khuyên BỎ QUA.";
-            } else if (countP > countB && countB === 0) {
-                finalPrediction = 'P';
-                finalReasonText = `Đồng thuận PLAYER từ ${countP} biểu đồ có quy luật chuẩn.`;
-            } else if (countB > countP && countP === 0) {
-                finalPrediction = 'B';
-                finalReasonText = `Đồng thuận BANKER từ ${countB} biểu đồ có quy luật chuẩn.`;
-            } else {
-                finalReasonText = `Xung đột tín hiệu chắc chắn (P:${countP} - B:${countB}). Hệ thống tự động huỷ bỏ lệnh để bảo toàn vốn.`;
-            }
-
-            masterState.currentKltPrediction = finalPrediction;
-            
-            // Tích luỹ lịch sử
-            const currentStateStr = `${validSignalsCount} Biểu đồ đạt chuẩn`;
-            masterState.currentKltState = currentStateStr;
-
-            // --- TẠO GIAO DIỆN HIỂN THỊ CHI TIẾT ---
-            let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-left w-full">`;
-            evaluations.forEach(ev => {
-                let statusColor = ev.res.signal ? (ev.res.signal === 'P' ? 'border-blue-500/50 bg-blue-900/20' : 'border-red-500/50 bg-red-900/20') : 'border-gray-600 bg-gray-800/50';
-                let badge = ev.res.signal ? `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-900 ${ev.res.signal === 'P' ? 'text-blue-400' : 'text-red-400'}">${ev.res.signal}</span>` : `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-700 text-gray-400">BỎ QUA</span>`;
-                
-                detailsHtml += `
-                    <div class="p-3 rounded-lg border ${statusColor} text-sm cursor-pointer hover:bg-gray-800/80 transition-colors" onclick="toggleKltSubChart('${ev.name}')">
-                        <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-1 pointer-events-none">
-                            <span class="font-bold text-gray-300 uppercase flex items-center gap-1">${ev.name} <span class="text-[10px] bg-gray-700 px-1 rounded">📊</span></span>
-                            ${badge}
-                        </div>
-                        <div class="text-gray-400 mt-1 pointer-events-none">${ev.res.reason}</div>
-                        <div id="klt-subchart-${ev.name}" class="hidden h-6 mt-2 flex items-end justify-start gap-[1px] overflow-x-auto custom-scrollbar pb-1"></div>
-                    </div>
-                `;
-            });
-            detailsHtml += `</div>`;
-
-            if (!session.kltHistory) session.kltHistory = [];
-            
-            // Render
-            renderKltUI(currentStateStr, finalPrediction, finalReasonText, detailsHtml, session.kltHistory);
-        }
-
-        // --- HÀM RENDER KLT ĐÃ ĐƯỢC CẬP NHẬT ---
-        function renderKltUI(currentState, prediction, reason, detailsHtml, kltHistory) {
-            const stateEl = document.getElementById('klt-current-state');
-            const concEl = document.getElementById('klt-conclusion');
-            const decEl = document.getElementById('klt-final-decision');
-            const accEl = document.getElementById('klt-overall-accuracy');
-
-            // 1. Kiểm tra trạng thái đóng/mở hiện tại
-            const existingPanel = document.getElementById('klt-details-panel');
-            const isPanelOpen = existingPanel && !existingPanel.classList.contains('hidden');
-
-            if (stateEl) stateEl.textContent = currentState;
-            
-            if (concEl) {
-                concEl.innerHTML = `
-                    <div class="text-white">${reason}</div>
-                    <button onclick="toggleGlobalKltDetails()" class="mt-2 text-xs bg-cyan-900/50 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-1 rounded transition-colors w-full text-center font-bold">
-                        👁️ BẬT / TẮT CHI TIẾT TỪNG BIỂU ĐỒ (MARKOV)
-                    </button>
-                    <div id="klt-details-panel" class="${isPanelOpen ? '' : 'hidden'} w-full transition-all duration-300">
-                        ${detailsHtml}
-                    </div>
-                `;
-                
-                // Render lại các sub-charts đang mở (nếu có)
-                if (isPanelOpen && window.openSubCharts) {
-                    window.openSubCharts.forEach(name => {
-                        const chartDiv = document.getElementById(`klt-subchart-${name}`);
-                        if (chartDiv) {
-                            chartDiv.classList.remove('hidden');
-                            renderMiniKltChart(name, chartDiv);
-                        }
-                    });
-                }
-            }
-
-            if (decEl) {
-                if (prediction === 'P') {
-                    decEl.textContent = 'PLAYER';
-                    decEl.className = 'text-4xl md:text-5xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] mt-4 transition-all duration-300';
-                } else if (prediction === 'B') {
-                    decEl.textContent = 'BANKER';
-                    decEl.className = 'text-4xl md:text-5xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] mt-4 transition-all duration-300';
-                } else {
-                    decEl.textContent = 'BỎ QUA';
-                    decEl.className = 'text-4xl md:text-5xl font-black text-gray-500 drop-shadow-lg mt-4 transition-all duration-300';
-                }
-            }
-
-            const chartEl = document.getElementById('klt-history-chart');
-            const validHistory = (kltHistory || []).filter(h => h.predicted !== null);
-            
-            if (chartEl && validHistory.length > 0) {
-                let correct = 0;
-                let chartHtml = '<div class="flex items-end justify-start h-full gap-1 px-1 min-w-max pb-1">';
-                validHistory.forEach(h => {
-                    if (h.correct) correct++;
-                    const color = h.correct ? 'bg-cyan-500 shadow-[0_0_5px_rgba(6,182,212,0.6)]' : 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
-                    const height = h.correct ? 'h-full' : 'h-2/5';
-                    chartHtml += `<div class="w-2.5 rounded-[1px] ${color} ${height}" title="Ván ${h.gameNum}: KLT dự đoán ${h.predicted} ➜ KQ: ${h.actual}"></div>`;
-                });
-                chartHtml += '</div>';
-                chartEl.innerHTML = chartHtml;
-                chartEl.scrollLeft = chartEl.scrollWidth;
-
-                if (accEl) {
-                    const accRate = Math.round((correct / validHistory.length) * 100);
-                    accEl.textContent = `${accRate}% (${correct}/${validHistory.length})`;
-                    accEl.className = accRate >= 50 ? 'text-cyan-400' : 'text-red-400';
-                }
-            } else if (chartEl) {
-                chartEl.innerHTML = '<p class="text-gray-600 text-xs w-full text-center h-full flex items-center justify-center">Đang tích lũy...</p>';
-                if (accEl) accEl.textContent = '0%';
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
             loadMasterSessions();
             
@@ -3500,9 +3163,10 @@
             }, 500);
         });
 
-        // Hàm tự động tạo phiên
+        // Hàm tự động tạo phiên (Mới eidt vào)
         function autoCreateSession() {
             const id = `session-${Date.now()}`;
+            // Đặt tên phiên kèm thời gian tự động
             const sessionName = `Phiên F5 ${new Date().toLocaleTimeString('vi-VN')}`;
             
             masterState.sessions[id] = { id: id, name: sessionName, created: new Date().toISOString(), history: [], geHistory: [] };
@@ -3512,11 +3176,13 @@
             saveMasterSessions(); 
             updateMasterSessionSelector(); 
             
+            // Đặt thẻ select hiển thị đúng phiên vừa tạo
             const selector = document.getElementById('masterSessionSelector');
             if(selector) selector.value = id;
             
             updateCurrentSessionInfo();
             
+            // Bắn tín hiệu sang các iframe
             broadcastToAll('create_session', { name: sessionName, id: id });
             initializeOriginalPatternDB();
             
@@ -3524,64 +3190,6 @@
             startSessionTimer();
         }
 
-        /* =========================================================================
-           HÀM HỖ TRỢ GIAO DIỆN (UI) MỚI ĐƯỢC BỔ SUNG
-           ========================================================================= */
-        window.openSubCharts = new Set(); // Bộ nhớ tạm các chart con đang mở
-
-        function toggleGlobalKltDetails() {
-            const p = document.getElementById('klt-details-panel');
-            if (p) p.classList.toggle('hidden');
-        }
-
-        function toggleKltSubChart(chartName) {
-            const chartDiv = document.getElementById(`klt-subchart-${chartName}`);
-            if (!chartDiv) return;
-
-            if (!chartDiv.classList.contains('hidden')) {
-                chartDiv.classList.add('hidden');
-                window.openSubCharts.delete(chartName);
-                return;
-            }
-            
-            chartDiv.classList.remove('hidden');
-            window.openSubCharts.add(chartName);
-            renderMiniKltChart(chartName, chartDiv);
-        }
-
-        function renderMiniKltChart(chartName, targetDiv) {
-            const session = masterState.sessions[masterState.currentSessionId];
-            if (!session) return;
-
-            let arr = [];
-            if (chartName === 'BIGROAD') arr = session.history || [];
-            else if (chartName === 'HT1') arr = masterState.systemDetails.ht1?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
-            else if (chartName === 'HT4') arr = masterState.systemDetails.ht4?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
-            else if (chartName === 'GE') arr = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
-            else if (chartName === 'SGE') arr = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
-            else if (chartName === 'KLC') arr = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
-
-            if (arr.length === 0) {
-                 targetDiv.innerHTML = '<span class="text-xs text-gray-500 w-full text-center flex items-center justify-center">Chưa có dữ liệu</span>';
-                 return;
-            }
-
-            let html = '';
-            arr.slice(-40).forEach(val => { // Lấy 40 tay gần nhất
-                if (chartName === 'BIGROAD') {
-                    const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_3px_rgba(59,130,246,0.5)]' : 'bg-red-500 shadow-[0_0_3px_rgba(239,68,68,0.5)]';
-                    html += `<div class="w-[14px] h-[14px] flex-shrink-0 rounded-full ${color} text-[8px] flex items-center justify-center text-white font-bold border border-white/20">${val}</div>`;
-                } else {
-                    const color = val === 'D' ? 'bg-green-500 shadow-[0_0_2px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_2px_rgba(239,68,68,0.5)]';
-                    const h = val === 'D' ? 'h-full' : 'h-1/3';
-                    html += `<div class="w-1.5 flex-shrink-0 rounded-sm ${color} ${h}"></div>`;
-                }
-            });
-            
-            targetDiv.innerHTML = html;
-            targetDiv.scrollLeft = targetDiv.scrollWidth;
-        }
-
     </script>
 </body>
-</html>
+            </html>
