@@ -3377,12 +3377,12 @@
             const evalKLC = analyzeMarkovPattern(arrKLC, 'DS', klcBase, false, 'KLC');
 
             const evaluations = [
-                { name: 'BIGROAD', res: evalBR, base: null, betInfo: checkBetPriority(arrBR) },
-                { name: 'HT1', res: evalHT1, base: ht1Base, betInfo: checkBetPriority(arrHT1) },
-                { name: 'HT4', res: evalHT4, base: ht4Base, betInfo: checkBetPriority(arrHT4) },
-                { name: 'GE', res: evalGE, base: geBase, betInfo: checkBetPriority(arrGE) },
-                { name: 'SGE', res: evalSGE, base: sgeBase, betInfo: checkBetPriority(arrSGE) },
-                { name: 'KLC', res: evalKLC, base: klcBase, betInfo: checkBetPriority(arrKLC) }
+                { name: 'BIGROAD', res: evalBR, base: null, betInfo: checkBetPriority(arrBR), isRev: false },
+                { name: 'HT1', res: evalHT1, base: ht1Base, betInfo: checkBetPriority(arrHT1), isRev: ht1Rev },
+                { name: 'HT4', res: evalHT4, base: ht4Base, betInfo: checkBetPriority(arrHT4), isRev: ht4Rev },
+                { name: 'GE', res: evalGE, base: geBase, betInfo: checkBetPriority(arrGE), isRev: false },
+                { name: 'SGE', res: evalSGE, base: sgeBase, betInfo: checkBetPriority(arrSGE), isRev: false },
+                { name: 'KLC', res: evalKLC, base: klcBase, betInfo: checkBetPriority(arrKLC), isRev: false }
             ];
 
             // --- TÍNH ĐIỂM (CÓ TRỌNG SỐ ƯU TIÊN BỆT) ---
@@ -3430,13 +3430,19 @@
             const currentStateStr = `${validSignalsCount} Biểu đồ đạt chuẩn Markov`;
             masterState.currentKltState = currentStateStr;
 
-            // --- TẠO GIAO DIỆN HIỂN THỊ CHI TIẾT (CHỈ HIỂN THỊ RÕ LỆNH GỐC) ---
+            // --- TẠO GIAO DIỆN HIỂN THỊ CHI TIẾT (CHỈ HIỂN THỊ RÕ LỆNH GỐC ĐÃ BIÊN DỊCH) ---
             let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-left w-full">`;
             evaluations.forEach(ev => {
-                // Xác định màu sắc và text dựa trên LỆNH GỐC
-                let baseText = ev.base ? ev.base : 'CHƯA CÓ';
-                let baseColor = ev.base === 'P' ? 'text-blue-400' : (ev.base === 'B' ? 'text-red-400' : 'text-gray-500');
-                let statusColor = ev.base ? (ev.base === 'P' ? 'border-blue-500/40 bg-blue-900/10' : 'border-red-500/40 bg-red-900/10') : 'border-gray-600 bg-gray-800/50';
+                // XỬ LÝ LỆNH GỐC: Nếu trạng thái là NGƯỢC (isRev = true), tự động đảo tín hiệu (P -> B, B -> P)
+                let finalBase = ev.base;
+                if (ev.isRev && finalBase) {
+                    finalBase = (finalBase === 'P') ? 'B' : 'P';
+                }
+
+                // Xác định màu sắc và text dựa trên LỆNH GỐC đã qua xử lý
+                let baseText = finalBase ? finalBase : 'CHƯA CÓ';
+                let baseColor = finalBase === 'P' ? 'text-blue-400' : (finalBase === 'B' ? 'text-red-400' : 'text-gray-500');
+                let statusColor = finalBase ? (finalBase === 'P' ? 'border-blue-500/40 bg-blue-900/10' : 'border-red-500/40 bg-red-900/10') : 'border-gray-600 bg-gray-800/50';
 
                 let betBadge = ev.betInfo.isBet ? `<div class="mt-2 text-[11px] text-yellow-400 font-bold bg-yellow-900/40 px-2 py-0.5 rounded border border-yellow-500/50 inline-block drop-shadow-md">🔥 ƯU TIÊN (BỆT): ${ev.betInfo.desc}</div>` : '';
 
@@ -3656,4 +3662,4 @@
 
     </script>
 </body>
-    </html>
+</html>
