@@ -3164,291 +3164,195 @@
         }
 
         /* =========================================================================
-           THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - MARKOV PATTERN MATCHING
+           THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - V2 (LOGIC THỰC CHIẾN)
            ========================================================================= */
 
-        function analyzeMarkovPattern(arr, type, baseSignal, isReverse, chartName) {
-            if (!arr || arr.length < 3) return { signal: null, reason: `Chưa đủ dữ liệu (Cần > 3 ván)` };
+        function analyzeKLT_PatternV2(arr, type, trueBaseSignal, chartName) {
+            if (!arr || arr.length < 5) return { signal: null, reason: `Chưa đủ dữ liệu biểu đồ.` };
 
-            // 1. KIỂM TRA BỘ LỌC DỚP (Tránh các tay rủi ro cao)
-            let lastChar = arr[arr.length - 1];
-            
-            let streak = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] === lastChar) streak++;
-                else break;
-            }
-
-            let pingpong = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] !== arr[i+1]) pingpong++;
-                else break;
-            }
-
-            // Luật từ chối tín hiệu rủi ro (Theo yêu cầu: DD/SS lần 2 trở đi, 1-1 dài)
-            if (pingpong >= 5) {
-                return { signal: null, reason: `Từ chối: Cầu 1-1 đã kéo dài ${pingpong} nhịp (Dễ bẻ).` };
-            }
-            if (streak >= 4) { 
-                return { signal: null, reason: `Từ chối: Bệt ${lastChar} đã kéo dài ${streak} nhịp (Rủi ro gãy).` };
-            }
-
-            // 2. PHÂN TÍCH MARKOV: CHẤM ĐIỂM TÌM CỤM UY TÍN NHẤT
-            let maxClusterSize = Math.min(arr.length - 1, 5); 
-            let bestMatch = null;
-            let highestScore = -1; // Điểm số = Tỷ lệ % x Số lần lặp lại
-
-            for (let size = 1; size <= maxClusterSize; size++) {
-                let currentCluster = arr.slice(-size).join('');
-                let nextPossibilities = [];
-
-                // Quét lại lịch sử xem cụm này từng ra gì tiếp theo
-                for (let i = 0; i <= arr.length - size - 1; i++) {
-                    let pastCluster = arr.slice(i, i + size).join('');
-                    if (pastCluster === currentCluster) {
-                        nextPossibilities.push(arr[i + size]);
-                    }
-                }
-
-                if (nextPossibilities.length > 0) {
-                    let count1 = 0, count2 = 0;
-                    let val1 = type === 'DS' ? 'D' : 'P';
-                    let val2 = type === 'DS' ? 'S' : 'B';
-
-                    nextPossibilities.forEach(x => {
-                        if (x === val1) count1++;
-                        else if (x === val2) count2++;
-                    });
-
-                    let total = nextPossibilities.length;
-                    let rate1 = (count1 / total) * 100;
-                    let rate2 = (count2 / total) * 100;
-
-                    let predictRaw = null;
-                    let confidence = 0;
-
-                    if (rate1 === 100) { predictRaw = val1; confidence = 100; }
-                    else if (rate2 === 100) { predictRaw = val2; confidence = 100; }
-                    else if (rate1 >= 75) { predictRaw = val1; confidence = rate1; }
-                    else if (rate2 >= 75) { predictRaw = val2; confidence = rate2; }
-                    else if (total >= 2) {
-                        // Xử lý trường hợp 50-50: Bắt nhịp 2 lần gần nhất
-                        let lastTwo = nextPossibilities.slice(-2);
-                        if (lastTwo[0] === lastTwo[1]) {
-                            predictRaw = lastTwo[1];
-                            confidence = 55;
-                        }
-                    }
-
-                    if (predictRaw) {
-                        // TÍNH ĐIỂM TIN CẬY: Một mẫu 100% lặp 3 lần (300 điểm) sẽ "đè chết" mẫu 100% lặp 1 lần (100 điểm)
-                        let score = confidence * total; 
-                        
-                        // Giảm trọng số của cụm 50-50 để không cạnh tranh với cụm chuẩn
-                        if (confidence === 55) score = 55;
-
-                        if (score > highestScore) {
-                            highestScore = score;
-                            let detailStr = "";
-                            
-                            if (confidence === 100) {
-                                detailStr = `Cụm ${currentCluster}->${predictRaw} 100% (${total}/${total} lần)`;
-                            } else if (confidence === 55) {
-                                detailStr = `Cụm ${currentCluster} tỷ lệ thấp, nhưng 2 lần gần nhất đều ra ${predictRaw}`;
-                            } else {
-                                detailStr = `Cụm ${currentCluster}->${predictRaw} ${confidence.toFixed(0)}% (Từ ${total} lần)`;
-                            }
-                            
-                            bestMatch = { cluster: currentCluster, predictRaw, confidence, detailStr, total };
-                        }
-                    }
-                }
-            }
-
-            if (!bestMatch) {
-                return { signal: null, reason: `Chưa có cụm quy luật rõ ràng (Tỷ lệ thấp).` };
-            }
-
-            // 3. CHUYỂN ĐỔI TÍN HIỆU RA P/B
-            let finalPB = null;
-            if (type === 'PB') {
-                finalPB = bestMatch.predictRaw; 
-            } else {
-                if (!baseSignal) return { signal: null, reason: `<span class="text-white">${bestMatch.detailStr}</span> nhưng thiếu lệnh nền để chốt.` };
-                
-                let targetDS = bestMatch.predictRaw; 
-                if (!isReverse) {
-                    finalPB = targetDS === 'D' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
-                } else {
-                    finalPB = targetDS === 'S' ? baseSignal : (baseSignal === 'P' ? 'B' : 'P');
-                }
-            }
-
-            return { 
-                signal: finalPB, 
-                reason: `<span class="text-white">${bestMatch.detailStr}</span> ➜ Lệnh: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>` 
-            };
-        }
-
-        /* =========================================================================
-           THUẬT TOÁN KLT - TÌM KIẾM BỆT TIỀM NĂNG (VỠ KHUÔN 1-1, 1-2)
-           ========================================================================= */
-        function checkBetPriority(arr) {
-            if (!arr || arr.length < 4) return { isBet: false, desc: "" };
-            
+            // 1. Chuyển mảng thành các chuỗi (streaks)
             let streaks = [];
             let cur = arr[0], count = 1;
-            for(let i=1; i<arr.length; i++) {
+            for(let i = 1; i < arr.length; i++) {
                 if(arr[i] === cur) count++;
                 else { streaks.push({val: cur, count: count}); cur = arr[i]; count = 1; }
             }
             streaks.push({val: cur, count: count});
 
-            if (streaks.length < 2) {
-                return { isBet: streaks[0].count >= 3, desc: streaks[0].count >= 3 ? `Đang bệt dài (${streaks[0].count})` : "" };
-            }
+            const lastStreak = streaks[streaks.length - 1];
+            const currVal = lastStreak.val;
 
-            let last = streaks[streaks.length - 1];
-            let prev1 = streaks.length > 1 ? streaks[streaks.length - 2] : null;
-            let prev2 = streaks.length > 2 ? streaks[streaks.length - 3] : null;
+            // 2. Lấy tất cả các chuỗi trong quá khứ có CÙNG giá trị với chuỗi hiện tại
+            const pastStreaks = streaks.slice(0, -1).filter(s => s.val === currVal);
 
-            if (last.count >= 4) {
-                return { isBet: true, desc: `Đang bệt ${last.val} (${last.count} tay)` };
-            }
-
-            if (last.count === 2 || last.count === 3) {
-                if (prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
-                    return { isBet: true, desc: `Vỡ khuôn 1-1, bắt đầu bệt ${last.val}` };
-                }
-                if (prev1 && prev1.count === 2 && prev2 && prev2.count === 1) {
-                    return { isBet: true, desc: `Vỡ khuôn 1-2, chuyển sang bệt ${last.val}` };
-                }
-                if (prev1 && prev1.count === 1 && prev2 && prev2.count === 2) {
-                    return { isBet: true, desc: `Vỡ khuôn 2-1, chuyển sang bệt ${last.val}` };
-                }
-                if (last.count === 3) {
-                     return { isBet: true, desc: `Đang hình thành bệt ${last.val} (3 tay)` };
+            // Kiểm tra RULE 1: Trước đó cứ 1 D sang S (hoặc 1 S sang D) >= 2 lần
+            // Tức là 2 chuỗi gần nhất của currVal phải có độ dài CHÍNH XÁC bằng 1
+            let hasPattern = false;
+            if (pastStreaks.length >= 2) {
+                const prev1 = pastStreaks[pastStreaks.length - 1];
+                const prev2 = pastStreaks[pastStreaks.length - 2];
+                if (prev1.count === 1 && prev2.count === 1) {
+                    hasPattern = true;
                 }
             }
 
-            return { isBet: false, desc: "" };
+            // Nếu không có dớp 1D->S hoặc đang đi loạn -> BỎ QUA NGAY LẬP TỨC
+            if (!hasPattern) {
+                return { signal: null, reason: `Cầu loạn/Không có dớp 1-${currVal} rõ ràng. Bỏ qua.` };
+            }
+
+            // KHI ĐÃ VÀO FORM DỚP: Bắt đầu xử lý độ dài của cột hiện tại
+            let predictRaw = null;
+            let reasonDetail = "";
+            let oppositeVal = (currVal === 'D') ? 'S' : 'D';
+            if (type === 'PB') oppositeVal = (currVal === 'P') ? 'B' : 'P';
+
+            if (lastStreak.count === 1) {
+                // Rule 1: Đang ở nhịp 1 -> Khả năng cao sẽ bẻ
+                predictRaw = oppositeVal;
+                reasonDetail = `Có dớp 1-${currVal} bẻ ${oppositeVal} (>=2 lần). Bắt bẻ nhịp 1.`;
+            } 
+            else if (lastStreak.count === 2) {
+                // Rule 2: Đang ở DD hoặc SS -> Check lịch sử 100%
+                let reachedTwoHistory = pastStreaks.filter(s => s.count >= 2);
+                
+                if (reachedTwoHistory.length === 0) {
+                    return { signal: null, reason: `Chưa có lịch sử nhịp 2 của ${currVal} để so sánh. Bỏ qua.` };
+                }
+
+                let brokeCount = reachedTwoHistory.filter(s => s.count === 2).length;
+                let continuedCount = reachedTwoHistory.filter(s => s.count >= 3).length;
+
+                if (brokeCount > 0 && continuedCount === 0) {
+                    predictRaw = oppositeVal; // 100% bẻ ở nhịp 2
+                    reasonDetail = `Lịch sử 100% lên 2-${currVal} là bẻ ${oppositeVal}.`;
+                } else if (continuedCount > 0 && brokeCount === 0) {
+                    predictRaw = currVal; // 100% đi tiếp lên 3
+                    reasonDetail = `Lịch sử 100% lên 2-${currVal} là đi tiếp thành Bệt.`;
+                } else {
+                    return { signal: null, reason: `Lịch sử nhịp 2 của ${currVal} bị nhiễu (Không đạt 100%). Bỏ qua.` };
+                }
+            } 
+            else if (lastStreak.count >= 3) {
+                // Rule 3: Đang DDD (>=3) -> Tiếp tục đu bệt D
+                predictRaw = currVal;
+                reasonDetail = `Đang form đu bệt ${currVal} (${lastStreak.count} tay).`;
+            }
+
+            if (!predictRaw) return { signal: null, reason: "Lỗi logic không xác định." };
+
+            // 3. DỊCH MÃ RA P/B CHO ĐỒNG THUẬN
+            let finalPB = null;
+            if (type === 'PB') {
+                finalPB = predictRaw; // BigRoad thì predictRaw đã là P/B
+            } else {
+                if (!trueBaseSignal) return { signal: null, reason: `${reasonDetail} Nhưng thiếu Lệnh Gốc để biên dịch.` };
+                // trueBaseSignal là lệnh gốc ĐÃ biên dịch (tức là đã lật nếu có chữ NGƯỢC)
+                finalPB = (predictRaw === 'D') ? trueBaseSignal : (trueBaseSignal === 'P' ? 'B' : 'P');
+            }
+
+            return { 
+                signal: finalPB, 
+                reason: `<span class="text-white">${reasonDetail}</span> ➜ Chốt: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>` 
+            };
+        }
+
+        // Hàm hỗ trợ dịch lệnh gốc chuẩn xác từ text "P", "NGƯỢC B", v.v...
+        function getTrueBaseSignal(verdictRaw) {
+            if (!verdictRaw) return null;
+            let upper = verdictRaw.toUpperCase();
+            let isP = upper.includes('P');
+            let isB = upper.includes('B');
+            let isRev = upper.includes('NGƯỢC');
+            
+            if (isP) return isRev ? 'B' : 'P';
+            if (isB) return isRev ? 'P' : 'B';
+            return null;
         }
 
         function calculateKLT() {
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
 
-            // --- CHUẨN BỊ DỮ LIỆU TỪ 6 BIỂU ĐỒ ---
-            // 1. Big Road (PB)
+            // --- 1. CHUẨN BỊ DỮ LIỆU TỪ 6 BIỂU ĐỒ ---
             const arrBR = session.history || [];
-
-            // 2. HT1 (DS)
+            
             const ht1Details = masterState.systemDetails.ht1;
-            const arrHT1 = ht1Details && ht1Details.intervalHistory ? ht1Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
-            const ht1BaseVerdict = ht1Details && ht1Details.verdict ? ht1Details.verdict.toUpperCase().trim() : '';
-            let ht1Base = ht1BaseVerdict.includes('P') ? 'P' : (ht1BaseVerdict.includes('B') ? 'B' : null);
-            let ht1Rev = ht1BaseVerdict.includes('NGƯỢC');
+            const arrHT1 = ht1Details?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
+            const ht1TrueBase = getTrueBaseSignal(ht1Details?.verdict);
 
-            // 3. HT4 (DS)
             const ht4Details = masterState.systemDetails.ht4;
-            const arrHT4 = ht4Details && ht4Details.intervalHistory ? ht4Details.intervalHistory.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') : [];
-            const ht4BaseVerdict = ht4Details && ht4Details.verdict ? ht4Details.verdict.toUpperCase().trim() : '';
-            let ht4Base = ht4BaseVerdict.includes('P') ? 'P' : (ht4BaseVerdict.includes('B') ? 'B' : null);
-            let ht4Rev = ht4BaseVerdict.includes('NGƯỢC');
+            const arrHT4 = ht4Details?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
+            const ht4TrueBase = getTrueBaseSignal(ht4Details?.verdict);
 
-            // 4. GE (DS)
             const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
-            const geBase = masterState.currentGePrediction;
+            const geTrueBase = masterState.currentGePrediction;
 
-            // 5. SGE (DS)
             const arrSGE = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
-            const sgeBase = masterState.currentSgePending ? masterState.currentSgePending.prediction : null;
+            const sgeTrueBase = masterState.currentSgePending ? masterState.currentSgePending.prediction : null;
 
-            // 6. KLC (DS)
             const arrKLC = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
-            const klcBase = masterState.currentKlcPrediction;
+            const klcTrueBase = masterState.currentKlcPrediction;
 
-            // --- PHÂN TÍCH MARKOV & KIỂM TRA BỆT ƯU TIÊN ---
-            const evalBR = analyzeMarkovPattern(arrBR, 'PB', null, false, 'BIGROAD');
-            const evalHT1 = analyzeMarkovPattern(arrHT1, 'DS', ht1Base, ht1Rev, 'HT1');
-            const evalHT4 = analyzeMarkovPattern(arrHT4, 'DS', ht4Base, ht4Rev, 'HT4');
-            const evalGE = analyzeMarkovPattern(arrGE, 'DS', geBase, false, 'GE');
-            const evalSGE = analyzeMarkovPattern(arrSGE, 'DS', sgeBase, false, 'SGE');
-            const evalKLC = analyzeMarkovPattern(arrKLC, 'DS', klcBase, false, 'KLC');
+            // --- 2. QUÉT LOGIC TỪNG BIỂU ĐỒ ---
+            const evalBR = analyzeKLT_PatternV2(arrBR, 'PB', null, 'BIGROAD');
+            const evalHT1 = analyzeKLT_PatternV2(arrHT1, 'DS', ht1TrueBase, 'HT1');
+            const evalHT4 = analyzeKLT_PatternV2(arrHT4, 'DS', ht4TrueBase, 'HT4');
+            const evalGE = analyzeKLT_PatternV2(arrGE, 'DS', geTrueBase, 'GE');
+            const evalSGE = analyzeKLT_PatternV2(arrSGE, 'DS', sgeTrueBase, 'SGE');
+            const evalKLC = analyzeKLT_PatternV2(arrKLC, 'DS', klcTrueBase, 'KLC');
 
             const evaluations = [
-                { name: 'BIGROAD', res: evalBR, base: null, betInfo: checkBetPriority(arrBR), isRev: false },
-                { name: 'HT1', res: evalHT1, base: ht1Base, betInfo: checkBetPriority(arrHT1), isRev: ht1Rev },
-                { name: 'HT4', res: evalHT4, base: ht4Base, betInfo: checkBetPriority(arrHT4), isRev: ht4Rev },
-                { name: 'GE', res: evalGE, base: geBase, betInfo: checkBetPriority(arrGE), isRev: false },
-                { name: 'SGE', res: evalSGE, base: sgeBase, betInfo: checkBetPriority(arrSGE), isRev: false },
-                { name: 'KLC', res: evalKLC, base: klcBase, betInfo: checkBetPriority(arrKLC), isRev: false }
+                { name: 'BIGROAD', res: evalBR, base: null },
+                { name: 'HT1', res: evalHT1, base: ht1TrueBase },
+                { name: 'HT4', res: evalHT4, base: ht4TrueBase },
+                { name: 'GE', res: evalGE, base: geTrueBase },
+                { name: 'SGE', res: evalSGE, base: sgeTrueBase },
+                { name: 'KLC', res: evalKLC, base: klcTrueBase }
             ];
 
-            // --- TÍNH ĐIỂM (CÓ TRỌNG SỐ ƯU TIÊN BỆT) ---
-            let scoreP = 0;
-            let scoreB = 0;
+            // --- 3. ĐẾM PHIẾU ĐỒNG THUẬN ---
+            let votesP = 0;
+            let votesB = 0;
             let validSignalsCount = 0;
-            let priorityMessages = [];
 
             evaluations.forEach(ev => {
-                if (ev.res.signal === 'P' || ev.res.signal === 'B') {
-                    validSignalsCount++;
-                    let points = 1; 
-                    
-                    if (ev.betInfo.isBet) {
-                        points = 3; 
-                        priorityMessages.push(`${ev.name} [${ev.betInfo.desc}]`);
-                    }
-
-                    if (ev.res.signal === 'P') scoreP += points;
-                    if (ev.res.signal === 'B') scoreB += points;
-                }
+                if (ev.res.signal === 'P') { votesP++; validSignalsCount++; }
+                if (ev.res.signal === 'B') { votesB++; validSignalsCount++; }
             });
 
+            // --- 4. CHỐT KẾT LUẬN TỔNG ---
             let finalPrediction = null;
             let finalReasonText = "";
 
             if (validSignalsCount === 0) {
-                finalReasonText = "Tất cả các biểu đồ đều rơi vào trạng thái rủi ro (Cầu loạn/Ping-pong) hoặc không có quy luật. Khuyên BỎ QUA.";
-            } else if (scoreP > scoreB) {
+                finalReasonText = "Tất cả các biểu đồ đều rơi vào trạng thái rủi ro (Cầu loạn) hoặc thiếu chắc chắn. Hệ thống tự động BỎ QUA.";
+            } else if (votesP > votesB) {
                 finalPrediction = 'P';
-                finalReasonText = `ĐỀ XUẤT QUA LOGIC KLT: Đồng thuận PLAYER (Điểm P: ${scoreP} > B: ${scoreB}).`;
-            } else if (scoreB > scoreP) {
+                let strength = (votesP >= 3 && votesB === 0) ? "MẠNH TAY" : "VÀO LỆNH";
+                finalReasonText = `ĐỒNG THUẬN PLAYER (${strength}): Có ${votesP} biểu đồ báo P, ${votesB} biểu đồ báo B.`;
+            } else if (votesB > votesP) {
                 finalPrediction = 'B';
-                finalReasonText = `ĐỀ XUẤT QUA LOGIC KLT: Đồng thuận BANKER (Điểm B: ${scoreB} > P: ${scoreP}).`;
+                let strength = (votesB >= 3 && votesP === 0) ? "MẠNH TAY" : "VÀO LỆNH";
+                finalReasonText = `ĐỒNG THUẬN BANKER (${strength}): Có ${votesB} biểu đồ báo B, ${votesP} biểu đồ báo P.`;
             } else {
-                finalReasonText = `Xung đột tín hiệu đánh giá qua logic KLT (Điểm P: ${scoreP} = B: ${scoreB}). Tự động huỷ lệnh.`;
-            }
-
-            if (priorityMessages.length > 0 && finalPrediction) {
-                finalReasonText += `<br/><span class="text-yellow-400 font-bold">🔥 ĐÃ TỰ ĐỘNG BẺ LỆNH/ƯU TIÊN THEO: ${priorityMessages.join(', ')}</span>`;
+                // votesP === votesB (Hoà nhau: 1-1, 2-2...)
+                finalReasonText = `XUNG ĐỘT TÍN HIỆU (Hoà ${votesP} P - ${votesB} B): Các biểu đồ đang đánh nhau. Hệ thống yêu cầu BỎ QUA.`;
             }
 
             masterState.currentKltPrediction = finalPrediction;
-            
-            const currentStateStr = `${validSignalsCount} Biểu đồ đạt chuẩn Markov`;
+            const currentStateStr = `${validSignalsCount}/6 Biểu đồ đạt chuẩn Dớp`;
             masterState.currentKltState = currentStateStr;
 
-            // --- TẠO GIAO DIỆN HIỂN THỊ CHI TIẾT (CHỈ HIỂN THỊ RÕ LỆNH GỐC ĐÃ BIÊN DỊCH) ---
+            // --- 5. RENDER GIAO DIỆN ---
             let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-left w-full">`;
             evaluations.forEach(ev => {
-                // XỬ LÝ LỆNH GỐC: Nếu trạng thái là NGƯỢC (isRev = true), tự động đảo tín hiệu (P -> B, B -> P)
-                let finalBase = ev.base;
-                if (ev.isRev && finalBase) {
-                    finalBase = (finalBase === 'P') ? 'B' : 'P';
-                }
+                let baseText = ev.base ? ev.base : 'CHƯA CÓ';
+                let baseColor = ev.base === 'P' ? 'text-blue-400' : (ev.base === 'B' ? 'text-red-400' : 'text-gray-500');
+                let statusColor = ev.base ? (ev.base === 'P' ? 'border-blue-500/40 bg-blue-900/10' : 'border-red-500/40 bg-red-900/10') : 'border-gray-600 bg-gray-800/50';
 
-                // Xác định màu sắc và text dựa trên LỆNH GỐC đã qua xử lý
-                let baseText = finalBase ? finalBase : 'CHƯA CÓ';
-                let baseColor = finalBase === 'P' ? 'text-blue-400' : (finalBase === 'B' ? 'text-red-400' : 'text-gray-500');
-                let statusColor = finalBase ? (finalBase === 'P' ? 'border-blue-500/40 bg-blue-900/10' : 'border-red-500/40 bg-red-900/10') : 'border-gray-600 bg-gray-800/50';
-
-                let betBadge = ev.betInfo.isBet ? `<div class="mt-2 text-[11px] text-yellow-400 font-bold bg-yellow-900/40 px-2 py-0.5 rounded border border-yellow-500/50 inline-block drop-shadow-md">🔥 ƯU TIÊN (BỆT): ${ev.betInfo.desc}</div>` : '';
-
-                // Dọn dẹp logic KLT thành text phụ để hiển thị ghi chú
                 let cleanReason = ev.res.reason.replace(/<[^>]*>?/gm, '');
-                let markovSignal = ev.res.signal ? ev.res.signal : 'BỎ QUA';
+                let logicSignal = ev.res.signal ? ev.res.signal : 'BỎ QUA';
 
                 detailsHtml += `
                     <div class="p-3 rounded-lg border ${statusColor} text-sm cursor-pointer hover:bg-gray-800/80 transition-colors" onclick="toggleKltSubChart('${ev.name}')">
@@ -3459,9 +3363,9 @@
                                 <span class="font-black text-base ${baseColor}">${baseText}</span>
                             </div>
                         </div>
-                        ${betBadge}
                         <div class="text-gray-500 mt-2 pointer-events-none text-[11px] leading-relaxed italic">
-                            ↳ Logic KLT đề xuất: ${markovSignal} (${cleanReason})
+                            ↳ Logic V2: <span class="font-bold ${ev.res.signal === 'P' ? 'text-blue-400' : (ev.res.signal === 'B' ? 'text-red-400' : 'text-gray-400')}">${logicSignal}</span> 
+                            (${cleanReason})
                         </div>
                         <div id="klt-subchart-${ev.name}" class="hidden h-6 mt-2 flex items-end justify-start gap-[1px] overflow-x-auto custom-scrollbar pb-1"></div>
                     </div>
@@ -3471,7 +3375,6 @@
 
             if (!session.kltHistory) session.kltHistory = [];
             
-            // Render
             renderKltUI(currentStateStr, finalPrediction, finalReasonText, detailsHtml, session.kltHistory);
         }
 
