@@ -3182,144 +3182,78 @@
             const lastStreak = streaks[streaks.length - 1];
             const currVal = lastStreak.val;
 
+            // 2. Lấy tất cả các chuỗi trong quá khứ có CÙNG giá trị với chuỗi hiện tại
+            const pastStreaks = streaks.slice(0, -1).filter(s => s.val === currVal);
+
+            // Kiểm tra RULE 1: Trước đó cứ 1 D sang S (hoặc 1 S sang D) >= 2 lần
+            // Tức là 2 chuỗi gần nhất của currVal phải có độ dài CHÍNH XÁC bằng 1
+            let hasPattern = false;
+            if (pastStreaks.length >= 2) {
+                const prev1 = pastStreaks[pastStreaks.length - 1];
+                const prev2 = pastStreaks[pastStreaks.length - 2];
+                if (prev1.count === 1 && prev2.count === 1) {
+                    hasPattern = true;
+                }
+            }
+
+            // Nếu không có dớp 1D->S hoặc đang đi loạn -> BỎ QUA NGAY LẬP TỨC
+            if (!hasPattern) {
+                return { signal: null, reason: `Cầu loạn/Không có dớp 1-${currVal} rõ ràng. Bỏ qua.` };
+            }
+
+            // KHI ĐÃ VÀO FORM DỚP: Bắt đầu xử lý độ dài của cột hiện tại
             let predictRaw = null;
             let reasonDetail = "";
             let oppositeVal = (currVal === 'D') ? 'S' : 'D';
             if (type === 'PB') oppositeVal = (currVal === 'P') ? 'B' : 'P';
 
-            // --- ĐÃ ĐẢO LẠI LOGIC: ƯU TIÊN BẮT BỆT LÊN ĐẦU ---
-            if (lastStreak.count >= 3) {
+            if (lastStreak.count === 1) {
+                // Rule 1: Đang ở nhịp 1 -> Khả năng cao sẽ bẻ
+                predictRaw = oppositeVal;
+                reasonDetail = `Có dớp 1-${currVal} bẻ ${oppositeVal} (>=2 lần). Bắt bẻ nhịp 1.`;
+            } 
+            else if (lastStreak.count === 2) {
+                // Rule 2: Đang ở DD hoặc SS -> Check lịch sử 100%
+                let reachedTwoHistory = pastStreaks.filter(s => s.count >= 2);
+                
+                if (reachedTwoHistory.length === 0) {
+                    return { signal: null, reason: `Chưa có lịch sử nhịp 2 của ${currVal} để so sánh. Bỏ qua.` };
+                }
+
+                let brokeCount = reachedTwoHistory.filter(s => s.count === 2).length;
+                let continuedCount = reachedTwoHistory.filter(s => s.count >= 3).length;
+
+                if (brokeCount > 0 && continuedCount === 0) {
+                    predictRaw = oppositeVal; // 100% bẻ ở nhịp 2
+                    reasonDetail = `Lịch sử 100% lên 2-${currVal} là bẻ ${oppositeVal}.`;
+                } else if (continuedCount > 0 && brokeCount === 0) {
+                    predictRaw = currVal; // 100% đi tiếp lên 3
+                    reasonDetail = `Lịch sử 100% lên 2-${currVal} là đi tiếp thành Bệt.`;
+                } else {
+                    return { signal: null, reason: `Lịch sử nhịp 2 của ${currVal} bị nhiễu (Không đạt 100%). Bỏ qua.` };
+                }
+            } 
+            else if (lastStreak.count >= 3) {
+                // Rule 3: Đang DDD (>=3) -> Tiếp tục đu bệt D
                 predictRaw = currVal;
                 reasonDetail = `Đang form đu bệt ${currVal} (${lastStreak.count} tay).`;
-            } 
-            else {
-                // NẾU CHƯA TỚI 3 (ĐANG NHỊP 1 HOẶC 2), XÉT THEO LOGIC BẮT DỚP CŨ
-                const pastStreaks = streaks.slice(0, -1).filter(s => s.val === currVal);
-
-                let hasPattern = false;
-                if (pastStreaks.length >= 2) {
-                    const prev1 = pastStreaks[pastStreaks.length - 1];
-                    const prev2 = pastStreaks[pastStreaks.length - 2];
-                    if (prev1.count === 1 && prev2.count === 1) {
-                        hasPattern = true;
-                    }
-                }
-
-                if (!hasPattern) {
-                    return { signal: null, reason: `Cầu loạn/Không có dớp 1-${currVal} rõ ràng. Bỏ qua.` };
-                }
-
-                if (lastStreak.count === 1) {
-                    predictRaw = oppositeVal;
-                    reasonDetail = `Có dớp 1-${currVal} bẻ ${oppositeVal} (>=2 lần). Bắt bẻ nhịp 1.`;
-                } 
-                else if (lastStreak.count === 2) {
-                    let reachedTwoHistory = pastStreaks.filter(s => s.count >= 2);
-                    
-                    if (reachedTwoHistory.length === 0) {
-                        return { signal: null, reason: `Chưa có lịch sử nhịp 2 của ${currVal} để so sánh. Bỏ qua.` };
-                    }
-
-                    let brokeCount = reachedTwoHistory.filter(s => s.count === 2).length;
-                    let continuedCount = reachedTwoHistory.filter(s => s.count >= 3).length;
-
-                    if (brokeCount > 0 && continuedCount === 0) {
-                        predictRaw = oppositeVal; // 100% bẻ ở nhịp 2
-                        reasonDetail = `Lịch sử 100% lên 2-${currVal} là bẻ ${oppositeVal}.`;
-                    } else if (continuedCount > 0 && brokeCount === 0) {
-                        predictRaw = currVal; // 100% đi tiếp lên 3
-                        reasonDetail = `Lịch sử 100% lên 2-${currVal} là đi tiếp thành Bệt.`;
-                    } else {
-                        return { signal: null, reason: `Lịch sử nhịp 2 của ${currVal} bị nhiễu (Không đạt 100%). Bỏ qua.` };
-                    }
-                }
             }
 
             if (!predictRaw) return { signal: null, reason: "Lỗi logic không xác định." };
 
+            // 3. DỊCH MÃ RA P/B CHO ĐỒNG THUẬN
             let finalPB = null;
             if (type === 'PB') {
-                finalPB = predictRaw;
+                finalPB = predictRaw; // BigRoad thì predictRaw đã là P/B
             } else {
                 if (!trueBaseSignal) return { signal: null, reason: `${reasonDetail} Nhưng thiếu Lệnh Gốc để biên dịch.` };
+                // trueBaseSignal là lệnh gốc ĐÃ biên dịch (tức là đã lật nếu có chữ NGƯỢC)
                 finalPB = (predictRaw === 'D') ? trueBaseSignal : (trueBaseSignal === 'P' ? 'B' : 'P');
             }
 
             return { 
                 signal: finalPB, 
                 reason: `<span class="text-white">${reasonDetail}</span> ➜ Chốt: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>` 
-            };
-        }
-
-        function analyzeKLT_BigRoad(arr) {
-            if (!arr || arr.length < 3) return { signal: null, reason: `Chưa đủ dữ liệu Big Road (Cần >= 3 ván).` };
-
-            let streaks = [];
-            let cur = arr[0], count = 1;
-            for(let i = 1; i < arr.length; i++) {
-                if(arr[i] === cur) count++;
-                else { streaks.push({val: cur, count: count}); cur = arr[i]; count = 1; }
-            }
-            streaks.push({val: cur, count: count});
-
-            const last = streaks[streaks.length - 1];
-            const prev1 = streaks.length > 1 ? streaks[streaks.length - 2] : null;
-            const prev2 = streaks.length > 2 ? streaks[streaks.length - 3] : null;
-
-            const currVal = last.val;
-            const oppVal = currVal === 'P' ? 'B' : 'P';
-            
-            let predictRaw = null;
-            let reasonDetail = "";
-
-            if (last.count >= 3) {
-                predictRaw = currVal;
-                reasonDetail = `Cầu Big Road đang form Bệt ${currVal} (${last.count} tay). Tiếp tục đu bệt.`;
-            }
-            else if (last.count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
-                predictRaw = oppVal;
-                reasonDetail = `Cầu Big Road đang đi form 1-1. Bắt bẻ sang ${oppVal}.`;
-            }
-            else if (prev1 && prev1.count === 2 && prev2 && prev2.count === 2) {
-                if (last.count === 1) {
-                    predictRaw = currVal;
-                    reasonDetail = `Cầu Big Road đang đi form 2-2. Nhịp 1 ưu tiên đánh tiếp lên 2.`;
-                } else if (last.count === 2) {
-                    predictRaw = oppVal;
-                    reasonDetail = `Cầu Big Road đang đi form 2-2. Đã đủ 2 nhịp, bắt bẻ sang ${oppVal}.`;
-                }
-            }
-            else if (last.count === 2 && prev1 && prev1.count === 2) {
-                predictRaw = oppVal;
-                reasonDetail = `Xuất hiện cặp 2-2. Bắt bẻ sang ${oppVal}.`;
-            }
-            else {
-                const pastSameColor = streaks.slice(0, -1).filter(s => s.val === currVal);
-                
-                if (pastSameColor.length > 0) {
-                    const lastTimeSameColor = pastSameColor[pastSameColor.length - 1];
-                    
-                    if (last.count === lastTimeSameColor.count) {
-                        predictRaw = oppVal;
-                        reasonDetail = `Lần gần nhất ${currVal} gãy ở nhịp ${last.count}. Áp dụng: Gãy ở đâu bẻ ở đó.`;
-                    } 
-                    else if (last.count < lastTimeSameColor.count) {
-                        predictRaw = currVal;
-                        reasonDetail = `Lần gần nhất ${currVal} lên được nhịp ${lastTimeSameColor.count}. Xu hướng bù nhịp, đánh tiếp.`;
-                    } 
-                    else {
-                         return { signal: null, reason: `Nhịp đang mở rộng, chưa tạo form rõ ràng. Bỏ qua.` };
-                    }
-                } else {
-                    return { signal: null, reason: `Cầu Big Road chưa có đủ form để xét. Bỏ qua.` };
-                }
-            }
-
-            if (!predictRaw) return { signal: null, reason: `Không bắt được form Big Road. Bỏ qua.` };
-
-            return { 
-                signal: predictRaw, 
-                reason: `<span class="text-white">${reasonDetail}</span> ➜ Chốt: <span class="font-bold ${predictRaw === 'P' ? 'text-blue-400' : 'text-red-400'}">${predictRaw}</span>` 
             };
         }
 
@@ -3361,10 +3295,7 @@
             const klcTrueBase = masterState.currentKlcPrediction;
 
             // --- 2. QUÉT LOGIC TỪNG BIỂU ĐỒ ---
-            // Gọi riêng hàm phân tích thực chiến cho Big Road
-            const evalBR = analyzeKLT_BigRoad(arrBR); 
-            
-            // Các AI còn lại vẫn dùng logic Pattern V2 bắt D/S
+            const evalBR = analyzeKLT_PatternV2(arrBR, 'PB', null, 'BIGROAD');
             const evalHT1 = analyzeKLT_PatternV2(arrHT1, 'DS', ht1TrueBase, 'HT1');
             const evalHT4 = analyzeKLT_PatternV2(arrHT4, 'DS', ht4TrueBase, 'HT4');
             const evalGE = analyzeKLT_PatternV2(arrGE, 'DS', geTrueBase, 'GE');
@@ -3527,7 +3458,7 @@
             loadMasterSessions();
             
             const selector = document.getElementById('masterSessionSelector');
-            if(selector){
+            if(selector) {
                 selector.addEventListener('change', function(e) {
                     if (e.target.value && masterState.sessions[e.target.value]) {
                         masterState.currentSessionId = e.target.value; masterState.currentSessionName = masterState.sessions[e.target.value].name;
