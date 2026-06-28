@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLT V3</title>
+    <title>VẠN SỰ NHƯ Ý - Pattern Matching 102 Mẫu (HT1) + SGE + KLC + KLT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -291,7 +291,7 @@
             <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 mb-3">
                 VẠN SỰ NHƯ Ý
             </h1>
-            <p class="text-gray-300 text-lg">Hệ Thống Tổng Hợp Phân Tích Cầu Cao Cấp - KLT V3 (Dynamic Hedging)</p>
+            <p class="text-gray-300 text-lg">Hệ Thống Tổng Hợp Phân Tích Cầu Cao Cấp - 4 Hệ Thống</p>
             <div class="flex flex-wrap justify-center gap-4 mt-4">
                 <span class="px-3 py-1 bg-blue-600 rounded-full text-sm font-semibold">HT1: Pattern Matching</span>
                 <span class="px-3 py-1 bg-green-600 rounded-full text-sm font-semibold">HT2: Fixed & Optimized</span>
@@ -744,7 +744,7 @@
 
         <div id="klt-section" class="mt-8 bg-gradient-to-br from-teal-900 via-gray-900 to-cyan-900 p-6 rounded-2xl border-4 border-cyan-500 shadow-[0_0_40px_rgba(6,182,212,0.3)] relative transition-all duration-500">
             <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-cyan-600 to-teal-500 text-white font-black px-8 py-2 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.8)] text-xl flex items-center gap-2 border-2 border-black whitespace-nowrap z-10">
-                🌐 KẾT LUẬN TỔNG (KLT V3) - ĐẢO CHIỀU XUNG ĐỘNG
+                🌐 KẾT LUẬN TỔNG (KLT) - META LOGIC
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -806,8 +806,8 @@
         </div>
 
         <div class="mt-8 text-center text-gray-500 text-xs font-medium space-y-1">
-            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + KLT V3</p>
-            <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 và các biểu đồ khác để đưa ra đề xuất chính xác nhất.</p>
+            <p>Hệ thống Độc quyền "VẠN SỰ NHƯ Ý" - Lõi phân tích AI Pattern Database Tuỳ Chỉnh & Continuous Learning | Phiên bản 5.0 (God Eye) + SGE + KLC</p>
+            <p>Thuật toán tự động quét 100% dữ liệu từ biểu đồ tỷ lệ HT1 và 3 biểu đồ khác để đưa ra đề xuất chính xác nhất.</p>
         </div>
     </div>
 
@@ -1376,7 +1376,7 @@
         }
 
         /* =========================================================================
-           3. THUẬT TOÁN QUYẾT ĐỊNH CUỐI CÙNG TỪ LÕI PATTERN MATCHING (HT1)
+           3. THUẬT TOÁN QUYẾT ĐỊNH CUỐI CÙNG TỪ LÕI PATTERN MATCHING
            ========================================================================= */
         function evaluateAIHistory(intervalHistory) {
             if (!intervalHistory || intervalHistory.length < 2) return 0;
@@ -3164,50 +3164,96 @@
         }
 
         /* =========================================================================
-           THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - V3 (ĐẢO CHIỀU XUNG ĐỘNG) & LỌC BIG ROAD
+           THUẬT TOÁN KẾT LUẬN TỔNG (KLT) - V2 (LOGIC THỰC CHIẾN)
            ========================================================================= */
 
-        function analyzeKLT_V3(arrDS, trueBaseSignal, chartName) {
-            if (!arrDS || arrDS.length < 3) return { signal: null, weight: 0, reason: "Chưa đủ dữ liệu 3 tay." };
-            if (!trueBaseSignal) return { signal: null, weight: 0, reason: "Không có lệnh gốc." };
+        function analyzeKLT_PatternV2(arr, type, trueBaseSignal, chartName) {
+            if (!arr || arr.length < 5) return { signal: null, reason: `Chưa đủ dữ liệu biểu đồ.` };
 
-            const last3 = arrDS.slice(-3).join('');
-            const last2 = arrDS.slice(-2).join('');
-            
-            let finalSignal = trueBaseSignal; 
-            let weight = 0;
-            let reasonText = "";
+            // 1. Chuyển mảng thành các chuỗi (streaks)
+            let streaks = [];
+            let cur = arr[0], count = 1;
+            for(let i = 1; i < arr.length; i++) {
+                if(arr[i] === cur) count++;
+                else { streaks.push({val: cur, count: count}); cur = arr[i]; count = 1; }
+            }
+            streaks.push({val: cur, count: count});
 
-            if (last3 === 'SSS' || last3.endsWith('SSSS')) {
-                finalSignal = (trueBaseSignal === 'P') ? 'B' : 'P';
-                weight = 2;
-                reasonText = `Chuỗi ${last3} -> NGHỊCH ĐẢO LỆNH (Lật ${trueBaseSignal} thành ${finalSignal})`;
+            const lastStreak = streaks[streaks.length - 1];
+            const currVal = lastStreak.val;
+
+            // 2. Lấy tất cả các chuỗi trong quá khứ có CÙNG giá trị với chuỗi hiện tại
+            const pastStreaks = streaks.slice(0, -1).filter(s => s.val === currVal);
+
+            // Kiểm tra RULE 1: Trước đó cứ 1 D sang S (hoặc 1 S sang D) >= 2 lần
+            // Tức là 2 chuỗi gần nhất của currVal phải có độ dài CHÍNH XÁC bằng 1
+            let hasPattern = false;
+            if (pastStreaks.length >= 2) {
+                const prev1 = pastStreaks[pastStreaks.length - 1];
+                const prev2 = pastStreaks[pastStreaks.length - 2];
+                if (prev1.count === 1 && prev2.count === 1) {
+                    hasPattern = true;
+                }
+            }
+
+            // Nếu không có dớp 1D->S hoặc đang đi loạn -> BỎ QUA NGAY LẬP TỨC
+            if (!hasPattern) {
+                return { signal: null, reason: `Cầu loạn/Không có dớp 1-${currVal} rõ ràng. Bỏ qua.` };
+            }
+
+            // KHI ĐÃ VÀO FORM DỚP: Bắt đầu xử lý độ dài của cột hiện tại
+            let predictRaw = null;
+            let reasonDetail = "";
+            let oppositeVal = (currVal === 'D') ? 'S' : 'D';
+            if (type === 'PB') oppositeVal = (currVal === 'P') ? 'B' : 'P';
+
+            if (lastStreak.count === 1) {
+                // Rule 1: Đang ở nhịp 1 -> Khả năng cao sẽ bẻ
+                predictRaw = oppositeVal;
+                reasonDetail = `Có dớp 1-${currVal} bẻ ${oppositeVal} (>=2 lần). Bắt bẻ nhịp 1.`;
             } 
-            else if (last2 === 'SS') {
-                finalSignal = trueBaseSignal;
-                weight = 3; 
-                reasonText = `Chuỗi SS -> Săn điểm gãy về D. TIN TƯỞNG tuyệt đối.`;
+            else if (lastStreak.count === 2) {
+                // Rule 2: Đang ở DD hoặc SS -> Check lịch sử 100%
+                let reachedTwoHistory = pastStreaks.filter(s => s.count >= 2);
+                
+                if (reachedTwoHistory.length === 0) {
+                    return { signal: null, reason: `Chưa có lịch sử nhịp 2 của ${currVal} để so sánh. Bỏ qua.` };
+                }
+
+                let brokeCount = reachedTwoHistory.filter(s => s.count === 2).length;
+                let continuedCount = reachedTwoHistory.filter(s => s.count >= 3).length;
+
+                if (brokeCount > 0 && continuedCount === 0) {
+                    predictRaw = oppositeVal; // 100% bẻ ở nhịp 2
+                    reasonDetail = `Lịch sử 100% lên 2-${currVal} là bẻ ${oppositeVal}.`;
+                } else if (continuedCount > 0 && brokeCount === 0) {
+                    predictRaw = currVal; // 100% đi tiếp lên 3
+                    reasonDetail = `Lịch sử 100% lên 2-${currVal} là đi tiếp thành Bệt.`;
+                } else {
+                    return { signal: null, reason: `Lịch sử nhịp 2 của ${currVal} bị nhiễu (Không đạt 100%). Bỏ qua.` };
+                }
+            } 
+            else if (lastStreak.count >= 3) {
+                // Rule 3: Đang DDD (>=3) -> Tiếp tục đu bệt D
+                predictRaw = currVal;
+                reasonDetail = `Đang form đu bệt ${currVal} (${lastStreak.count} tay).`;
             }
-            else if (last3.endsWith('DD')) {
-                finalSignal = trueBaseSignal;
-                weight = 2;
-                reasonText = `Chuỗi DD -> Đang ăn thông D. Đu theo.`;
-            }
-            else if (last3 === 'SDS' || last3 === 'DSD') {
-                finalSignal = trueBaseSignal;
-                weight = 1.5;
-                reasonText = `Form 1-1 D/S -> Đu theo D.`;
-            }
-            else {
-                finalSignal = trueBaseSignal;
-                weight = 0.5; 
-                reasonText = `Form D/S chưa rõ ràng (${last3}). Trọng số thấp.`;
+
+            if (!predictRaw) return { signal: null, reason: "Lỗi logic không xác định." };
+
+            // 3. DỊCH MÃ RA P/B CHO ĐỒNG THUẬN
+            let finalPB = null;
+            if (type === 'PB') {
+                finalPB = predictRaw; // BigRoad thì predictRaw đã là P/B
+            } else {
+                if (!trueBaseSignal) return { signal: null, reason: `${reasonDetail} Nhưng thiếu Lệnh Gốc để biên dịch.` };
+                // trueBaseSignal là lệnh gốc ĐÃ biên dịch (tức là đã lật nếu có chữ NGƯỢC)
+                finalPB = (predictRaw === 'D') ? trueBaseSignal : (trueBaseSignal === 'P' ? 'B' : 'P');
             }
 
             return { 
-                signal: finalSignal, 
-                weight: weight,
-                reason: `<span class="text-white">${reasonText}</span> ➜ Chốt: <span class="font-bold ${finalSignal === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalSignal}</span> (+${weight}đ)` 
+                signal: finalPB, 
+                reason: `<span class="text-white">${reasonDetail}</span> ➜ Chốt: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>` 
             };
         }
 
@@ -3224,48 +3270,11 @@
             return null;
         }
 
-        function applyBigRoadFilter(finalSignal, kltWeight, bigRoadHistory) {
-            if (!bigRoadHistory || bigRoadHistory.length < 4 || !finalSignal) return { action: finalSignal, advice: "ĐÁNH ĐỀU TAY (Chưa đủ dữ liệu Big Road)" };
-
-            let streaks = [];
-            let cur = bigRoadHistory[0], count = 1;
-            for(let i=1; i<bigRoadHistory.length; i++) {
-                if(bigRoadHistory[i] === cur) count++;
-                else { streaks.push({val: cur, count: count}); cur = bigRoadHistory[i]; count = 1; }
-            }
-            streaks.push({val: cur, count: count});
-            
-            const lastBr = streaks[streaks.length - 1];
-
-            // BỘ LỌC 1: CHỐNG CHẶN ĐẦU XE LỬA
-            if (lastBr.count >= 4 && finalSignal !== lastBr.val) {
-                return { 
-                    action: 'BỎ QUA', 
-                    advice: `🛑 CẢNH BÁO RỦI RO: Big Road đang Bệt ${lastBr.val} (${lastBr.count} tay). KLT báo ${finalSignal} là chặn đầu xe lửa. BẮT BUỘC NGHỈ!` 
-                };
-            }
-
-            // BỘ LỌC 2: CỘNG HƯỞNG XU HƯỚNG
-            if (lastBr.count >= 3 && finalSignal === lastBr.val) {
-                return { 
-                    action: finalSignal, 
-                    advice: `🔥 THIÊN THỜI: KLT thuận theo Big Road đang Bệt ${lastBr.val}. ĐÁNH MẠNH TAY!` 
-                };
-            }
-
-            // Các trường hợp khác: Đánh theo điểm trọng số của KLT
-            if (kltWeight >= 3) {
-                return { action: finalSignal, advice: "✅ Lệnh KLT tín nhiệm cao. VÀO LỆNH TỰ TIN." };
-            } else {
-                return { action: finalSignal, advice: "⚠️ Lệnh KLT tín nhiệm thấp. ĐÁNH NHẸ TAY." };
-            }
-        }
-
         function calculateKLT() {
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
 
-            // --- 1. CHUẨN BỊ DỮ LIỆU TỪ 5 BIỂU ĐỒ (Bỏ BR ra khỏi list vote) ---
+            // --- 1. CHUẨN BỊ DỮ LIỆU TỪ 6 BIỂU ĐỒ ---
             const arrBR = session.history || [];
             
             const ht1Details = masterState.systemDetails.ht1;
@@ -3285,14 +3294,16 @@
             const arrKLC = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
             const klcTrueBase = masterState.currentKlcPrediction;
 
-            // --- 2. QUÉT LOGIC TỪNG BIỂU ĐỒ BẰNG V3 ---
-            const evalHT1 = analyzeKLT_V3(arrHT1, ht1TrueBase, 'HT1');
-            const evalHT4 = analyzeKLT_V3(arrHT4, ht4TrueBase, 'HT4');
-            const evalGE = analyzeKLT_V3(arrGE, geTrueBase, 'GE');
-            const evalSGE = analyzeKLT_V3(arrSGE, sgeTrueBase, 'SGE');
-            const evalKLC = analyzeKLT_V3(arrKLC, klcTrueBase, 'KLC');
+            // --- 2. QUÉT LOGIC TỪNG BIỂU ĐỒ ---
+            const evalBR = analyzeKLT_PatternV2(arrBR, 'PB', null, 'BIGROAD');
+            const evalHT1 = analyzeKLT_PatternV2(arrHT1, 'DS', ht1TrueBase, 'HT1');
+            const evalHT4 = analyzeKLT_PatternV2(arrHT4, 'DS', ht4TrueBase, 'HT4');
+            const evalGE = analyzeKLT_PatternV2(arrGE, 'DS', geTrueBase, 'GE');
+            const evalSGE = analyzeKLT_PatternV2(arrSGE, 'DS', sgeTrueBase, 'SGE');
+            const evalKLC = analyzeKLT_PatternV2(arrKLC, 'DS', klcTrueBase, 'KLC');
 
             const evaluations = [
+                { name: 'BIGROAD', res: evalBR, base: null },
                 { name: 'HT1', res: evalHT1, base: ht1TrueBase },
                 { name: 'HT4', res: evalHT4, base: ht4TrueBase },
                 { name: 'GE', res: evalGE, base: geTrueBase },
@@ -3300,59 +3311,41 @@
                 { name: 'KLC', res: evalKLC, base: klcTrueBase }
             ];
 
-            // --- 3. ĐẾM ĐIỂM TRỌNG SỐ ---
+            // --- 3. ĐẾM PHIẾU ĐỒNG THUẬN ---
             let votesP = 0;
             let votesB = 0;
             let validSignalsCount = 0;
 
             evaluations.forEach(ev => {
-                if (ev.res.signal === 'P') { votesP += ev.res.weight; validSignalsCount++; }
-                if (ev.res.signal === 'B') { votesB += ev.res.weight; validSignalsCount++; }
+                if (ev.res.signal === 'P') { votesP++; validSignalsCount++; }
+                if (ev.res.signal === 'B') { votesB++; validSignalsCount++; }
             });
 
-            // --- 4. CHỐT KẾT LUẬN TỔNG (KLT) BƯỚC 1 ---
-            let preFinalPrediction = null;
-            let kltBaseReason = "";
-            let maxWeight = 0;
+            // --- 4. CHỐT KẾT LUẬN TỔNG ---
+            let finalPrediction = null;
+            let finalReasonText = "";
 
             if (validSignalsCount === 0) {
-                kltBaseReason = "Tất cả biểu đồ chưa đủ 3 tay dữ liệu. Hệ thống BỎ QUA.";
-            } else if (votesP - votesB >= 3) {
-                preFinalPrediction = 'P';
-                maxWeight = votesP;
-                kltBaseReason = `ĐỒNG THUẬN PLAYER (Điểm P: ${votesP} > Điểm B: ${votesB}).`;
-            } else if (votesB - votesP >= 3) {
-                preFinalPrediction = 'B';
-                maxWeight = votesB;
-                kltBaseReason = `ĐỒNG THUẬN BANKER (Điểm B: ${votesB} > Điểm P: ${votesP}).`;
+                finalReasonText = "Tất cả các biểu đồ đều rơi vào trạng thái rủi ro (Cầu loạn) hoặc thiếu chắc chắn. Hệ thống tự động BỎ QUA.";
+            } else if (votesP > votesB) {
+                finalPrediction = 'P';
+                let strength = (votesP >= 3 && votesB === 0) ? "MẠNH TAY" : "VÀO LỆNH";
+                finalReasonText = `ĐỒNG THUẬN PLAYER (${strength}): Có ${votesP} biểu đồ báo P, ${votesB} biểu đồ báo B.`;
+            } else if (votesB > votesP) {
+                finalPrediction = 'B';
+                let strength = (votesB >= 3 && votesP === 0) ? "MẠNH TAY" : "VÀO LỆNH";
+                finalReasonText = `ĐỒNG THUẬN BANKER (${strength}): Có ${votesB} biểu đồ báo B, ${votesP} biểu đồ báo P.`;
             } else {
-                kltBaseReason = `XUNG ĐỘT TÍN HIỆU (P: ${votesP} - B: ${votesB}). Điểm chênh lệch < 3. BỎ QUA.`;
+                // votesP === votesB (Hoà nhau: 1-1, 2-2...)
+                finalReasonText = `XUNG ĐỘT TÍN HIỆU (Hoà ${votesP} P - ${votesB} B): Các biểu đồ đang đánh nhau. Hệ thống yêu cầu BỎ QUA.`;
             }
 
-            // --- 5. BỘ LỌC BIG ROAD (BƯỚC CHỐT CUỐI) ---
-            const finalResult = applyBigRoadFilter(preFinalPrediction, maxWeight, arrBR);
-            const finalPrediction = finalResult.action === 'BỎ QUA' ? null : finalResult.action;
-            const finalReasonText = `${kltBaseReason}<br/><span class="text-yellow-400 font-bold mt-2 block">=> LỜI KHUYÊN TỪ BIG ROAD: ${finalResult.advice}</span>`;
-
             masterState.currentKltPrediction = finalPrediction;
-            const currentStateStr = `${validSignalsCount}/5 Biểu đồ đang Tracking`;
+            const currentStateStr = `${validSignalsCount}/6 Biểu đồ đạt chuẩn Dớp`;
             masterState.currentKltState = currentStateStr;
 
-            // --- 6. RENDER GIAO DIỆN ---
+            // --- 5. RENDER GIAO DIỆN ---
             let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-left w-full">`;
-            // Thêm BigRoad vào phần xem chi tiết
-            detailsHtml += `
-                <div class="p-3 rounded-lg border border-gray-600 bg-gray-800/50 text-sm cursor-pointer hover:bg-gray-800/80 transition-colors" onclick="toggleKltSubChart('BIGROAD')">
-                    <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-2 pointer-events-none">
-                        <span class="font-bold text-gray-300 uppercase flex items-center gap-1">BIGROAD <span class="text-[10px] bg-gray-700 px-1 rounded">📊</span></span>
-                    </div>
-                    <div class="text-yellow-400 mt-2 pointer-events-none text-[11px] leading-relaxed italic">
-                        ↳ Đóng vai trò làm bộ lọc môi trường (Không tham gia vote).
-                    </div>
-                    <div id="klt-subchart-BIGROAD" class="hidden h-6 mt-2 flex items-end justify-start gap-[1px] overflow-x-auto custom-scrollbar pb-1"></div>
-                </div>
-            `;
-
             evaluations.forEach(ev => {
                 let baseText = ev.base ? ev.base : 'CHƯA CÓ';
                 let baseColor = ev.base === 'P' ? 'text-blue-400' : (ev.base === 'B' ? 'text-red-400' : 'text-gray-500');
@@ -3371,7 +3364,7 @@
                             </div>
                         </div>
                         <div class="text-gray-500 mt-2 pointer-events-none text-[11px] leading-relaxed italic">
-                            ↳ Logic V3: <span class="font-bold ${ev.res.signal === 'P' ? 'text-blue-400' : (ev.res.signal === 'B' ? 'text-red-400' : 'text-gray-400')}">${logicSignal}</span> 
+                            ↳ Logic V2: <span class="font-bold ${ev.res.signal === 'P' ? 'text-blue-400' : (ev.res.signal === 'B' ? 'text-red-400' : 'text-gray-400')}">${logicSignal}</span> 
                             (${cleanReason})
                         </div>
                         <div id="klt-subchart-${ev.name}" class="hidden h-6 mt-2 flex items-end justify-start gap-[1px] overflow-x-auto custom-scrollbar pb-1"></div>
@@ -3388,7 +3381,8 @@
         // --- HÀM RENDER KLT ĐÃ ĐƯỢC CẬP NHẬT ---
         function renderKltUI(currentState, prediction, reason, detailsHtml, kltHistory) {
             const stateEl = document.getElementById('klt-current-state');
-            const concEl = document.getElementById('klt-conclusion');const decEl = document.getElementById('klt-final-decision');
+            const concEl = document.getElementById('klt-conclusion');
+            const decEl = document.getElementById('klt-final-decision');
             const accEl = document.getElementById('klt-overall-accuracy');
 
             // 1. Kiểm tra trạng thái đóng/mở hiện tại
@@ -3401,7 +3395,7 @@
                 concEl.innerHTML = `
                     <div class="text-white">${reason}</div>
                     <button onclick="toggleGlobalKltDetails()" class="mt-2 text-xs bg-cyan-900/50 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-1 rounded transition-colors w-full text-center font-bold">
-                        👁️ BẬT / TẮT CHI TIẾT TỪNG BIỂU ĐỒ (D/S HEDGING)
+                        👁️ BẬT / TẮT CHI TIẾT TỪNG BIỂU ĐỒ (MARKOV)
                     </button>
                     <div id="klt-details-panel" class="${isPanelOpen ? '' : 'hidden'} w-full transition-all duration-300">
                         ${detailsHtml}
@@ -3475,6 +3469,7 @@
             
             let checkInit = setInterval(() => {
                 if (allSystemsReady()) { 
+                    
                     // Gọi hàm tự động tạo Session
                     autoCreateSession();
                     
@@ -3553,7 +3548,7 @@
             }
 
             let html = '';
-            arr.slice(-40).forEach(val => { // Lấy 40 tay gần nhất
+            arr.slice(-40).forEach(val => { // Lấy 40 tay gầnnhất
                 if (chartName === 'BIGROAD') {
                     const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_3px_rgba(59,130,246,0.5)]' : 'bg-red-500 shadow-[0_0_3px_rgba(239,68,68,0.5)]';
                     html += `<div class="w-[14px] h-[14px] flex-shrink-0 rounded-full ${color} text-[8px] flex items-center justify-center text-white font-bold border border-white/20">${val}</div>`;
