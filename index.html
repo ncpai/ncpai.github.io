@@ -750,70 +750,25 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div class="bg-gray-800 p-5 rounded-xl border border-cyan-500/30 shadow-inner">
                     <h3 class="text-cyan-400 font-bold mb-2 text-sm uppercase text-center">Trạng Thái KLT</h3>
-                    <div id="klt-current-state" class="text-xl md:text-2xl font-black text-white text-center py-4 bg-gray-900 rounded-lg border border-cyan-500/50 drop-shadow-md">
+                    <div id="klt-current-state" class="text-2xl md:text-3xl font-black text-white text-center py-4 bg-gray-900 rounded-lg border border-cyan-500/50 drop-shadow-md">
                         Chờ dữ liệu...
                     </div>
                     <div class="mt-4 space-y-2 text-sm">
                         <div class="pt-2 text-center bg-gray-900/50 p-3 rounded-lg border border-gray-700 mt-2">
-                            <div id="klt-conclusion"></div> </div>
+                            <span class="text-xs text-gray-500 uppercase tracking-wider font-bold block mb-1">LÝ DO KLT</span>
+                            <div id="klt-conclusion" class="font-bold text-blue-300 text-sm leading-relaxed">-</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-gray-800 p-5 rounded-xl border border-cyan-500/30 flex-1 flex flex-col justify-center items-center relative overflow-hidden shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-                    <div class="absolute top-2 left-2 text-xs font-bold text-gray-500 uppercase tracking-wider">PHÁN QUYẾT KLT</div>
-                    <div class="absolute top-2 right-2 text-xs font-bold text-cyan-400 bg-cyan-900/30 px-2 py-1 rounded border border-cyan-500/30 shadow-sm">
-                        Tỉ lệ chuẩn: <span id="klt-overall-accuracy">0%</span>
+                <div class="flex flex-col gap-4">
+                    <div class="bg-gray-800 p-5 rounded-xl border border-cyan-500/30 flex-1 flex flex-col justify-center items-center relative overflow-hidden">
+                        <div class="absolute top-2 left-2 text-xs font-bold text-gray-500 uppercase tracking-wider">PHÁN QUYẾT KLT</div>
+                        <div class="absolute top-2 right-2 text-xs font-bold text-cyan-400 bg-cyan-900/30 px-2 py-1 rounded border border-cyan-500/30 shadow-sm">
+                            Tỉ lệ chuẩn: <span id="klt-overall-accuracy">0%</span>
+                        </div>
+                        <div id="klt-final-decision" class="text-5xl md:text-6xl font-black text-gray-600 drop-shadow-lg mt-4 transition-all duration-300">-</div>
                     </div>
-                    <div id="klt-final-decision" class="text-5xl md:text-6xl font-black text-gray-600 drop-shadow-lg mt-6 transition-all duration-300">-</div>
-                    <div id="klt-main-reason" class="mt-5 text-center text-lg md:text-xl font-bold text-gray-400 px-2 leading-relaxed min-h-[4rem]">Chờ phân tích biểu đồ...</div>
-                </div>
-            </div>
-
-            <div class="bg-black/50 p-4 rounded-xl border border-cyan-500/30 shadow-inner mt-6 mb-4 relative z-10">
-                <h4 class="text-[11px] text-cyan-400 font-bold mb-3 uppercase tracking-wider flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                    1. Bật/Tắt Biểu Đồ Đầu Vào (Vote)
-                </h4>
-                <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4">
-                    <label class="flex flex-col items-center cursor-pointer group bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 hover:border-cyan-500/50 transition-colors">
-                        <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400 transition-colors">BIG ROAD</span>
-                        <div class="relative"><input type="checkbox" id="klt-toggle-BIGROAD" class="sr-only peer" onchange="toggleKltInput('BIGROAD', this.checked)"><div class="block bg-gray-700 w-8 h-4 rounded-full peer-checked:bg-cyan-600 transition-all"></div><div class="dot absolute left-[2px] top-[2px] bg-gray-300 w-3 h-3 rounded-full peer-checked:bg-white peer-checked:translate-x-4 transition-all"></div></div>
-                    </label>
-                    <label class="flex flex-col items-center cursor-pointer group bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 hover:border-cyan-500/50 transition-colors">
-                        <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400 transition-colors">HT1 (AI)</span>
-                        <div class="relative"><input type="checkbox" id="klt-toggle-HT1" class="sr-only peer" onchange="toggleKltInput('HT1', this.checked)"><div class="block bg-gray-700 w-8 h-4 rounded-full peer-checked:bg-cyan-600 transition-all"></div><div class="dot absolute left-[2px] top-[2px] bg-gray-300 w-3 h-3 rounded-full peer-checked:bg-white peer-checked:translate-x-4 transition-all"></div></div>
-                    </label>
-                    <label class="flex flex-col items-center cursor-pointer group bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 hover:border-cyan-500/50 transition-colors">
-                        <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400 transition-colors">HT4 (AI)</span>
-                        <div class="relative"><input type="checkbox" id="klt-toggle-HT4" class="sr-only peer" onchange="toggleKltInput('HT4', this.checked)"><div class="block bg-gray-700 w-8 h-4 rounded-full peer-checked:bg-cyan-600 transition-all"></div><div class="dot absolute left-[2px] top-[2px] bg-gray-300 w-3 h-3 rounded-full peer-checked:bg-white peer-checked:translate-x-4 transition-all"></div></div>
-                    </label>
-                    <label class="flex flex-col items-center cursor-pointer group bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 hover:border-cyan-500/50 transition-colors">
-                        <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400 transition-colors">GOD EYE</span>
-                        <div class="relative"><input type="checkbox" id="klt-toggle-GE" class="sr-only peer" onchange="toggleKltInput('GE', this.checked)"><div class="block bg-gray-700 w-8 h-4 rounded-full peer-checked:bg-cyan-600 transition-all"></div><div class="dot absolute left-[2px] top-[2px] bg-gray-300 w-3 h-3 rounded-full peer-checked:bg-white peer-checked:translate-x-4 transition-all"></div></div>
-                    </label>
-                    <label class="flex flex-col items-center cursor-pointer group bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 hover:border-cyan-500/50 transition-colors">
-                        <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400 transition-colors">SGE</span>
-                        <div class="relative"><input type="checkbox" id="klt-toggle-SGE" class="sr-only peer" onchange="toggleKltInput('SGE', this.checked)"><div class="block bg-gray-700 w-8 h-4 rounded-full peer-checked:bg-cyan-600 transition-all"></div><div class="dot absolute left-[2px] top-[2px] bg-gray-300 w-3 h-3 rounded-full peer-checked:bg-white peer-checked:translate-x-4 transition-all"></div></div>
-                    </label>
-                    <label class="flex flex-col items-center cursor-pointer group bg-gray-900/50 p-2 rounded-lg border border-gray-700/50 hover:border-cyan-500/50 transition-colors">
-                        <span class="text-[10px] text-gray-400 font-bold mb-1 group-hover:text-cyan-400 transition-colors">KLC</span>
-                        <div class="relative"><input type="checkbox" id="klt-toggle-KLC" class="sr-only peer" onchange="toggleKltInput('KLC', this.checked)"><div class="block bg-gray-700 w-8 h-4 rounded-full peer-checked:bg-cyan-600 transition-all"></div><div class="dot absolute left-[2px] top-[2px] bg-gray-300 w-3 h-3 rounded-full peer-checked:bg-white peer-checked:translate-x-4 transition-all"></div></div>
-                    </label>
-                </div>
-
-                <h4 class="text-[11px] text-cyan-400 font-bold mb-3 uppercase tracking-wider flex items-center gap-2 border-t border-gray-700/50 pt-3">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                    2. Bật/Tắt Logic Bắt Nhịp (V2)
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <label class="flex justify-between items-center cursor-pointer group bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 hover:border-blue-500/50 transition-colors">
-                        <span class="text-[11px] md:text-xs text-gray-300 font-bold group-hover:text-blue-400 transition-colors">Bắt Nhịp 1 & 2 (D, DD)</span>
-                        <div class="relative"><input type="checkbox" id="klt-toggle-catch12" class="sr-only peer" onchange="toggleKltLogic('catch12', this.checked)"><div class="block bg-gray-700 w-10 h-5 rounded-full peer-checked:bg-blue-600 transition-all"></div><div class="dot absolute left-[3px] top-[3px] bg-gray-300 w-3.5 h-3.5 rounded-full peer-checked:bg-white peer-checked:translate-x-5 transition-all"></div></div>
-                    </label>
-                    <label class="flex justify-between items-center cursor-pointer group bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 hover:border-purple-500/50 transition-colors">
-                        <span class="text-[11px] md:text-xs text-gray-300 font-bold group-hover:text-purple-400 transition-colors">Chỉ Bắt Bệt (DDD)</span>
-                        <div class="relative"><input type="checkbox" id="klt-toggle-catch3" class="sr-only peer" onchange="toggleKltLogic('catch3', this.checked)"><div class="block bg-gray-700 w-10 h-5 rounded-full peer-checked:bg-purple-600 transition-all"></div><div class="dot absolute left-[3px] top-[3px] bg-gray-300 w-3.5 h-3.5 rounded-full peer-checked:bg-white peer-checked:translate-x-5 transition-all"></div></div>
-                    </label>
                 </div>
             </div>
 
@@ -1350,13 +1305,6 @@
             currentKlcPrediction: null,
             currentKlcRule: null,
             klcToggles: { th1: true, th2: true, th3: true },
-
-            // STATE CHO KLT
-            kltToggles: {
-                inputs: { BIGROAD: true, HT1: true, HT4: true, GE: true, SGE: true, KLC: true },
-                catch12: true, 
-                catch3: true   
-            },
 
             currentKltState: "Chưa rõ - Chưa rõ",
             currentKltPrediction: null
@@ -3027,48 +2975,6 @@
             }
         }
 
-        /* =========================================================================
-           HÀM XỬ LÝ LƯU VÀ ĐỒNG BỘ TOGGLES KLT
-           ========================================================================= */
-        function saveKltToggles() {
-            localStorage.setItem('vanSuNhuY_kltToggles', JSON.stringify(masterState.kltToggles));
-        }
-
-        function loadKltToggles() {
-            try {
-                const saved = localStorage.getItem('vanSuNhuY_kltToggles');
-                if (saved) {
-                    masterState.kltToggles = JSON.parse(saved);
-                }
-            } catch(e) {}
-        }
-
-        function syncKltToggleUI() {
-            ['BIGROAD', 'HT1', 'HT4', 'GE', 'SGE', 'KLC'].forEach(id => {
-                const el = document.getElementById(`klt-toggle-${id}`);
-                if (el) el.checked = masterState.kltToggles.inputs[id];
-            });
-            const catch12El = document.getElementById('klt-toggle-catch12');
-            if (catch12El) catch12El.checked = masterState.kltToggles.catch12;
-            const catch3El = document.getElementById('klt-toggle-catch3');
-            if (catch3El) catch3El.checked = masterState.kltToggles.catch3;
-        }
-
-        function toggleKltInput(system, isChecked) {
-            masterState.kltToggles.inputs[system] = isChecked;
-            saveKltToggles(); 
-            showToast(`Đã ${isChecked ? 'BẬT' : 'TẮT'} biểu đồ ${system} cho KLT`, isChecked ? 'success' : 'warning');
-            calculateKLT();
-        }
-
-        function toggleKltLogic(logicType, isChecked) {
-            masterState.kltToggles[logicType] = isChecked;
-            saveKltToggles(); 
-            const name = logicType === 'catch12' ? 'Bắt Nhịp 1, 2 (D, DD)' : 'Bắt Bệt >=3 (DDD)';
-            showToast(`Đã ${isChecked ? 'BẬT' : 'TẮT'} logic KLT: ${name}`, isChecked ? 'success' : 'warning');
-            calculateKLT();
-        }
-
         function analyzeKLCLogic(arr) {
             if (!arr || arr.length === 0) return { th: 'NONE', predictDS: null, money: '', desc: 'Chưa có dữ liệu' };
 
@@ -3273,166 +3179,81 @@
             }
             streaks.push({val: cur, count: count});
 
-            // Thay thế logic chặn theo Toggles vào phân tích Pattern V2
             const lastStreak = streaks[streaks.length - 1];
             const currVal = lastStreak.val;
-            const currentStreakCount = lastStreak.count;
 
-            // KIỂM TRA CHẶN LOGIC THEO TOGGLES
-            if (currentStreakCount >= 3 && !masterState.kltToggles.catch3) {
-                return { signal: null, reason: `[ĐÃ TẮT LOGIC] Đang form bệt (${currentStreakCount} tay) nhưng logic bắt bệt đang tắt.` };
-            }
-            if (currentStreakCount < 3 && !masterState.kltToggles.catch12) {
-                return { signal: null, reason: `[ĐÃ TẮT LOGIC] Đang form ${currentStreakCount} nhịp nhưng logic bắt nhịp ngắn đang tắt.` };
+            // 2. Lấy tất cả các chuỗi trong quá khứ có CÙNG giá trị với chuỗi hiện tại
+            const pastStreaks = streaks.slice(0, -1).filter(s => s.val === currVal);
+
+            // Kiểm tra RULE 1: Trước đó cứ 1 D sang S (hoặc 1 S sang D) >= 2 lần
+            // Tức là 2 chuỗi gần nhất của currVal phải có độ dài CHÍNH XÁC bằng 1
+            let hasPattern = false;
+            if (pastStreaks.length >= 2) {
+                const prev1 = pastStreaks[pastStreaks.length - 1];
+                const prev2 = pastStreaks[pastStreaks.length - 2];
+                if (prev1.count === 1 && prev2.count === 1) {
+                    hasPattern = true;
+                }
             }
 
+            // Nếu không có dớp 1D->S hoặc đang đi loạn -> BỎ QUA NGAY LẬP TỨC
+            if (!hasPattern) {
+                return { signal: null, reason: `Cầu loạn/Không có dớp 1-${currVal} rõ ràng. Bỏ qua.` };
+            }
+
+            // KHI ĐÃ VÀO FORM DỚP: Bắt đầu xử lý độ dài của cột hiện tại
             let predictRaw = null;
             let reasonDetail = "";
             let oppositeVal = (currVal === 'D') ? 'S' : 'D';
             if (type === 'PB') oppositeVal = (currVal === 'P') ? 'B' : 'P';
 
-            // --- ĐÃ ĐẢO LẠI LOGIC: ƯU TIÊN BẮT BỆT LÊN ĐẦU ---
-            if (currentStreakCount >= 3) {
-                predictRaw = currVal;
-                reasonDetail = `Đang form đu bệt ${currVal} (${currentStreakCount} tay).`;
+            if (lastStreak.count === 1) {
+                // Rule 1: Đang ở nhịp 1 -> Khả năng cao sẽ bẻ
+                predictRaw = oppositeVal;
+                reasonDetail = `Có dớp 1-${currVal} bẻ ${oppositeVal} (>=2 lần). Bắt bẻ nhịp 1.`;
             } 
-            else {
-                // NẾU CHƯA TỚI 3 (ĐANG NHỊP 1 HOẶC 2), XÉT THEO LOGIC BẮT DỚP CŨ
-                const pastStreaks = streaks.slice(0, -1).filter(s => s.val === currVal);
-
-                let hasPattern = false;
-                if (pastStreaks.length >= 2) {
-                    const prev1 = pastStreaks[pastStreaks.length - 1];
-                    const prev2 = pastStreaks[pastStreaks.length - 2];
-                    if (prev1.count === 1 && prev2.count === 1) {
-                        hasPattern = true;
-                    }
+            else if (lastStreak.count === 2) {
+                // Rule 2: Đang ở DD hoặc SS -> Check lịch sử 100%
+                let reachedTwoHistory = pastStreaks.filter(s => s.count >= 2);
+                
+                if (reachedTwoHistory.length === 0) {
+                    return { signal: null, reason: `Chưa có lịch sử nhịp 2 của ${currVal} để so sánh. Bỏ qua.` };
                 }
 
-                if (!hasPattern) {
-                    return { signal: null, reason: `Cầu loạn/Không có dớp 1-${currVal} rõ ràng. Bỏ qua.` };
+                let brokeCount = reachedTwoHistory.filter(s => s.count === 2).length;
+                let continuedCount = reachedTwoHistory.filter(s => s.count >= 3).length;
+
+                if (brokeCount > 0 && continuedCount === 0) {
+                    predictRaw = oppositeVal; // 100% bẻ ở nhịp 2
+                    reasonDetail = `Lịch sử 100% lên 2-${currVal} là bẻ ${oppositeVal}.`;
+                } else if (continuedCount > 0 && brokeCount === 0) {
+                    predictRaw = currVal; // 100% đi tiếp lên 3
+                    reasonDetail = `Lịch sử 100% lên 2-${currVal} là đi tiếp thành Bệt.`;
+                } else {
+                    return { signal: null, reason: `Lịch sử nhịp 2 của ${currVal} bị nhiễu (Không đạt 100%). Bỏ qua.` };
                 }
-
-                if (currentStreakCount === 1) {
-                    predictRaw = oppositeVal;
-                    reasonDetail = `Có dớp 1-${currVal} bẻ ${oppositeVal} (>=2 lần). Bắt bẻ nhịp 1.`;
-                } 
-                else if (currentStreakCount === 2) {
-                    let reachedTwoHistory = pastStreaks.filter(s => s.count >= 2);
-                    
-                    if (reachedTwoHistory.length === 0) {
-                        return { signal: null, reason: `Chưa có lịch sử nhịp 2 của ${currVal} để so sánh. Bỏ qua.` };
-                    }
-
-                    let brokeCount = reachedTwoHistory.filter(s => s.count === 2).length;
-                    let continuedCount = reachedTwoHistory.filter(s => s.count >= 3).length;
-
-                    if (brokeCount > 0 && continuedCount === 0) {
-                        predictRaw = oppositeVal; // 100% bẻ ở nhịp 2
-                        reasonDetail = `Lịch sử 100% lên 2-${currVal} là bẻ ${oppositeVal}.`;
-                    } else if (continuedCount > 0 && brokeCount === 0) {
-                        predictRaw = currVal; // 100% đi tiếp lên 3
-                        reasonDetail = `Lịch sử 100% lên 2-${currVal} là đi tiếp thành Bệt.`;
-                    } else {
-                        return { signal: null, reason: `Lịch sử nhịp 2 của ${currVal} bị nhiễu (Không đạt 100%). Bỏ qua.` };
-                    }
-                }
+            } 
+            else if (lastStreak.count >= 3) {
+                // Rule 3: Đang DDD (>=3) -> Tiếp tục đu bệt D
+                predictRaw = currVal;
+                reasonDetail = `Đang form đu bệt ${currVal} (${lastStreak.count} tay).`;
             }
 
             if (!predictRaw) return { signal: null, reason: "Lỗi logic không xác định." };
 
+            // 3. DỊCH MÃ RA P/B CHO ĐỒNG THUẬN
             let finalPB = null;
             if (type === 'PB') {
-                finalPB = predictRaw;
+                finalPB = predictRaw; // BigRoad thì predictRaw đã là P/B
             } else {
                 if (!trueBaseSignal) return { signal: null, reason: `${reasonDetail} Nhưng thiếu Lệnh Gốc để biên dịch.` };
+                // trueBaseSignal là lệnh gốc ĐÃ biên dịch (tức là đã lật nếu có chữ NGƯỢC)
                 finalPB = (predictRaw === 'D') ? trueBaseSignal : (trueBaseSignal === 'P' ? 'B' : 'P');
             }
 
             return { 
                 signal: finalPB, 
                 reason: `<span class="text-white">${reasonDetail}</span> ➜ Chốt: <span class="font-bold ${finalPB === 'P' ? 'text-blue-400' : 'text-red-400'}">${finalPB}</span>` 
-            };
-        }
-
-        function analyzeKLT_BigRoad(arr) {
-            if (!arr || arr.length < 3) return { signal: null, reason: `Chưa đủ dữ liệu Big Road (Cần >= 3 ván).` };
-
-            let streaks = [];
-            let cur = arr[0], c = 1;
-            for(let i = 1; i < arr.length; i++) {
-                if(arr[i] === cur) c++;
-                else { streaks.push({val: cur, count: c}); cur = arr[i]; c = 1; }
-            }
-            streaks.push({val: cur, count: c});
-
-            const last = streaks[streaks.length - 1];
-            const prev1 = streaks.length > 1 ? streaks[streaks.length - 2] : null;
-            const prev2 = streaks.length > 2 ? streaks[streaks.length - 3] : null;
-
-            const currVal = last.val;
-            const oppVal = currVal === 'P' ? 'B' : 'P';
-            const count = last.count;
-
-            // KIỂM TRA CHẶN LOGIC THEO TOGGLES CHO BIGROAD
-            if (count >= 3 && !masterState.kltToggles.catch3) {
-                return { signal: null, reason: `[ĐÃ TẮT LOGIC] BigRoad đang bệt (${count} tay) nhưng logic bắt bệt đang tắt.` };
-            }
-            if (count < 3 && !masterState.kltToggles.catch12) {
-                return { signal: null, reason: `[ĐÃ TẮT LOGIC] BigRoad đang form ${count} nhịp nhưng logic bắt nhịp ngắn đang tắt.` };
-            }
-            
-            let predictRaw = null;
-            let reasonDetail = "";
-
-            if (count >= 3) {
-                predictRaw = currVal;
-                reasonDetail = `Cầu Big Road đang form Bệt ${currVal} (${count} tay). Tiếp tục đu bệt.`;
-            }
-            else if (count === 1 && prev1 && prev1.count === 1 && prev2 && prev2.count === 1) {
-                predictRaw = oppVal;
-                reasonDetail = `Cầu Big Road đang đi form 1-1. Bắt bẻ sang ${oppVal}.`;
-            }
-            else if (prev1 && prev1.count === 2 && prev2 && prev2.count === 2) {
-                if (count === 1) {
-                    predictRaw = currVal;
-                    reasonDetail = `Cầu Big Road đang đi form 2-2. Nhịp 1 ưu tiên đánh tiếp lên 2.`;
-                } else if (count === 2) {
-                    predictRaw = oppVal;
-                    reasonDetail = `Cầu Big Road đang đi form 2-2. Đã đủ 2 nhịp, bắt bẻ sang ${oppVal}.`;
-                }
-            }
-            else if (count === 2 && prev1 && prev1.count === 2) {
-                predictRaw = oppVal;
-                reasonDetail = `Xuất hiện cặp 2-2. Bắt bẻ sang ${oppVal}.`;
-            }
-            else {
-                const pastSameColor = streaks.slice(0, -1).filter(s => s.val === currVal);
-                
-                if (pastSameColor.length > 0) {
-                    const lastTimeSameColor = pastSameColor[pastSameColor.length - 1];
-                    
-                    if (count === lastTimeSameColor.count) {
-                        predictRaw = oppVal;
-                        reasonDetail = `Lần gần nhất ${currVal} gãy ở nhịp ${count}. Áp dụng: Gãy ở đâu bẻ ở đó.`;
-                    } 
-                    else if (count < lastTimeSameColor.count) {
-                        predictRaw = currVal;
-                        reasonDetail = `Lần gần nhất ${currVal} lên được nhịp ${lastTimeSameColor.count}. Xu hướng bù nhịp, đánh tiếp.`;
-                    } 
-                    else {
-                         return { signal: null, reason: `Nhịp đang mở rộng, chưa tạo form rõ ràng. Bỏ qua.` };
-                    }
-                } else {
-                    return { signal: null, reason: `Cầu Big Road chưa có đủ form để xét. Bỏ qua.` };
-                }
-            }
-
-            if (!predictRaw) return { signal: null, reason: `Không bắt được form Big Road. Bỏ qua.` };
-
-            return { 
-                signal: predictRaw, 
-                reason: `<span class="text-white">${reasonDetail}</span> ➜ Chốt: <span class="font-bold ${predictRaw === 'P' ? 'text-blue-400' : 'text-red-400'}">${predictRaw}</span>` 
             };
         }
 
@@ -3474,21 +3295,21 @@
             const klcTrueBase = masterState.currentKlcPrediction;
 
             // --- 2. QUÉT LOGIC TỪNG BIỂU ĐỒ ---
-            const evalBR = analyzeKLT_BigRoad(arrBR); 
+            const evalBR = analyzeKLT_PatternV2(arrBR, 'PB', null, 'BIGROAD');
             const evalHT1 = analyzeKLT_PatternV2(arrHT1, 'DS', ht1TrueBase, 'HT1');
             const evalHT4 = analyzeKLT_PatternV2(arrHT4, 'DS', ht4TrueBase, 'HT4');
             const evalGE = analyzeKLT_PatternV2(arrGE, 'DS', geTrueBase, 'GE');
             const evalSGE = analyzeKLT_PatternV2(arrSGE, 'DS', sgeTrueBase, 'SGE');
             const evalKLC = analyzeKLT_PatternV2(arrKLC, 'DS', klcTrueBase, 'KLC');
 
-            // --- KIỂM TRA MẢNG ĐẦU VÀO DỰA TRÊN CÔNG TẮC BẬT/TẮT BIỂU ĐỒ ---
-            const evaluations = [];
-            if (masterState.kltToggles.inputs.BIGROAD) evaluations.push({ name: 'BIGROAD', res: evalBR, base: null });
-            if (masterState.kltToggles.inputs.HT1) evaluations.push({ name: 'HT1', res: evalHT1, base: ht1TrueBase });
-            if (masterState.kltToggles.inputs.HT4) evaluations.push({ name: 'HT4', res: evalHT4, base: ht4TrueBase });
-            if (masterState.kltToggles.inputs.GE) evaluations.push({ name: 'GE', res: evalGE, base: geTrueBase });
-            if (masterState.kltToggles.inputs.SGE) evaluations.push({ name: 'SGE', res: evalSGE, base: sgeTrueBase });
-            if (masterState.kltToggles.inputs.KLC) evaluations.push({ name: 'KLC', res: evalKLC, base: klcTrueBase });
+            const evaluations = [
+                { name: 'BIGROAD', res: evalBR, base: null },
+                { name: 'HT1', res: evalHT1, base: ht1TrueBase },
+                { name: 'HT4', res: evalHT4, base: ht4TrueBase },
+                { name: 'GE', res: evalGE, base: geTrueBase },
+                { name: 'SGE', res: evalSGE, base: sgeTrueBase },
+                { name: 'KLC', res: evalKLC, base: klcTrueBase }
+            ];
 
             // --- 3. ĐẾM PHIẾU ĐỒNG THUẬN ---
             let votesP = 0;
@@ -3500,67 +3321,51 @@
                 if (ev.res.signal === 'B') { votesB++; validSignalsCount++; }
             });
 
-            // --- 4. CHỐT KẾT LUẬN TỔNG (LÝ DO TO RÕ HƠN) ---
+            // --- 4. CHỐT KẾT LUẬN TỔNG ---
             let finalPrediction = null;
             let finalReasonText = "";
 
             if (validSignalsCount === 0) {
-                finalReasonText = "Không có biểu đồ nào đạt chuẩn form an toàn.<br/><span class='text-base text-gray-500 font-medium'>➜ Hệ thống tự động BỎ QUA.</span>";
+                finalReasonText = "Tất cả các biểu đồ đều rơi vào trạng thái rủi ro (Cầu loạn) hoặc thiếu chắc chắn. Hệ thống tự động BỎ QUA.";
             } else if (votesP > votesB) {
                 finalPrediction = 'P';
-                let strength = (votesP >= 3 && votesB === 0) ? "MẠNH TAY 🔥" : "VÀO LỆNH ✅";
-                finalReasonText = `ĐỒNG THUẬN PLAYER (${strength})<br/><span class="text-sm md:text-base font-medium text-gray-300 mt-2 block">Cơ sở: ${votesP} biểu đồ báo P, ${votesB} biểu đồ báo B.</span>`;
+                let strength = (votesP >= 3 && votesB === 0) ? "MẠNH TAY" : "VÀO LỆNH";
+                finalReasonText = `ĐỒNG THUẬN PLAYER (${strength}): Có ${votesP} biểu đồ báo P, ${votesB} biểu đồ báo B.`;
             } else if (votesB > votesP) {
                 finalPrediction = 'B';
-                let strength = (votesB >= 3 && votesP === 0) ? "MẠNH TAY 🔥" : "VÀO LỆNH ✅";
-                finalReasonText = `ĐỒNG THUẬN BANKER (${strength})<br/><span class="text-sm md:text-base font-medium text-gray-300 mt-2 block">Cơ sở: ${votesB} biểu đồ báo B, ${votesP} biểu đồ báo P.</span>`;
+                let strength = (votesB >= 3 && votesP === 0) ? "MẠNH TAY" : "VÀO LỆNH";
+                finalReasonText = `ĐỒNG THUẬN BANKER (${strength}): Có ${votesB} biểu đồ báo B, ${votesP} biểu đồ báo P.`;
             } else {
-                finalReasonText = `XUNG ĐỘT TÍN HIỆU ⚔️<br/><span class="text-sm md:text-base font-medium text-gray-400 mt-2 block">(Hoà ${votesP} P - ${votesB} B) Các biểu đồ đang đánh nhau. BỎ QUA.</span>`;
+                // votesP === votesB (Hoà nhau: 1-1, 2-2...)
+                finalReasonText = `XUNG ĐỘT TÍN HIỆU (Hoà ${votesP} P - ${votesB} B): Các biểu đồ đang đánh nhau. Hệ thống yêu cầu BỎ QUA.`;
             }
 
             masterState.currentKltPrediction = finalPrediction;
-            const currentStateStr = `${validSignalsCount}/6 Biểu đồ đạt chuẩn form`;
+            const currentStateStr = `${validSignalsCount}/6 Biểu đồ đạt chuẩn Dớp`;
             masterState.currentKltState = currentStateStr;
 
-            // --- 5. R// --- 5. RENDER GIAO DIỆN (CÓ VIỀN PHÁT SÁNG) ---
+            // --- 5. RENDER GIAO DIỆN ---
             let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-left w-full">`;
             evaluations.forEach(ev => {
                 let baseText = ev.base ? ev.base : 'CHƯA CÓ';
                 let baseColor = ev.base === 'P' ? 'text-blue-400' : (ev.base === 'B' ? 'text-red-400' : 'text-gray-500');
-                
-                let hasPattern = ev.res.signal !== null;
-                let statusColor = '';
-                let glowClass = '';
-
-                // XỬ LÝ VIỀN PHÁT SÁNG
-                if (hasPattern) {
-                    if (ev.res.signal === 'P') {
-                        statusColor = 'border-blue-500 bg-blue-900/30';
-                        glowClass = 'shadow-[0_0_15px_rgba(59,130,246,0.6)] transform scale-[1.02] z-10';
-                    } else if (ev.res.signal === 'B') {
-                        statusColor = 'border-red-500 bg-red-900/30';
-                        glowClass = 'shadow-[0_0_15px_rgba(239,68,68,0.6)] transform scale-[1.02] z-10';
-                    }
-                } else {
-                    statusColor = 'border-gray-700 bg-gray-800/40 opacity-70';
-                    glowClass = '';
-                }
+                let statusColor = ev.base ? (ev.base === 'P' ? 'border-blue-500/40 bg-blue-900/10' : 'border-red-500/40 bg-red-900/10') : 'border-gray-600 bg-gray-800/50';
 
                 let cleanReason = ev.res.reason.replace(/<[^>]*>?/gm, '');
                 let logicSignal = ev.res.signal ? ev.res.signal : 'BỎ QUA';
 
                 detailsHtml += `
-                    <div class="p-3 rounded-lg border ${statusColor} ${glowClass} text-sm cursor-pointer transition-all duration-300" onclick="toggleKltSubChart('${ev.name}')">
+                    <div class="p-3 rounded-lg border ${statusColor} text-sm cursor-pointer hover:bg-gray-800/80 transition-colors" onclick="toggleKltSubChart('${ev.name}')">
                         <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-2 pointer-events-none">
-                            <span class="font-bold ${hasPattern ? 'text-white' : 'text-gray-400'} uppercase flex items-center gap-1">${ev.name} ${hasPattern ? '🔥' : '📊'}</span>
+                            <span class="font-bold text-gray-300 uppercase flex items-center gap-1">${ev.name} <span class="text-[10px] bg-gray-700 px-1 rounded">📊</span></span>
                             <div class="flex items-center gap-1.5 bg-gray-900 px-3 py-1 rounded-md border border-gray-600 shadow-inner">
-                                <span class="text-[10px] text-gray-400 uppercase tracking-widest">GỐC:</span> 
+                                <span class="text-[10px] text-gray-400 uppercase tracking-widest">LỆNH GỐC:</span> 
                                 <span class="font-black text-base ${baseColor}">${baseText}</span>
                             </div>
                         </div>
-                        <div class="text-gray-400 mt-2 pointer-events-none text-[11px] leading-relaxed italic">
-                            ↳ Chốt V2: <span class="font-bold text-sm ${ev.res.signal === 'P' ? 'text-blue-400' : (ev.res.signal === 'B' ? 'text-red-400' : 'text-gray-500')}">${logicSignal}</span> 
-                            <br/>(${cleanReason})
+                        <div class="text-gray-500 mt-2 pointer-events-none text-[11px] leading-relaxed italic">
+                            ↳ Logic V2: <span class="font-bold ${ev.res.signal === 'P' ? 'text-blue-400' : (ev.res.signal === 'B' ? 'text-red-400' : 'text-gray-400')}">${logicSignal}</span> 
+                            (${cleanReason})
                         </div>
                         <div id="klt-subchart-${ev.name}" class="hidden h-6 mt-2 flex items-end justify-start gap-[1px] overflow-x-auto custom-scrollbar pb-1"></div>
                     </div>
@@ -3573,29 +3378,31 @@
             renderKltUI(currentStateStr, finalPrediction, finalReasonText, detailsHtml, session.kltHistory);
         }
 
+        // --- HÀM RENDER KLT ĐÃ ĐƯỢC CẬP NHẬT ---
         function renderKltUI(currentState, prediction, reason, detailsHtml, kltHistory) {
             const stateEl = document.getElementById('klt-current-state');
             const concEl = document.getElementById('klt-conclusion');
             const decEl = document.getElementById('klt-final-decision');
             const accEl = document.getElementById('klt-overall-accuracy');
-            const mainReasonEl = document.getElementById('klt-main-reason'); // Dùng div to rõ
 
+            // 1. Kiểm tra trạng thái đóng/mở hiện tại
             const existingPanel = document.getElementById('klt-details-panel');
             const isPanelOpen = existingPanel && !existingPanel.classList.contains('hidden');
 
             if (stateEl) stateEl.textContent = currentState;
             
             if (concEl) {
-                // BOX KLT-CONCLUSION GIỜ CHỈ CHỨA NÚT BẤM
                 concEl.innerHTML = `
-                    <button onclick="toggleGlobalKltDetails()" class="mt-1 text-xs bg-cyan-900/50 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-2 rounded-lg transition-colors w-full text-center font-bold shadow-md">
-                        👁️ XEM PHÂN TÍCH TỪNG BIỂU ĐỒ BẦU CHỌN (MARKOV)
+                    <div class="text-white">${reason}</div>
+                    <button onclick="toggleGlobalKltDetails()" class="mt-2 text-xs bg-cyan-900/50 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-1 rounded transition-colors w-full text-center font-bold">
+                        👁️ BẬT / TẮT CHI TIẾT TỪNG BIỂU ĐỒ (MARKOV)
                     </button>
                     <div id="klt-details-panel" class="${isPanelOpen ? '' : 'hidden'} w-full transition-all duration-300">
                         ${detailsHtml}
                     </div>
                 `;
                 
+                // Render lại các sub-charts đang mở (nếu có)
                 if (isPanelOpen && window.openSubCharts) {
                     window.openSubCharts.forEach(name => {
                         const chartDiv = document.getElementById(`klt-subchart-${name}`);
@@ -3607,24 +3414,16 @@
                 }
             }
 
-            // GÁN LÝ DO VÀO DIV TO RÕ BÊN DƯỚI PHÁN QUYẾT
-            if (mainReasonEl) {
-                mainReasonEl.innerHTML = reason;
-                if (prediction === 'P') mainReasonEl.className = 'mt-5 text-center text-lg md:text-xl font-black text-blue-300 px-4 leading-relaxed min-h-[4rem] drop-shadow-md';
-                else if (prediction === 'B') mainReasonEl.className = 'mt-5 text-center text-lg md:text-xl font-black text-red-300 px-4 leading-relaxed min-h-[4rem] drop-shadow-md';
-                else mainReasonEl.className = 'mt-5 text-center text-lg md:text-xl font-bold text-gray-400 px-4 leading-relaxed min-h-[4rem]';
-            }
-
             if (decEl) {
                 if (prediction === 'P') {
                     decEl.textContent = 'PLAYER';
-                    decEl.className = 'text-5xl md:text-6xl font-black text-blue-400 drop-shadow-[0_0_20px_rgba(59,130,246,0.9)] mt-6 transition-all duration-300 animate-pulse';
+                    decEl.className = 'text-4xl md:text-5xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] mt-4 transition-all duration-300';
                 } else if (prediction === 'B') {
                     decEl.textContent = 'BANKER';
-                    decEl.className = 'text-5xl md:text-6xl font-black text-red-400 drop-shadow-[0_0_20px_rgba(239,68,68,0.9)] mt-6 transition-all duration-300 animate-pulse';
+                    decEl.className = 'text-4xl md:text-5xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] mt-4 transition-all duration-300';
                 } else {
                     decEl.textContent = 'BỎ QUA';
-                    decEl.className = 'text-5xl md:text-6xl font-black text-gray-600 drop-shadow-lg mt-6 transition-all duration-300';
+                    decEl.className = 'text-4xl md:text-5xl font-black text-gray-500 drop-shadow-lg mt-4 transition-all duration-300';
                 }
             }
 
@@ -3657,11 +3456,9 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             loadMasterSessions();
-            loadKltToggles(); // TẢI CẤU HÌNH TỪ BỘ NHỚ
-            syncKltToggleUI(); // ĐỒNG BỘ NÚT BẤM GIAO DIỆN
             
             const selector = document.getElementById('masterSessionSelector');
-            if(selector){
+            if(selector) {
                 selector.addEventListener('change', function(e) {
                     if (e.target.value && masterState.sessions[e.target.value]) {
                         masterState.currentSessionId = e.target.value; masterState.currentSessionName = masterState.sessions[e.target.value].name;
@@ -3751,7 +3548,7 @@
             }
 
             let html = '';
-            arr.slice(-40).forEach(val => { // Lấy 40 tay gần nhất
+            arr.slice(-40).forEach(val => { // Lấy 40 tay gầnnhất
                 if (chartName === 'BIGROAD') {
                     const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_3px_rgba(59,130,246,0.5)]' : 'bg-red-500 shadow-[0_0_3px_rgba(239,68,68,0.5)]';
                     html += `<div class="w-[14px] h-[14px] flex-shrink-0 rounded-full ${color} text-[8px] flex items-center justify-center text-white font-bold border border-white/20">${val}</div>`;
