@@ -247,6 +247,7 @@
 
     <div class="fixed bottom-6 right-6 z-[200] flex items-end gap-4">
         <div id="fab-menu-left" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom mb-[88px]">
+            <button onclick="reInputCurrentSession()" class="w-[60px] h-[60px] bg-orange-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(234,88,12,0.5)] hover:bg-orange-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Chạy lại toàn bộ phiên">♻️</button>
             <a href="#klt-section" class="w-[60px] h-[60px] bg-teal-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(13,148,136,0.5)] hover:bg-teal-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới KLT">KLT</a>
             <button onclick="undoLastAll()" class="w-[60px] h-[60px] bg-gray-600 rounded-full text-white font-bold shadow-[0_0_15px_rgba(75,85,99,0.5)] hover:bg-gray-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Hoàn Tác">↩️</button>
         </div>
@@ -2671,6 +2672,124 @@
                 showToast('Lịch sử đã được xoá trắng', 'info');
             }
         }
+
+        /* =========================================================================
+           HÀM MỚI: TỰ ĐỘNG XOÁ VÀ NHẬP LẠI TOÀN BỘ PHIÊN HIỆN TẠI
+           ========================================================================= */
+        async function reInputCurrentSession() {
+            if (isProcessingInput || isQueueRunning) {
+                showToast('Hệ thống đang xử lý dữ liệu, vui lòng chờ!', 'warning');
+                return;
+            }
+            if (!masterState.currentSessionId) {
+                showToast('Vui lòng chọn phiên trước!', 'warning');
+                return;
+            }
+
+            const session = masterState.sessions[masterState.currentSessionId];
+            const currentHistory = [...(session.history || [])];
+
+            if (currentHistory.length === 0) {
+                showToast('Phiên hiện tại đang trống!', 'warning');
+                return;
+            }
+
+            if (!confirm(`Bạn có chắc muốn xoá và TỰ ĐỘNG NHẬP LẠI toàn bộ ${currentHistory.length} ván của phiên này?\n\n(Quá trình này sẽ tốn chút thời gian để hệ thống đồng bộ lại biểu đồ)`)) {
+                return;
+            }
+
+            // --- 1. CLEAR HISTORY HIỆN TẠI TỰ ĐỘNG (Không cần hỏi) ---
+            inputQueue = [];
+            isQueueRunning = false;
+            isProcessingInput = false;
+
+            session.history = [];
+            session.geHistory = [];
+            session.sgeHistory = [];
+            updateSGEStatsUI([]);
+            
+            session.klcHistory = [];
+            updateKlcChart([]);
+            masterState.currentKlcPrediction = null;
+            masterState.currentKlcRule = null;
+
+            session.kltHistory = [];
+            masterState.currentKltPrediction = null;
+            masterState.currentKltState = "Chưa rõ - Chưa rõ";
+            renderKltUI("Chưa rõ - Chưa rõ", null, "Đã xoá lịch sử để chuẩn bị nhập lại.", "-", []);
+
+            saveMasterSessions(); 
+            updateCurrentSessionInfo();
+            broadcastToAll('clear_history');
+            
+            masterState.pendingResultToEvaluate = null;
+            masterState.currentGeState = "Chưa rõ - Chưa rõ";
+            masterState.currentGePrediction = null;
+            
+            await initializeOriginalPatternDB();
+            calculateFinalDecision(); 
+            renderGodEyeUI("Chưa rõ - Chưa rõ", null, "Chờ chạy lại phiên...", "-", []);
+            
+            // Đặt lại các Giao Diện Nổi (Float/SGE/KLC)
+            const decEl = document.getElementById('sge-final-decision');
+            const reasonEl = document.getElementById('sge-final-reason');
+            const listEl = document.getElementById('sge-reasoning-list');
+            const warnEl = document.getElementById('sge-super-warning');
+            const glowEl = document.getElementById('sge-bg-glow');
+            const titleBadge = document.getElementById('sge-title-badge');
+            const sgePanel = document.getElementById('sge-panel');
+
+            if(decEl) { decEl.textContent = 'ĐANG TÍNH TOÁN...'; decEl.className = 'text-5xl md:text-6xl font-black text-gray-500 drop-shadow-xl transition-all duration-300 relative z-10'; }
+            if(reasonEl) reasonEl.innerHTML = '';
+            if(listEl) listEl.innerHTML = '<li class="italic text-gray-500">Chờ dữ liệu từ các hệ thống...</li>';
+            
+            if(warnEl && glowEl && titleBadge && sgePanel) {
+                warnEl.classList.add('hidden'); warnEl.classList.remove('flex');
+                titleBadge.classList.remove('hidden');
+                glowEl.classList.remove('bg-gradient-to-t', 'from-red-600/30', 'to-yellow-500/10', 'animate-pulse');
+                sgePanel.classList.remove('border-red-500', 'shadow-[0_0_50px_rgba(239,68,68,0.6)]');
+                sgePanel.classList.add('border-yellow-500', 'shadow-[0_0_40px_rgba(234,179,8,0.3)]');
+            }
+
+            const decElKLC = document.getElementById('klc-final-decision');
+            const adviceElKLC = document.getElementById('klc-advice');
+            if(decElKLC) decElKLC.innerHTML = '-';
+            if(adviceElKLC) adviceElKLC.innerHTML = '-';
+            const toggleBtnKLC = document.getElementById('klc-toggle-btn');
+            const btnIconKLC = document.getElementById('klc-btn-icon');
+            const notifDotKLC = document.getElementById('klc-notification-dot');
+            if(toggleBtnKLC) toggleBtnKLC.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-gray-800 to-gray-900 rounded-full text-white font-black shadow-[0_0_15px_rgba(0,0,0,0.8)] border-2 border-gray-600 hover:scale-105 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative";
+            if(btnIconKLC) btnIconKLC.textContent = "💤";
+            if(notifDotKLC) notifDotKLC.classList.add('hidden');
+
+            const floatDecEl = document.getElementById('float-sge-decision');
+            const floatReasonEl = document.getElementById('float-sge-reason');
+            const floatChartEl = document.getElementById('float-sge-chart');
+            const floatWrEl = document.getElementById('float-sge-winrate');
+            const floatNotif = document.getElementById('sge-float-notification-dot');
+            const floatBtn = document.getElementById('sge-float-toggle-btn');
+            
+            if(floatDecEl) { floatDecEl.innerHTML = 'ĐANG TÍNH...'; floatDecEl.className = 'text-4xl md:text-5xl font-black drop-shadow-md transition-all relative z-10 text-gray-500 py-2'; }
+            if(floatReasonEl) floatReasonEl.innerHTML = '-';
+            if(floatChartEl) floatChartEl.innerHTML = '<span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu</span>';
+            if(floatWrEl) floatWrEl.textContent = '0%';
+            if(floatNotif) floatNotif.classList.add('hidden');
+            if(floatBtn) floatBtn.classList.remove('animate-bounce');
+
+            renderSGEChart('sge-chart-br', [], 'PB');
+            renderSGEChart('sge-chart-ht1', [], 'DS');
+            renderSGEChart('sge-chart-ge', [], 'DS');
+            renderSGEChart('sge-chart-ht4', [], 'DS');
+
+            // --- 2. BẮT ĐẦU CHẠY LẠI HÀNG ĐỢI ---
+            showToast(`Bắt đầu chạy lại ${currentHistory.length} kết quả...`, 'info');
+            
+            inputQueue = currentHistory;
+
+            if (!isQueueRunning) {
+                processQueue();
+            }
+        }
         
         function loadMasterSessions() { try { const saved = localStorage.getItem('vanSuNhuY_sessions_v3'); if (saved) { masterState.sessions = JSON.parse(saved); updateMasterSessionSelector(); } } catch (e) {} }
         function saveMasterSessions() { safeStorageSet('vanSuNhuY_sessions_v3', masterState.sessions); }
@@ -3548,7 +3667,7 @@
             }
 
             let html = '';
-            arr.slice(-40).forEach(val => { // Lấy 40 tay gầnnhất
+            arr.slice(-40).forEach(val => { // Lấy 40 tay gần nhất
                 if (chartName === 'BIGROAD') {
                     const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_3px_rgba(59,130,246,0.5)]' : 'bg-red-500 shadow-[0_0_3px_rgba(239,68,68,0.5)]';
                     html += `<div class="w-[14px] h-[14px] flex-shrink-0 rounded-full ${color} text-[8px] flex items-center justify-center text-white font-bold border border-white/20">${val}</div>`;
