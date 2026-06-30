@@ -8,210 +8,53 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827;
-            color: #F9FAFB;
-        }
-        .btn {
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .btn:active {
-            transform: translateY(1px);
-        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #F9FAFB; }
+        .btn { transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .btn:active { transform: translateY(1px); }
         .card-glow-total { box-shadow: 0 0 25px rgba(168, 85, 247, 0.7); }
-        .modal-backdrop {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.7);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 50; animation: fadeIn 0.3s ease;
-        }
-        .modal-content {
-            background-color: #1f2937;
-            padding: 1.5rem; border-radius: 1rem;
-            width: 90%; max-width: 500px;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid #374151;
-        }
-        .toast-notification {
-            position: fixed; top: 20px; right: 20px;
-            background-color: #1f2937; color: white;
-            padding: 1rem 1.5rem; border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-            z-index: 100; animation: slideDown 0.5s ease;
-            border-left: 4px solid;
-        }
-        .warning-alert {
-            position: fixed; top: 20px; left: 50%;
-            transform: translateX(-50%);
-            background-color: #f59e0b; color: white;
-            padding: 1rem 2rem; border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-            z-index: 100; animation: slideDown 0.5s ease;
-            border-left: 4px solid #d97706;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-100%); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
-        }
-        @keyframes superBounce {
-            0% { transform: translate(-50%, -10px) scale(1); }
-            100% { transform: translate(-50%, 5px) scale(1.05); }
-        }
-        @keyframes spinPulse {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.3) rotate(18deg); }
-            100% { transform: scale(1) rotate(-18deg); }
-        }
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fadeIn 0.3s ease; }
+        .modal-content { background-color: #1f2937; padding: 1.5rem; border-radius: 1rem; width: 90%; max-width: 500px; animation: slideIn 0.3s ease-out; border: 1px solid #374151; }
+        .toast-notification { position: fixed; top: 20px; right: 20px; background-color: #1f2937; color: white; padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 100; animation: slideDown 0.5s ease; border-left: 4px solid; }
+        .warning-alert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #f59e0b; color: white; padding: 1rem 2rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 100; animation: slideDown 0.5s ease; border-left: 4px solid #d97706; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+        @keyframes superBounce { 0% { transform: translate(-50%, -10px) scale(1); } 100% { transform: translate(-50%, 5px) scale(1.05); } }
+        @keyframes spinPulse { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.3) rotate(18deg); } 100% { transform: scale(1) rotate(-18deg); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .animate-slideIn { animation: slideInUp 0.3s ease-out forwards; }
-        
-        .system-frame {
-            border: 2px solid #374151;
-            border-radius: 0.75rem;
-            background: #1f2937;
-            transition: all 0.3s ease;
-        }
-        .system-frame.active {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
-        }
-        .history-chart {
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-start;
-            gap: 2px;
-            height: 60px;
-            padding: 5px 0 8px 0;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scroll-behavior: smooth;
-        }
-        .history-bar {
-            flex-shrink: 0;
-            width: 4px;
-            border-radius: 1px;
-        }
-        .history-bar-correct {
-            background-color: #3b82f6;
-            height: 100%;
-        }
-        .history-bar-incorrect {
-            background-color: #ef4444;
-            height: 40%;
-        }
-        .accuracy-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
+        .system-frame { border: 2px solid #374151; border-radius: 0.75rem; background: #1f2937; transition: all 0.3s ease; }
+        .system-frame.active { border-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+        .history-chart { display: flex; align-items: flex-end; justify-content: flex-start; gap: 2px; height: 60px; padding: 5px 0 8px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; }
+        .history-bar { flex-shrink: 0; width: 4px; border-radius: 1px; }
+        .history-bar-correct { background-color: #3b82f6; height: 100%; }
+        .history-bar-incorrect { background-color: #ef4444; height: 40%; }
+        .accuracy-badge { padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
         .accuracy-high { background-color: #10b981; color: white; }
         .accuracy-medium { background-color: #f59e0b; color: white; }
         .accuracy-low { background-color: #ef4444; color: white; }
-        .system-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        @media (min-width: 1024px) {
-            .system-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        .game-bar-chart {
-            height: 300px;
-            margin-top: 1rem;
-        }
-        .confidence-interval-chart {
-            height: 200px;
-            margin-top: 1rem;
-        }
-        .game-result-chip {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin: 1px;
-        }
+        .system-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        @media (min-width: 1024px) { .system-grid { grid-template-columns: repeat(2, 1fr); } }
+        .game-bar-chart { height: 300px; margin-top: 1rem; }
+        .confidence-interval-chart { height: 200px; margin-top: 1rem; }
+        .game-result-chip { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin: 1px; }
         .game-correct { background-color: #10b981; color: white; }
         .game-incorrect { background-color: #ef4444; color: white; }
         .game-neutral { background-color: #6b7280; color: white; }
-        .final-decision-bar {
-            flex-shrink: 0;
-            width: 8px;
-            border-radius: 2px;
-            margin: 0 1px;
-        }
-        .final-decision-correct {
-            background-color: #3b82f6;
-            height: 100%;
-        }
-        .final-decision-incorrect {
-            background-color: #ef4444;
-            height: 40%;
-        }
-        input[type=range] {
-            -webkit-appearance: none;
-            background: #374151;
-            height: 4px;
-            border-radius: 2px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #8b5cf6;
-            cursor: pointer;
-        }
+        .final-decision-bar { flex-shrink: 0; width: 8px; border-radius: 2px; margin: 0 1px; }
+        .final-decision-correct { background-color: #3b82f6; height: 100%; }
+        .final-decision-incorrect { background-color: #ef4444; height: 40%; }
+        input[type=range] { -webkit-appearance: none; background: #374151; height: 4px; border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #8b5cf6; cursor: pointer; }
         .custom-scrollbar::-webkit-scrollbar, .history-chart::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track, .history-chart::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb, .history-chart::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover, .history-chart::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-
-        .section-content {
-            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out;
-            max-height: 2000px;
-            opacity: 1;
-            overflow: hidden;
-        }
-        .section-content.collapsed {
-            max-height: 0;
-            opacity: 0;
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-        }
+        .section-content { transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out; max-height: 2000px; opacity: 1; overflow: hidden; }
+        .section-content.collapsed { max-height: 0; opacity: 0; margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; }
     </style>
 </head>
 <body class="p-4 md:p-8 relative" style="overflow: hidden;">
@@ -247,7 +90,6 @@
 
     <div class="fixed bottom-6 right-6 z-[200] flex items-end gap-4">
         <div id="fab-menu-left" class="flex flex-col gap-4 transition-all duration-500 ease-out translate-y-8 scale-75 opacity-0 pointer-events-none origin-bottom mb-[88px]">
-            <button onclick="reInputCurrentSession()" class="w-[60px] h-[60px] bg-orange-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(234,88,12,0.5)] hover:bg-orange-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Chạy lại toàn bộ phiên">♻️</button>
             <a href="#klt-section" class="w-[60px] h-[60px] bg-teal-600 rounded-full text-white font-black shadow-[0_0_15px_rgba(13,148,136,0.5)] hover:bg-teal-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-lg select-none" title="Tới KLT">KLT</a>
             <button onclick="undoLastAll()" class="w-[60px] h-[60px] bg-gray-600 rounded-full text-white font-bold shadow-[0_0_15px_rgba(75,85,99,0.5)] hover:bg-gray-500 hover:scale-110 active:scale-95 transition-all duration-300 flex justify-center items-center text-2xl select-none" title="Hoàn Tác">↩️</button>
         </div>
@@ -1308,6 +1150,7 @@
             klcToggles: { th1: true, th2: true, th3: true },
 
             currentKltState: "Chưa rõ - Chưa rõ",
+            currentKltRawState: null,
             currentKltPrediction: null
         };
 
@@ -2487,11 +2330,11 @@
                     session.kltHistory.push({
                         gameNum: session.history.length,
                         state: masterState.currentKltState,
+                        rawState: masterState.currentKltRawState || "",
                         predicted: masterState.currentKltPrediction,
                         actual: currentResult,
                         correct: masterState.currentKltPrediction === currentResult
                     });
-                    renderKltUI(masterState.currentKltState, masterState.currentKltPrediction, "", "", session.kltHistory);
                 }
                 
                 saveMasterSessions();
@@ -2604,6 +2447,7 @@
                 session.kltHistory = [];
                 masterState.currentKltPrediction = null;
                 masterState.currentKltState = "Chưa rõ - Chưa rõ";
+                masterState.currentKltRawState = null; 
                 renderKltUI("Chưa rõ - Chưa rõ", null, "Đã xoá lịch sử phiên.", "-", []);
 
                 saveMasterSessions(); updateCurrentSessionInfo();
@@ -2670,124 +2514,6 @@
                 renderSGEChart('sge-chart-ht4', [], 'DS');
 
                 showToast('Lịch sử đã được xoá trắng', 'info');
-            }
-        }
-
-        /* =========================================================================
-           HÀM MỚI: TỰ ĐỘNG XOÁ VÀ NHẬP LẠI TOÀN BỘ PHIÊN HIỆN TẠI
-           ========================================================================= */
-        async function reInputCurrentSession() {
-            if (isProcessingInput || isQueueRunning) {
-                showToast('Hệ thống đang xử lý dữ liệu, vui lòng chờ!', 'warning');
-                return;
-            }
-            if (!masterState.currentSessionId) {
-                showToast('Vui lòng chọn phiên trước!', 'warning');
-                return;
-            }
-
-            const session = masterState.sessions[masterState.currentSessionId];
-            const currentHistory = [...(session.history || [])];
-
-            if (currentHistory.length === 0) {
-                showToast('Phiên hiện tại đang trống!', 'warning');
-                return;
-            }
-
-            if (!confirm(`Bạn có chắc muốn xoá và TỰ ĐỘNG NHẬP LẠI toàn bộ ${currentHistory.length} ván của phiên này?\n\n(Quá trình này sẽ tốn chút thời gian để hệ thống đồng bộ lại biểu đồ)`)) {
-                return;
-            }
-
-            // --- 1. CLEAR HISTORY HIỆN TẠI TỰ ĐỘNG (Không cần hỏi) ---
-            inputQueue = [];
-            isQueueRunning = false;
-            isProcessingInput = false;
-
-            session.history = [];
-            session.geHistory = [];
-            session.sgeHistory = [];
-            updateSGEStatsUI([]);
-            
-            session.klcHistory = [];
-            updateKlcChart([]);
-            masterState.currentKlcPrediction = null;
-            masterState.currentKlcRule = null;
-
-            session.kltHistory = [];
-            masterState.currentKltPrediction = null;
-            masterState.currentKltState = "Chưa rõ - Chưa rõ";
-            renderKltUI("Chưa rõ - Chưa rõ", null, "Đã xoá lịch sử để chuẩn bị nhập lại.", "-", []);
-
-            saveMasterSessions(); 
-            updateCurrentSessionInfo();
-            broadcastToAll('clear_history');
-            
-            masterState.pendingResultToEvaluate = null;
-            masterState.currentGeState = "Chưa rõ - Chưa rõ";
-            masterState.currentGePrediction = null;
-            
-            await initializeOriginalPatternDB();
-            calculateFinalDecision(); 
-            renderGodEyeUI("Chưa rõ - Chưa rõ", null, "Chờ chạy lại phiên...", "-", []);
-            
-            // Đặt lại các Giao Diện Nổi (Float/SGE/KLC)
-            const decEl = document.getElementById('sge-final-decision');
-            const reasonEl = document.getElementById('sge-final-reason');
-            const listEl = document.getElementById('sge-reasoning-list');
-            const warnEl = document.getElementById('sge-super-warning');
-            const glowEl = document.getElementById('sge-bg-glow');
-            const titleBadge = document.getElementById('sge-title-badge');
-            const sgePanel = document.getElementById('sge-panel');
-
-            if(decEl) { decEl.textContent = 'ĐANG TÍNH TOÁN...'; decEl.className = 'text-5xl md:text-6xl font-black text-gray-500 drop-shadow-xl transition-all duration-300 relative z-10'; }
-            if(reasonEl) reasonEl.innerHTML = '';
-            if(listEl) listEl.innerHTML = '<li class="italic text-gray-500">Chờ dữ liệu từ các hệ thống...</li>';
-            
-            if(warnEl && glowEl && titleBadge && sgePanel) {
-                warnEl.classList.add('hidden'); warnEl.classList.remove('flex');
-                titleBadge.classList.remove('hidden');
-                glowEl.classList.remove('bg-gradient-to-t', 'from-red-600/30', 'to-yellow-500/10', 'animate-pulse');
-                sgePanel.classList.remove('border-red-500', 'shadow-[0_0_50px_rgba(239,68,68,0.6)]');
-                sgePanel.classList.add('border-yellow-500', 'shadow-[0_0_40px_rgba(234,179,8,0.3)]');
-            }
-
-            const decElKLC = document.getElementById('klc-final-decision');
-            const adviceElKLC = document.getElementById('klc-advice');
-            if(decElKLC) decElKLC.innerHTML = '-';
-            if(adviceElKLC) adviceElKLC.innerHTML = '-';
-            const toggleBtnKLC = document.getElementById('klc-toggle-btn');
-            const btnIconKLC = document.getElementById('klc-btn-icon');
-            const notifDotKLC = document.getElementById('klc-notification-dot');
-            if(toggleBtnKLC) toggleBtnKLC.className = "pointer-events-auto w-[72px] h-[72px] bg-gradient-to-r from-gray-800 to-gray-900 rounded-full text-white font-black shadow-[0_0_15px_rgba(0,0,0,0.8)] border-2 border-gray-600 hover:scale-105 active:scale-95 transition-all duration-300 flex justify-center items-center z-20 relative";
-            if(btnIconKLC) btnIconKLC.textContent = "💤";
-            if(notifDotKLC) notifDotKLC.classList.add('hidden');
-
-            const floatDecEl = document.getElementById('float-sge-decision');
-            const floatReasonEl = document.getElementById('float-sge-reason');
-            const floatChartEl = document.getElementById('float-sge-chart');
-            const floatWrEl = document.getElementById('float-sge-winrate');
-            const floatNotif = document.getElementById('sge-float-notification-dot');
-            const floatBtn = document.getElementById('sge-float-toggle-btn');
-            
-            if(floatDecEl) { floatDecEl.innerHTML = 'ĐANG TÍNH...'; floatDecEl.className = 'text-4xl md:text-5xl font-black drop-shadow-md transition-all relative z-10 text-gray-500 py-2'; }
-            if(floatReasonEl) floatReasonEl.innerHTML = '-';
-            if(floatChartEl) floatChartEl.innerHTML = '<span class="text-xs text-gray-600 italic w-full text-center flex items-center justify-center h-full">Chưa có dữ liệu</span>';
-            if(floatWrEl) floatWrEl.textContent = '0%';
-            if(floatNotif) floatNotif.classList.add('hidden');
-            if(floatBtn) floatBtn.classList.remove('animate-bounce');
-
-            renderSGEChart('sge-chart-br', [], 'PB');
-            renderSGEChart('sge-chart-ht1', [], 'DS');
-            renderSGEChart('sge-chart-ge', [], 'DS');
-            renderSGEChart('sge-chart-ht4', [], 'DS');
-
-            // --- 2. BẮT ĐẦU CHẠY LẠI HÀNG ĐỢI ---
-            showToast(`Bắt đầu chạy lại ${currentHistory.length} kết quả...`, 'info');
-            
-            inputQueue = currentHistory;
-
-            if (!isQueueRunning) {
-                processQueue();
             }
         }
         
@@ -3393,108 +3119,115 @@
             const session = masterState.sessions[masterState.currentSessionId];
             if (!session) return;
 
-            // --- 1. CHUẨN BỊ DỮ LIỆU TỪ 6 BIỂU ĐỒ ---
-            const arrBR = session.history || [];
-            
-            const ht1Details = masterState.systemDetails.ht1;
-            const arrHT1 = ht1Details?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
-            const ht1TrueBase = getTrueBaseSignal(ht1Details?.verdict);
-
-            const ht4Details = masterState.systemDetails.ht4;
-            const arrHT4 = ht4Details?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
-            const ht4TrueBase = getTrueBaseSignal(ht4Details?.verdict);
-
-            const arrGE = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
-            const geTrueBase = masterState.currentGePrediction;
-
-            const arrSGE = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
+            // --- 1. LẤY TÍN HIỆU GỐC TỪ SGE VÀ KLC ---
             const sgeTrueBase = masterState.currentSgePending ? masterState.currentSgePending.prediction : null;
-
-            const arrKLC = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
             const klcTrueBase = masterState.currentKlcPrediction;
 
-            // --- 2. QUÉT LOGIC TỪNG BIỂU ĐỒ ---
-            const evalBR = analyzeKLT_PatternV2(arrBR, 'PB', null, 'BIGROAD');
-            const evalHT1 = analyzeKLT_PatternV2(arrHT1, 'DS', ht1TrueBase, 'HT1');
-            const evalHT4 = analyzeKLT_PatternV2(arrHT4, 'DS', ht4TrueBase, 'HT4');
-            const evalGE = analyzeKLT_PatternV2(arrGE, 'DS', geTrueBase, 'GE');
-            const evalSGE = analyzeKLT_PatternV2(arrSGE, 'DS', sgeTrueBase, 'SGE');
-            const evalKLC = analyzeKLT_PatternV2(arrKLC, 'DS', klcTrueBase, 'KLC');
+            // --- 2. LẤY MẢNG ĐÚNG/SAI ĐỂ CHẠY MARKOV ---
+            const arrSGE = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
+            const arrKLC = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
 
-            const evaluations = [
-                { name: 'BIGROAD', res: evalBR, base: null },
-                { name: 'HT1', res: evalHT1, base: ht1TrueBase },
-                { name: 'HT4', res: evalHT4, base: ht4TrueBase },
-                { name: 'GE', res: evalGE, base: geTrueBase },
-                { name: 'SGE', res: evalSGE, base: sgeTrueBase },
-                { name: 'KLC', res: evalKLC, base: klcTrueBase }
+            // --- 3. QUÉT LOGIC MARKOV ---
+            const evalSGE_Markov = analyzeKLT_PatternV2(arrSGE, 'DS', sgeTrueBase, 'SGE');
+            const evalKLC_Markov = analyzeKLT_PatternV2(arrKLC, 'DS', klcTrueBase, 'KLC');
+
+            // --- 4. QUÉT LOGIC GOD EYE (Trạng thái kép SGE & KLC) ---
+            let stateStr = `SGE:${sgeTrueBase || 'WAIT'}|KLC:${klcTrueBase || 'WAIT'}`;
+            let evalGE_State = { signal: null, reason: 'Chưa đủ dữ liệu trạng thái.' };
+
+            if (session.kltHistory && session.kltHistory.length > 0) {
+                // Lọc những ván trong quá khứ có trạng thái giống hệt hiện tại
+                const matches = session.kltHistory.filter(h => h.rawState === stateStr && h.actual);
+                if (matches.length > 0) {
+                    const pCount = matches.filter(m => m.actual === 'P').length;
+                    const bCount = matches.filter(m => m.actual === 'B').length;
+                    const total = matches.length;
+                    const rateP = Math.round((pCount / total) * 100);
+                    const rateB = Math.round((bCount / total) * 100);
+
+                    if (pCount > bCount) {
+                        evalGE_State = { signal: 'P', reason: `Khi [${stateStr}], tỷ lệ ra P là ${rateP}% (${pCount}/${total} ván).` };
+                    } else if (bCount > pCount) {
+                        evalGE_State = { signal: 'B', reason: `Khi [${stateStr}], tỷ lệ ra B là ${rateB}% (${bCount}/${total} ván).` };
+                    } else {
+                        evalGE_State = { signal: null, reason: `Khi [${stateStr}], tỷ lệ P và B đang hoà (50/50).` };
+                    }
+                } else {
+                    evalGE_State = { signal: null, reason: `Trạng thái [${stateStr}] chưa từng xuất hiện trước đây.` };
+                }
+            }
+
+            // --- 5. TỔNG HỢP GÓI PHÂN TÍCH ---
+            const components = [
+                { id: 'SGE_MARKOV', label: 'SGE (Markov)', res: evalSGE_Markov, base: sgeTrueBase },
+                { id: 'KLC_MARKOV', label: 'KLC (Markov)', res: evalKLC_Markov, base: klcTrueBase },
+                { id: 'GE_STATE', label: 'GE (Lịch sử Kép)', res: evalGE_State, base: stateStr }
             ];
 
-            // --- 3. ĐẾM PHIẾU ĐỒNG THUẬN ---
             let votesP = 0;
             let votesB = 0;
             let validSignalsCount = 0;
 
-            evaluations.forEach(ev => {
-                if (ev.res.signal === 'P') { votesP++; validSignalsCount++; }
-                if (ev.res.signal === 'B') { votesB++; validSignalsCount++; }
+            components.forEach(comp => {
+                if (comp.res.signal === 'P') { votesP++; validSignalsCount++; }
+                if (comp.res.signal === 'B') { votesB++; validSignalsCount++; }
             });
 
-            // --- 4. CHỐT KẾT LUẬN TỔNG ---
+            // --- 6. CHỐT KẾT LUẬN TỔNG ---
             let finalPrediction = null;
             let finalReasonText = "";
 
             if (validSignalsCount === 0) {
-                finalReasonText = "Tất cả các biểu đồ đều rơi vào trạng thái rủi ro (Cầu loạn) hoặc thiếu chắc chắn. Hệ thống tự động BỎ QUA.";
+                finalReasonText = "SGE/KLC chưa đủ dớp và Trạng thái GE chưa có dữ liệu. Hệ thống BỎ QUA.";
             } else if (votesP > votesB) {
                 finalPrediction = 'P';
-                let strength = (votesP >= 3 && votesB === 0) ? "MẠNH TAY" : "VÀO LỆNH";
-                finalReasonText = `ĐỒNG THUẬN PLAYER (${strength}): Có ${votesP} biểu đồ báo P, ${votesB} biểu đồ báo B.`;
+                let strength = (votesP === 3) ? "SIÊU ĐỒNG THUẬN (3/3)" : "VÀO LỆNH (Tự tin)";
+                finalReasonText = `ĐỒNG THUẬN PLAYER [${strength}]: Có ${votesP} tín hiệu báo P, ${votesB} tín hiệu báo B.`;
             } else if (votesB > votesP) {
                 finalPrediction = 'B';
-                let strength = (votesB >= 3 && votesP === 0) ? "MẠNH TAY" : "VÀO LỆNH";
-                finalReasonText = `ĐỒNG THUẬN BANKER (${strength}): Có ${votesB} biểu đồ báo B, ${votesP} biểu đồ báo P.`;
+                let strength = (votesB === 3) ? "SIÊU ĐỒNG THUẬN (3/3)" : "VÀO LỆNH (Tự tin)";
+                finalReasonText = `ĐỒNG THUẬN BANKER [${strength}]: Có ${votesB} tín hiệu báo B, ${votesP} tín hiệu báo P.`;
             } else {
-                // votesP === votesB (Hoà nhau: 1-1, 2-2...)
-                finalReasonText = `XUNG ĐỘT TÍN HIỆU (Hoà ${votesP} P - ${votesB} B): Các biểu đồ đang đánh nhau. Hệ thống yêu cầu BỎ QUA.`;
+                finalReasonText = `XUNG ĐỘT TÍN HIỆU (Hoà ${votesP} P - ${votesB} B): Các hệ thống đánh nhau. Yêu cầu BỎ QUA.`;
             }
 
             masterState.currentKltPrediction = finalPrediction;
-            const currentStateStr = `${validSignalsCount}/6 Biểu đồ đạt chuẩn Dớp`;
-            masterState.currentKltState = currentStateStr;
+            masterState.currentKltState = `SGE/KLC: ${votesP}P - ${votesB}B`; 
+            masterState.currentKltRawState = stateStr; // Lưu lại để GE State Check ván sau
 
-            // --- 5. RENDER GIAO DIỆN ---
-            let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-left w-full">`;
-            evaluations.forEach(ev => {
-                let baseText = ev.base ? ev.base : 'CHƯA CÓ';
-                let baseColor = ev.base === 'P' ? 'text-blue-400' : (ev.base === 'B' ? 'text-red-400' : 'text-gray-500');
-                let statusColor = ev.base ? (ev.base === 'P' ? 'border-blue-500/40 bg-blue-900/10' : 'border-red-500/40 bg-red-900/10') : 'border-gray-600 bg-gray-800/50';
+            // --- 7. RENDER GIAO DIỆN ---
+            let detailsHtml = `<div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-left w-full">`;
+            components.forEach(comp => {
+                let baseText = comp.base ? comp.base : 'CHƯA CÓ';
+                // Highlight cho chuỗi State của GE
+                if (comp.id === 'GE_STATE') baseText = `<span class="text-xs">${comp.base}</span>`;
+                
+                let baseColor = comp.base === 'P' ? 'text-blue-400' : (comp.base === 'B' ? 'text-red-400' : 'text-yellow-400');
+                let statusColor = comp.res.signal ? (comp.res.signal === 'P' ? 'border-blue-500/40 bg-blue-900/10' : 'border-red-500/40 bg-red-900/10') : 'border-gray-600 bg-gray-800/50';
 
-                let cleanReason = ev.res.reason.replace(/<[^>]*>?/gm, '');
-                let logicSignal = ev.res.signal ? ev.res.signal : 'BỎ QUA';
+                let cleanReason = comp.res.reason.replace(/<[^>]*>?/gm, '');
+                let logicSignal = comp.res.signal ? comp.res.signal : 'BỎ QUA';
 
                 detailsHtml += `
-                    <div class="p-3 rounded-lg border ${statusColor} text-sm cursor-pointer hover:bg-gray-800/80 transition-colors" onclick="toggleKltSubChart('${ev.name}')">
+                    <div class="p-3 rounded-lg border ${statusColor} text-sm cursor-pointer hover:bg-gray-800/80 transition-colors" onclick="toggleKltSubChart('${comp.id}')">
                         <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-2 pointer-events-none">
-                            <span class="font-bold text-gray-300 uppercase flex items-center gap-1">${ev.name} <span class="text-[10px] bg-gray-700 px-1 rounded">📊</span></span>
+                            <span class="font-bold text-gray-300 uppercase flex items-center gap-1">${comp.label}</span>
                             <div class="flex items-center gap-1.5 bg-gray-900 px-3 py-1 rounded-md border border-gray-600 shadow-inner">
-                                <span class="text-[10px] text-gray-400 uppercase tracking-widest">LỆNH GỐC:</span> 
                                 <span class="font-black text-base ${baseColor}">${baseText}</span>
                             </div>
                         </div>
                         <div class="text-gray-500 mt-2 pointer-events-none text-[11px] leading-relaxed italic">
-                            ↳ Logic V2: <span class="font-bold ${ev.res.signal === 'P' ? 'text-blue-400' : (ev.res.signal === 'B' ? 'text-red-400' : 'text-gray-400')}">${logicSignal}</span> 
+                            ↳ Tín hiệu xuất: <span class="font-bold ${comp.res.signal === 'P' ? 'text-blue-400' : (comp.res.signal === 'B' ? 'text-red-400' : 'text-gray-400')}">${logicSignal}</span> 
                             (${cleanReason})
                         </div>
-                        <div id="klt-subchart-${ev.name}" class="hidden h-6 mt-2 flex items-end justify-start gap-[1px] overflow-x-auto custom-scrollbar pb-1"></div>
+                        <div id="klt-subchart-${comp.id}" class="hidden h-6 mt-2 flex items-end justify-start gap-[1px] overflow-x-auto custom-scrollbar pb-1"></div>
                     </div>
                 `;
             });
             detailsHtml += `</div>`;
 
             if (!session.kltHistory) session.kltHistory = [];
-            
-            renderKltUI(currentStateStr, finalPrediction, finalReasonText, detailsHtml, session.kltHistory);
+            renderKltUI(masterState.currentKltState, finalPrediction, finalReasonText, detailsHtml, session.kltHistory);
         }
 
         // --- HÀM RENDER KLT ĐÃ ĐƯỢC CẬP NHẬT ---
@@ -3654,12 +3387,19 @@
             if (!session) return;
 
             let arr = [];
-            if (chartName === 'BIGROAD') arr = session.history || [];
-            else if (chartName === 'HT1') arr = masterState.systemDetails.ht1?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
-            else if (chartName === 'HT4') arr = masterState.systemDetails.ht4?.intervalHistory?.map(x => (x.correct || x.isCorrect || x.predicted === x.actual) ? 'D' : 'S') || [];
-            else if (chartName === 'GE') arr = session.geHistory ? session.geHistory.filter(x => x.predicted !== null).map(x => x.correct ? 'D' : 'S') : [];
-            else if (chartName === 'SGE') arr = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
-            else if (chartName === 'KLC') arr = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
+            let isGEStateChart = false;
+
+            if (chartName === 'SGE_MARKOV') {
+                arr = session.sgeHistory ? session.sgeHistory.map(x => x.correct ? 'D' : 'S') : [];
+            } else if (chartName === 'KLC_MARKOV') {
+                arr = session.klcHistory ? session.klcHistory.map(x => x.correct ? 'D' : 'S') : [];
+            } else if (chartName === 'GE_STATE') {
+                isGEStateChart = true;
+                const currentStateStr = masterState.currentKltRawState;
+                if (session.kltHistory) {
+                    arr = session.kltHistory.filter(h => h.rawState === currentStateStr && h.actual).map(h => h.actual);
+                }
+            }
 
             if (arr.length === 0) {
                  targetDiv.innerHTML = '<span class="text-xs text-gray-500 w-full text-center flex items-center justify-center">Chưa có dữ liệu</span>';
@@ -3668,7 +3408,7 @@
 
             let html = '';
             arr.slice(-40).forEach(val => { // Lấy 40 tay gần nhất
-                if (chartName === 'BIGROAD') {
+                if (isGEStateChart) {
                     const color = val === 'P' ? 'bg-blue-500 shadow-[0_0_3px_rgba(59,130,246,0.5)]' : 'bg-red-500 shadow-[0_0_3px_rgba(239,68,68,0.5)]';
                     html += `<div class="w-[14px] h-[14px] flex-shrink-0 rounded-full ${color} text-[8px] flex items-center justify-center text-white font-bold border border-white/20">${val}</div>`;
                 } else {
